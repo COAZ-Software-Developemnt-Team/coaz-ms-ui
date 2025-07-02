@@ -19,7 +19,7 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
         if(screenSize === 'xs') {
             setOpenMobileMenu(!openMobileMenu)
         } else {
-            setExpanded(!expanded)
+            setExpanded(!expanded);
         }
     }
 

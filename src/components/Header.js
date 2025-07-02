@@ -3,7 +3,7 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import {PiArrowLeft,PiDotsThreeVertical} from 'react-icons/pi';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({previous,buttons,Icon,text,subText,}) => {
+const Header = ({previous,buttons,Icon,text}) => {
     const {screenSize,setPopupData} = useContext(GlobalContext);
     const moreRef = useRef(null);
     const navigate = useNavigate();
@@ -24,12 +24,6 @@ const Header = ({previous,buttons,Icon,text,subText,}) => {
                     <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} 
                         className='w-full h-auto text-xl sm:text-2xl text-[rgb(0,175,240)] font-jostSemi break-words overflow-hidden uppercase'>
                         {text}
-                    </p>
-                }
-                {subText &&
-                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'3'}} 
-                        className='flex w-full h-auto pr-10 text-sm text-[rgba(0,175,240,.4)] font-helveticaNeueRegular tracking-wide overflow-hidden overflow-ellipsis'>
-                        {subText}
                     </p>
                 }
             </div>
