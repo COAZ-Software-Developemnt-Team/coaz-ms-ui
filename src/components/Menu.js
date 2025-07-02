@@ -33,7 +33,7 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
     return (
         <div style={{backdropFilter:'blur(20px)'}}
             ref={menuRef}
-            className={`flex flex-col ${screenSize === 'xs'?'w-full':expanded?'w-60':'w-14'} h-fit sm:h-full py-4 space-y-1 overflow-hidden overflow-y-auto shrink-0 bg-[rgba(255,255,255,.2)]`}>
+            className={`flex flex-col ${screenSize === 'xs'?'w-full':expanded?'w-60':'w-14'} h-fit sm:h-full py-4 space-y-1 overflow-hidden shrink-0 bg-[rgba(255,255,255,.2)]`}>
             <div className='flex flex-row w-full h-fit px-2 space-x-2 items-center overflow-hidden shrink-0'>
                 <button onClick={onMenu} className={`flex w-10 h-10 items-center justify-center text-[rgb(68,71,70)] ${screenSize !== 'xs'?'hover:bg-[rgba(0,175,240,.2)]':''} rounded-xl shrink-0`}>
                     <PiList size={20}/>
@@ -47,8 +47,8 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
                     <p className='flex items-center font-jostSemi text-xl text-[rgb(0,175,240)]'>COAZ</p>
                 </div>
             </div>
-            <div className={`${screenSize === 'xs'?'hidden':'flex'} flex-col w-full h-full justify-between overflow-hidden`}>
-                <div className='flex flex-col w-full h-full'>
+            <div className={`${screenSize === 'xs'?'hidden':'flex'} flex-col w-full h-full space-y-2 overflow-hidden`}>
+                <div className='flex flex-col w-full h-full overflow-hidden'>
                     <MsSearch/>
                     <Scrollable vertical={true}>
                         <div className='flex flex-col h-fit'>
