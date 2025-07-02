@@ -15,7 +15,9 @@ const MenuItem = ({name,link,Icon,count,expanded,setOpenMobileMenu}) => {
                 </div>
                 <div className={`${expanded?'flex':'hidden'} flex-row w-full items-center justify-between pr-2`}>
                     <p className={`text-sm whitespace-nowrap overflow-ellipsis`}>{name}</p>
-                    {count != null && count != undefined && <p className='w-fit min-w-[16px] h-fit text-xs px-1 text-white bg-[rgb(0,175,240)] rounded-full text-center'>{count}</p>}
+                    {count != null && count != undefined && 
+                        <p className='w-fit min-w-[16px] h-fit text-xs px-1 text-white bg-[rgb(0,175,240)] rounded-full text-center'>{count}</p>
+                    }
                 </div>
             </NavLink>
         </div>

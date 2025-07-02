@@ -3,10 +3,9 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import {PiArrowLeft,PiDotsThreeVertical} from 'react-icons/pi';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({previous,buttons,Icon,text,subText,loading}) => {
+const Header = ({previous,buttons,Icon,text,subText,}) => {
     const {screenSize,setPopupData} = useContext(GlobalContext);
     const moreRef = useRef(null);
-
     const navigate = useNavigate();
 
   return (
@@ -52,8 +51,7 @@ const Header = ({previous,buttons,Icon,text,subText,loading}) => {
             {Icon && <Icon size={screenSize === 'xs'?64:128} className=' shrink-0'/>}
             <div className='flex flex-col w-full overflow-hidden'>
                 {text &&
-                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} 
-                        className='w-full h-auto text-2xl sm:text-4xl text-[rgb(0,175,240)] font-jostSemi break-words overflow-hidden uppercase'>
+                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} className='w-full h-auto text-2xl sm:text-4xl text-[rgb(0,175,240)] font-jostSemi break-words overflow-hidden uppercase'>
                         {text}
                     </p>
                 }
