@@ -10,7 +10,7 @@ const Header = ({previous,buttons,Icon,text,subText,}) => {
 
   return (
     <div style={{backdropFilter:'blur(2px)'}}
-        className='flex flex-col w-[95%] h-fit p-2 sm:p-4 mt-[2%] text-[rgb(0,175,240)] bg-[rgba(0,175,240,.2)] rounded-2xl shadow-xl overflow-hidden shrink-0'>
+        className='flex flex-row w-[95%] h-fit p-2 sm:p-4 mt-[2%] text-[rgb(0,175,240)] bg-[rgba(0,175,240,.2)] rounded-2xl shadow-xl overflow-hidden shrink-0'>
         <div className='flex flex-row w-full h-fit justify-between shrink-0 space-x-2 items-center'>
             {previous && <button 
                 onClick={(e) => navigate(previous)}
@@ -18,6 +18,21 @@ const Header = ({previous,buttons,Icon,text,subText,}) => {
             >
                 <PiArrowLeft size={32} className='flex m-auto'/>
             </button>}
+            {Icon && <Icon size={screenSize === 'xs'?50:50} className=' shrink-0'/>}
+            <div className='flex flex-col w-full overflow-hidden'>
+                {text &&
+                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} 
+                        className='w-full h-auto text-xl sm:text-2xl text-[rgb(0,175,240)] font-jostSemi break-words overflow-hidden uppercase'>
+                        {text}
+                    </p>
+                }
+                {subText &&
+                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'3'}} 
+                        className='flex w-full h-auto pr-10 text-sm text-[rgba(0,175,240,.4)] font-helveticaNeueRegular tracking-wide overflow-hidden overflow-ellipsis'>
+                        {subText}
+                    </p>
+                }
+            </div>
             {buttons && buttons.length > 0 &&
                 <button ref={moreRef}
                     onClick={(e) => {
@@ -48,20 +63,8 @@ const Header = ({previous,buttons,Icon,text,subText,}) => {
             }
         </div>
         <div className='flex flex-row w-full h-full items-center space-x-4'>
-            {Icon && <Icon size={screenSize === 'xs'?64:128} className=' shrink-0'/>}
-            <div className='flex flex-col w-full overflow-hidden'>
-                {text &&
-                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} className='w-full h-auto text-2xl sm:text-4xl text-[rgb(0,175,240)] font-jostSemi break-words overflow-hidden uppercase'>
-                        {text}
-                    </p>
-                }
-                {subText &&
-                    <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'3'}} 
-                        className='flex w-full h-auto pr-10 text-sm text-[rgba(0,175,240,.4)] font-helveticaNeueRegular tracking-wide overflow-hidden overflow-ellipsis'>
-                        {subText}
-                    </p>
-                }
-            </div>
+            
+            
         </div>
     </div>
   )
