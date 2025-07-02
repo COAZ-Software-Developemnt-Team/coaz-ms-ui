@@ -44,7 +44,7 @@ const ManagementSystem = () => {
                 current = response.content;
             }
         })
-        .then((error) => {
+        .catch((error) => {
             console.log(error);
             current = null;
         })
