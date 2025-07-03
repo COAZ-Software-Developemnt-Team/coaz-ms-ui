@@ -14,7 +14,7 @@ const Header = ({previous,buttons,Icon,text}) => {
         <div className='flex flex-row w-full h-fit justify-between shrink-0 space-x-2 items-center'>
             {previous && <button 
                 onClick={(e) => navigate(previous)}
-                className='flex w-12 h-12 hover:bg-[rgba(0,175,240,.1)] rounded-full'
+                className='flex w-12 h-12 hover:bg-[rgba(0,175,240,.1)]  shrink-0 rounded-full'
             >
                 <PiArrowLeft size={32} className='flex m-auto'/>
             </button>}
