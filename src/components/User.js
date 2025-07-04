@@ -180,7 +180,7 @@ const User = () => {
                 <>
                 <div style={{backdropFilter:'blur(2px)'}}
                     className='flex flex-col w-[95%] h-fit p-2 sm:p-4 mt-[2%] text-[rgb(0,175,240)] bg-[rgba(0,175,240,.2)] rounded-2xl shadow-xl overflow-hidden shrink-0'>
-                    <div className='flex flex-row w-full h-fit justify-between shrink-0 space-x-2 items-center'>
+                    <div className='flex flex-row w-full h-2 justify-between shrink-0 space-x-2 items-center'>
                         <button 
                             onClick={(e) => navigate(parentPath)}
                             className='flex w-12 h-12 hover:bg-[rgba(0,175,240,.1)] rounded-full'
@@ -230,13 +230,13 @@ const User = () => {
                         }
                     </div>
                     <div className='flex flex-row w-full h-fit items-center space-x-4'>
-                        <div className='flex w-16 sm:w-32 h-16 sm:h-32 shrink-0 rounded-full bg-[rgb(0,175,240)] shadow-lg'>
-                            {user && <p className='flex w-fit h-auto m-auto text-white text-4xl sm:text-6xl font-jostMedium'>
+                        <div className='flex w-10 sm:w-10 h-6 sm:h-8 shrink-0 rounded-full bg-[rgb(0,175,240)] shadow-lg'>
+                            {user && <p className='flex w-fit h-fit m-auto text-white text-2xl sm:text-2xl font-jostMedium'>
                                     {user.firstname.charAt(0)+user.lastname.charAt(0)}
                             </p>}
                         </div>
                         <div className='flex flex-col w-full'>
-                            <p className='w-full h-auto text-2xl sm:text-4xl text-[rgb(0,175,240)] font-jostSemi break-words uppercase'>
+                            <p className='w-full h-full text-xl sm:text-2xl text-[rgb(0,175,240)] font-jostSemi break-words uppercase'>
                                 {user.firstname}
                             </p>
                             <p className='text-[rgb(68,71,70)] text-sm tracking-wide font-helveticaNeueRegular capitalize'>
