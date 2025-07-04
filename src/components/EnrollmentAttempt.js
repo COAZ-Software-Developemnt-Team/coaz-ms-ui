@@ -17,7 +17,7 @@ const EnrollmentAttempt = () => {
     const [enrollmentAttempt,setEnrollmentAttempt] = useState(null);
     const [date,setDate] = useState(null);
     const [action,setAction] = useState('');
-    const {attemptId} = useParams();
+    const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
     const [message,setMessage] = useState({content:'',success:false});
     const moreRef = useRef(null);
 
@@ -70,9 +70,10 @@ const EnrollmentAttempt = () => {
         .then( async (response) => {
             if(response.status && response.status === 'SUCCESSFUL' && response.content && response.content.attempt) {
                 let attempt = response.content.attempt;
-                if(attempt.status === 'NEW' && user && user.id === attempt.user.id) {
+                console.log()
+                if(attempt.status === 'NEW' && studentId && studentId == attempt.user.id) {
                     setAction(ATTEMPTING);
-                } else if(attempt.status === 'PENDING' && user && user.id === attempt.activity.courseClass.teacherId) {
+                } else if(attempt.status === 'PENDING' && teacherId && teacherId == attempt.activity.courseClass.teacherId) {
                     setAction(MARKING);
                 }
                 setDate(new Date(response.content.attempt.createdOn))
@@ -255,7 +256,6 @@ const Timer = ({start,duration,onTimeOut}) => {
     const date = new Date(new Date(start).getTime() + duration * 60000);
     const [time,setTime] = useState(date.getTime() - new Date().getTime());
     
-
     useEffect(() => {
         if(time > 0) {
             setTimeout(() => {
