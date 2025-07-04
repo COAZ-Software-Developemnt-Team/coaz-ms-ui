@@ -20,6 +20,7 @@ const EnrollCourse = ({courseId,reload}) => {
         setMessage({content:'',success:false});
         if(course && courseClass) {
             setLoading(true);
+            
             request('POST','enrollment/course',null,{courseId:course.id,teacherId:courseClass.teacher.id},true)
             .then((response) => {
                 setLoading(false);
