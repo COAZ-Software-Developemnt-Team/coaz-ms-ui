@@ -1,6 +1,6 @@
 import React, {useState,useEffect,useContext, Component} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import {sex,idTypes} from '../data';
+import {sex,idTypes} from '../constants';
 import FormValidator,{useFormValidator} from './FormValidator';
 import Inputs from './Inputs';
 import Scrollable from './Scrollable';

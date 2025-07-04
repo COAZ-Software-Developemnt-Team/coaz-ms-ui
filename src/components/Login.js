@@ -6,6 +6,7 @@ import Message from './Message';
 import Payment from './MobilePayment';
 import FinishRegistration from './FinishRegistration';
 import ChangePassword from './ChangePassword';
+import AddUserSelf from './AddUserSelf';
 import {request} from '../App'
 
 const Login = ({reload}) => {
@@ -50,7 +51,12 @@ const Login = ({reload}) => {
             setLoading(false);
             reload && reload()
         })
-    };
+    }; 
+
+    const onCreateAccount = (e) => {
+        e.preventDefault();
+        setAccess({Component:() => <AddUserSelf/>})
+    }
 
     const onForgotPassword = async (e) => {
         setLoading(true);
@@ -116,6 +122,10 @@ const Login = ({reload}) => {
         <button onClick={(e) => onLogin(e)} 
             className='w-72 h-10 rounded-lg items-center justify-center shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
             Login
+        </button>
+        <button onClick={(e) => onCreateAccount(e)} 
+            className='w-72 h-10 rounded-lg items-center justify-center shrink-0 bg-white hover:bg-[rgb(0,175,240)] text-[rgb(0,175,240)] hover:text-white shadow-md'>
+            Create Account
         </button>
     </div>
   )
