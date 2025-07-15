@@ -3,7 +3,7 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams, Outlet } from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical,PiTag, PiCalendarDot, PiCalendarDotLight, PiUserPlus, PiCalendarDotsFill, PiCalendarPlus, PiCalendarCheckLight, PiCalendarCheck } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import {useData} from '../App';
+import {useData} from '../App'
 import ContentContainer from './ContentContainer';
 import AddEvent from './AddEvent';
 import Payment from './MobilePayment';
@@ -16,10 +16,9 @@ const Events = () => {
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
-    const [request] = useData();
     const {eventId} = useParams();
     const path = useLocation().pathname;
-
+    const [request] = useData;
     const onAddEvent = (e) => {
         setDialog({
             show:true,
