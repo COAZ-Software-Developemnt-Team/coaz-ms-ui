@@ -27,6 +27,7 @@ const Users = () => {
         sortBy:'id',
         sortDir:'asc'
     })
+    const [request] = useData;
     const [loading,setLoading] = useState(false);
     const [request] = useData();
     const path = useLocation().pathname;

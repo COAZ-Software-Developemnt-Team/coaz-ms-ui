@@ -32,7 +32,7 @@ const UserType = () => {
             Component:() => <EditUserType id={userTypeId} reload={load}/>
         })
     }
-
+const [request] = useData;
     const onAssignRole = (e) => {
         e.preventDefault();
         setDialog({

@@ -26,6 +26,7 @@ const UserTypes = () => {
                 <AddUserType reload={load}/>
         })
     }
+    const [request] = useData;
 
     const getUserTypes = async () => {
         await request('GET','usertypes',null,null,false)

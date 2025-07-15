@@ -5,7 +5,7 @@ import { PiDotsThreeVertical,PiTag,PiTrash, PiPencilSimple, PiMaskHappy, PiCalen
 import YesNoDialog from './YesNoDialog';
 import AddTariff from './AddTariff';
 import Tariff from './Tariff';
-import { useData } from '../App';
+import { useData} from '../App';
 import Detail from './Detail';
 import ContentContainer from './ContentContainer';
 import EditEvent from './EditEvent';
@@ -23,11 +23,10 @@ const Event = () => {
     const [loading,setLoading] = useState(false);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [readUsersAuthority,setReadUsersAuthority] = useState(false);
-    const [request] = useData();
     const {eventId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
-
+    const [request] = useData;
     const onEdit = (e) => {
         e.preventDefault();
         setDialog({
