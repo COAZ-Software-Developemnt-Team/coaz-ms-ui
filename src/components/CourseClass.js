@@ -7,16 +7,17 @@ import AddTopic from './AddTopic';
 import TopicItem from './TopicItem';
 import MsHeader from './Header';
 import Scrollable from './Scrollable';
-import { request } from '../App';
+import { useData } from '../App';
 import ContentContainer from './ContentContainer';
 
 const CourseClass = () => {
     const {setDialog} = useContext(GlobalContext);
     const [courseClass,setCourseClass] = useState(null);
-    const [updateAuthority,setUpdateAuthority] = useState(false)
+    const [updateAuthority,setUpdateAuthority] = useState(false);
     const [topics,setTopics] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const [request] = useData();
     const {courseId,teacherId,topicId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;

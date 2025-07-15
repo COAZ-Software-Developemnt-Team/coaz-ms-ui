@@ -7,7 +7,7 @@ import Message from './Message';
 import FormDialog from './FormDialog';
 import PaymentOptions from './PaymentOptions';
 import MessageDialog from './MessageDialog';
-import { request } from '../App';
+import { useData } from '../App';
 
 const EnrollCourse = ({courseId,reload}) => {
     const {setLoading,setDialog,setAccess} = useContext(GlobalContext);
@@ -17,6 +17,7 @@ const EnrollCourse = ({courseId,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
+    const [request] = useData();
 
     const submit = async (e) => {
         setMessage({content:'',success:false});

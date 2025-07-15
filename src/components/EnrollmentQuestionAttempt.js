@@ -1,12 +1,13 @@
 import React,{useEffect,useState} from 'react'
 import { RiCheckboxBlankLine,RiCheckboxLine } from 'react-icons/ri';
-import {request} from '../App'
+import {useData} from '../App'
 
 const EnrollmentQuestionAttempt = ({number,enrollmentQuestionAttempt, action,reload}) => {
     const [attemptAnswer,setAttemptAnswer] = useState(null);
     const [textAnswer,setTextAnswer] = useState('');
     const [questionAttemptMarks,setQuestionAttemptMarks] = useState('');
     const [marks,setMarks] = useState('');
+    const [request] = useData();
 
     useEffect(() => {
         if(enrollmentQuestionAttempt && enrollmentQuestionAttempt.questionAttempt) {

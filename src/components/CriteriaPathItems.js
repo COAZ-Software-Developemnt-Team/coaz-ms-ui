@@ -7,13 +7,14 @@ import Scrollable from './Scrollable';
 import AddCriteriaPathItem from './AddCriteriaPathItem';
 import CriteriaPathItem from './CriteriaPathItem';
 import MsHeader from './Header';
-import {request} from '../App'
+import {useData} from '../App'
 
 const CriteriaPathItems = () => {
     const {setDialog} = useContext(GlobalContext);
     const [roots,setRoots] = useState([]);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
+    const [request] = useData();
     const {pathId} = useParams();
     const path = useLocation().pathname;
 

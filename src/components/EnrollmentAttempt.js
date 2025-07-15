@@ -8,7 +8,7 @@ import Message from './Message';
 import YesNoDialog from './YesNoDialog';
 import MessageDialog from './MessageDialog';
 import EnrollmentQuestionAttempt from './EnrollmentQuestionAttempt';
-import { request } from '../App';
+import { useData } from '../App';
 
 const EnrollmentAttempt = () => {
     const path = useLocation().pathname;
@@ -19,6 +19,7 @@ const EnrollmentAttempt = () => {
     const [action,setAction] = useState('');
     const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
     const [message,setMessage] = useState({content:'',success:false});
+    const [request] = useData();
     const moreRef = useRef(null);
 
     const MARKING = 'MARKING';

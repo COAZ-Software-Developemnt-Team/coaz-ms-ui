@@ -6,7 +6,7 @@ import { PiBookFill,PiPencilSimple,PiTextAlignLeft,PiTag } from 'react-icons/pi'
 import AddTopic from './AddTopic';
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
-import { request } from '../App';
+import { useData } from '../App';
 import TopicItem from './TopicItem';
 import Detail from './Detail';
 import AddTariff from './AddTariff';
@@ -21,6 +21,7 @@ const Course = () => {
     const [buttons,setButtons] = useState([]);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [loading,setLoading] = useState(false); 
+    const [request] = useData();
     const {courseId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
