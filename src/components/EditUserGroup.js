@@ -5,7 +5,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App'
+import {useData} from '../App'
 
 const EditUserGroup = ({id,reload}) => {
     const {setLoading,setDialog,setReloadUser} = useContext(GlobalContext);
@@ -13,6 +13,7 @@ const EditUserGroup = ({id,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 320;
     const [inputWidth,setInputWidth] = useState(minWidth);
+    const [request] = useData();
 
     const submit = async (e) => {
         setMessage({content:'',success:false});

@@ -6,7 +6,7 @@ import {PiStudentFill,PiChalkboardTeacherLight,PiBookLight,PiStudent,PiDotsThree
 import YesNoDialog from './YesNoDialog';
 import EnrollCourse from './EnrollCourse';
 import ContentContainer from './ContentContainer';
-import { request } from '../App';
+import { useData } from '../App';
 import PaymentOptions from './PaymentOptions';
 import Detail from './Detail';
 import MessageDialog from './MessageDialog';
@@ -17,6 +17,7 @@ const Enrollment = () => {
     const {programId,courseId} = useParams();
     const {parentPath} = useOutletContext();
     const [loading,setLoading] = useState();
+    const [request] = useData();
     const path = useLocation().pathname;
 
     const navigate = useNavigate();

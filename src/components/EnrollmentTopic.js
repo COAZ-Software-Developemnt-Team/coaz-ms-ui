@@ -2,11 +2,12 @@ import React, {useEffect,useState} from 'react'
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import { PiTextAlignLeftFill,PiClipboardTextLight,PiFileTextLight, PiFilePdfLight} from "react-icons/pi";
 import ContentContainer from './ContentContainer';
-import { request} from '../App';
+import { useData} from '../App';
 
 const EnrollmentTopic = () => {
     const [enrollmentTopic,setEnrollmentTopic] = useState(null);
     const [loading,setLoading] = useState();
+    const [request] = useData();
     const {programId,studentId,courseId,teacherId,topicId,resourceId,activityId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;

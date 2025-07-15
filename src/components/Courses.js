@@ -6,7 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddCourse from './AddCourse';
 import MsHeader from './Header';
-import { request } from '../App';
+import { useData } from '../App';
 import ContentContainer from './ContentContainer';
 
 const Courses = () => {
@@ -15,7 +15,8 @@ const Courses = () => {
     const [availableCourses,setAvailableCourses] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
-    const [loading,setLoading] = useState()
+    const [loading,setLoading] = useState();
+    const [request] = useData();
     const {courseId} = useParams();
     const path = useLocation().pathname;
 

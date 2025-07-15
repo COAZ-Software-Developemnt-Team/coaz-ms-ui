@@ -4,13 +4,14 @@ import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'reac
 import { PiTarget,PiTargetFill} from "react-icons/pi";
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
-import { request } from '../App';
+import { useData } from '../App';
 
 const Attempts = () => {
     const {setDialog,} = useContext(GlobalContext);
     const [activity,setActivity] = useState(null);
     const [enrollmentAttempts,setEnrollmentAttempts] = useState([]);
     const [buttons,setButtons] = useState([]);
+    const [request] = useData();
     const {courseId,teacherId,topicId,activityId,attemptId} = useParams();
     const path = useLocation().pathname;
     const {parentPath} = useOutletContext();

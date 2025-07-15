@@ -7,7 +7,7 @@ import FormValidator from './FormValidator';
 import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import Message from './Message';
-import {request} from '../App';
+import {useData} from '../App';
 
 const EditUser = ({id,self,reload}) => {
     const {currentUser,setDialog,setLoading} = useContext(GlobalContext);
@@ -24,6 +24,7 @@ const EditUser = ({id,self,reload}) => {
     const [newPassword,setNewPassword] = useState('');
     const [confirmPassword,setConfirmPassword] = useState('');
     const [oldPassword,setOldPassword] = useState('');
+    const [request] = useData();
 
     const onChange = (e) => {
         const value = e.target.value;

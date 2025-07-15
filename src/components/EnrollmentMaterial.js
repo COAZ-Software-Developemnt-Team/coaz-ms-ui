@@ -5,7 +5,7 @@ import { PiTarget , PiFileTextFill, PiTargetLight } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import ContentContainer from './ContentContainer';
 import Detail from './Detail';
-import { request } from '../App';
+import { useData } from '../App';
 
 const EnrollmentMaterial = () => {
     const {setDialog} = useContext(GlobalContext);
@@ -16,6 +16,7 @@ const EnrollmentMaterial = () => {
     const [attempted,setAttempted] = useState(0);
     const [passGrade,setPassGrade] = useState(0);
     const [highestGrade,setHighestGrade] = useState(0);
+    const [request] = useData();
     const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
     const path = useLocation().pathname;
     const {parentPath} = useOutletContext();
