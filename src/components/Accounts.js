@@ -174,6 +174,7 @@ export default Accounts
 
 const AccountItem = ({account}) => {
     const [balance,setBalance] = useState(0);
+    const [request] = useData();
 
     let USDecimal = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,

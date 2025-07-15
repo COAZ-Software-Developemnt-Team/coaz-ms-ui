@@ -102,6 +102,7 @@ const EnrollmentCourseItem = ({enrollmentCourse,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const [enrollAuthority,setEnrollAuthority] = useState(false);
+    const [request] = useData();
     const {programId,courseId} = useParams();
     const moreRef = useRef(null);
 

@@ -127,7 +127,8 @@ const EventItem = ({event,user,deleteAuthority,reload,setLoading}) => {
     const {currentUser,setDialog,setPopupData,setAccess} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const [tariff,setTariff] = useState(null);
-    const moreRef = useRef(null)
+    const [request] = useData();
+    const moreRef = useRef(null);
 
     let USDecimal = new Intl.NumberFormat('en-US',{
         minimumFractionDigits: 2,

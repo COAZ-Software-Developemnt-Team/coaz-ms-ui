@@ -238,6 +238,7 @@ export default Event
 const EventDay = ({eventDay,updateAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const [request] = useData();
     const path = useLocation().pathname;
     const moreRef = useRef(null)
 

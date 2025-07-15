@@ -107,6 +107,7 @@ export default Courses
 const CourseItem = ({course,deleteAuthority,reload, setLoading}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const [request] = useData();
     const moreRef = useRef(null)
 
     let USDecimal = new Intl.NumberFormat('en-US', {

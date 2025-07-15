@@ -99,6 +99,7 @@ const EnrollmentCourse = () => {
 export default EnrollmentCourse
 
 const EnrollmentTopicItem = ({enrollmentTopic,reload}) => {
+    const [request] = useData();
     const {setDialog} = useContext(GlobalContext);
     const path = useLocation().pathname;
 
@@ -206,6 +207,7 @@ const EnrollmentTopicItem = ({enrollmentTopic,reload}) => {
 const Certificate = ({certificate}) => {
     const {setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const [download] = useData();
     const moreRef = useRef();
 
     const onDownload = (e) => {
