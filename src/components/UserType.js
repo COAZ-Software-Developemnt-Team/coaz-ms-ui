@@ -9,7 +9,7 @@ import AddTariff from './AddTariff';
 import AddContextRole from './AddContextRole';
 import Tariff from './Tariff';
 import MsHeader from './Header';
-import { request } from '../App';
+import { useData } from '../App';
 import Detail from './Detail';
 import ContentContainer from './ContentContainer';
 
@@ -31,7 +31,7 @@ const UserType = () => {
             Component:() => <EditUserType id={userTypeId} reload={load}/>
         })
     }
-
+const [request] = useData;
     const onAssignRole = (e) => {
         e.preventDefault();
         setDialog({

@@ -6,7 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddUserType from './AddUserType';
 import MsHeader from './Header';
-import {request} from '../App'
+import {useData} from '../App'
 import ContentContainer from './ContentContainer';
 
 const UserTypes = () => {
@@ -25,6 +25,7 @@ const UserTypes = () => {
                 <AddUserType reload={load}/>
         })
     }
+    const [request] = useData;
 
     const getUserTypes = async () => {
         await request('GET','usertypes',null,null,false)

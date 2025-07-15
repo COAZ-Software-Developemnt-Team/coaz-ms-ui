@@ -6,7 +6,7 @@ import AddUser from './AddUser';
 import UserItem from './UserItem';
 import AddUsers from './AddUsers';
 import Filter from './UserFilter';
-import { request } from '../App';
+import {useData} from '../App';
 import ContentContainer from './ContentContainer';
 
 const Users = () => {
@@ -27,6 +27,7 @@ const Users = () => {
         sortBy:'id',
         sortDir:'asc'
     })
+    const [request] = useData;
     const [loading,setLoading] = useState(false);
     const path = useLocation().pathname;
 
