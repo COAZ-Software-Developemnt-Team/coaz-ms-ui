@@ -5,7 +5,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App'
+import {useData} from '../App'
 
 const AddHtmlResource = ({courseId,teacherId,topicId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -14,6 +14,7 @@ const AddHtmlResource = ({courseId,teacherId,topicId,reload}) => {
     const [topic,setTopic] = useState(null);
     const [file,setFile] = useState(null);
     const [message,setMessage] = useState({content:'',success:false});
+    const [request] = useData();
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
 

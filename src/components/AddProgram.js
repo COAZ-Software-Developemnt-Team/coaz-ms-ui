@@ -6,7 +6,7 @@ import TextArea from './TextArea';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App';
+import {useData} from '../App';
 
 const AddProgram = ({reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -15,7 +15,7 @@ const AddProgram = ({reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
-
+    const [request] = useData();
     const submit = async (e) => {
         setMessage({content:'',success:false});
         setLoading(true);

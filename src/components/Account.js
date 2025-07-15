@@ -2,8 +2,8 @@ import React,{useContext, useEffect,useState} from 'react'
 import {BsGraphUpArrow,BsGraphUp} from "react-icons/bs";
 import Scrollable from './Scrollable';
 import { useRef } from 'react';
-import { request } from '../App';
-import { PiArrowLeftLight, PiBook, PiBookThin, PiCaretLineUp, PiChartLine, PiChartLineDownThin, PiChartLineThin, PiChartLineUp, PiChartLineUpThin, PiGraduationCap, PiGraduationCapLight, PiGraduationCapThin, PiHandDeposit, PiMoneyWavyThin } from 'react-icons/pi';
+import { useData } from '../App';
+import { PiArrowLeftLight, PiChartLineDownThin, PiChartLineUpThin, PiMoneyWavyThin } from 'react-icons/pi';
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import Deposit from './Deposit';
@@ -21,6 +21,7 @@ const Account = () => {
     const transactionsRef = useRef(null);
     const padding = 16;
     const [contentSize,setContentSize] = useState({width:0,height:0});
+    const [request] = useData();
 
     const navigate = useNavigate();
 

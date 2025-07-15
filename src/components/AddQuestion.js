@@ -6,13 +6,13 @@ import TextArea from './TextArea';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App';
+import {useData} from '../App';
 
 const AddQuestion = ({id,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [question,setQuestion] = useState({});
     const [message,setMessage] = useState({content:'',success:false});
-
+    const [request] = useData();
     const submit = async (e) => {
         setMessage({content:'',success:false});
         setLoading(true);

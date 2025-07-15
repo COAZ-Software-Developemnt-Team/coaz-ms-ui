@@ -6,7 +6,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App'
+import {useData} from '../App'
 
 const AddUser = ({reload}) => {
     const {setDialog,setLoading} = useContext(GlobalContext);
@@ -21,7 +21,7 @@ const AddUser = ({reload}) => {
     const [inputWidth,setInputWidth] = useState(minWidth);
     const [message,setMessage] = useState({content:'',success:false});
     const [user,setUser] = useState({});
-
+    const [request] = useData();
 
     const onAutoPassword = (e) => {
         setAutoPassword(!autoPassword);

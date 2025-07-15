@@ -6,7 +6,7 @@ import AddUser from './AddUser';
 import UserItem from './UserItem';
 import AddUsers from './AddUsers';
 import TransactionFilter from './TransactionFilter';
-import { request } from '../App';
+import { useData } from '../App';
 import ContentContainer from './ContentContainer';
 import TransactionItem from './TransactionItem';
 
@@ -27,6 +27,7 @@ const Transactions = () => {
         sortDir:'asc'
     })
     const [loading,setLoading] = useState(false);
+    const [request] = useData();
     const path = useLocation().pathname;
 
     const onFilter = (e) => {

@@ -5,7 +5,7 @@ import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import { request } from '../App';
+import {useData} from '../App';
 import TextArea from './TextArea';
 
 const AddEvent = ({reload}) => {
@@ -13,7 +13,7 @@ const AddEvent = ({reload}) => {
     const [event,setEvent] = useState({});
     const [criteriaPaths,setCriteriaPaths] = useState([]);
     const [message,setMessage] = useState({content:'',success:false});
-
+    const [request] = useData()
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
 

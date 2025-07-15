@@ -5,9 +5,7 @@ import EditUser from './EditUser';
 import {PiLockKeyOpen ,PiPencilSimple,PiCaretDoubleLeft,PiCaretLeft,PiCaretDoubleRight,PiCaretRight, PiFunnel,PiFolderLight } from 'react-icons/pi';
 import ResetPassword from './ResetPassword';
 import Detail from './Detail';
-import {request} from '../App';
-import YesNoDialog from './YesNoDialog';
-import Deposit from './Deposit';
+import {useData} from '../App';
 import TransactionFilter from './TransactionFilter';
 import TransactionItem from './TransactionItem';
 import ContentContainer from './ContentContainer';
@@ -22,6 +20,8 @@ const User = () => {
     const location = useLocation();
     const { state } = location;
     const path = useLocation().pathname;
+
+    const [request] = useData();
 
     const onEdit = async (e) => {
         e.preventDefault();
@@ -210,7 +210,7 @@ const User = () => {
 
 export default User
 
-const Transactions = ({user,readAuthority}) => {
+/* const Transactions = ({user,readAuthority}) => {
     const {currentUser,setDialog, setPopupData,transactionFilter,setTransactionFilter} = useContext(GlobalContext);
     const [transactions,setTransactions] = useState([]);
     const [pageNo,setPageNo] = useState(0);
@@ -398,5 +398,5 @@ const Transactions = ({user,readAuthority}) => {
             }
         </div>
     )
-}
+} */
 

@@ -122,7 +122,6 @@ export function useData() {
                       } else {
                           response =  error.message;
                       } */
-                      logout()
                     })
                 }
             })
@@ -170,7 +169,51 @@ export function useData() {
     return response;
   }
 
-  return [currentUser,setCurrentUser,request,download];
+  const login = async (username,password) => {
+      sessionStorage.setItem("access_token",'');
+      sessionStorage.setItem("refresh_token",'');
+      let responseObject = {};
+      await axios.get("login",{params:{username:username,password:password}})
+      .then((response) => {
+          if(response.data['access_token']) {
+              sessionStorage.setItem("access_token",response.data['access_token']);
+              sessionStorage.setItem("refresh_token",response.data['refresh_token']);
+              responseObject = {status:'SUCCESSFUL'};
+              request('GET','current',null,null,true)
+              .then(async (currentResponse) => {
+                  if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                    setCurrentUser(currentResponse.content.user);
+                  } else {
+                    setCurrentUser(false);
+                  }
+              });
+          } else {
+              responseObject = response.data;
+          }
+      })
+      .catch(async (error) => {
+          if(error.response && error.response.status === 401) { 
+              if (error.response.data['error_message'] && error.response.data['error_message'].toLowerCase().includes('bad credentials')) {
+                  responseObject = {error_message:'Incorrect username or password'};
+              }else {
+                  responseObject = error.response.data;
+              }
+          } else {
+              responseObject = {error_message:error.message};
+          }
+      })
+      
+      return responseObject; 
+  }
+
+  const logout = () => {
+      sessionStorage.setItem("access_token",'');
+      sessionStorage.setItem("refresh_token",'');
+      setCurrentUser(null);
+  }
+
+  return [currentUser,setCurrentUser,request,download,login,logout];
 }
 
 const convertToId = (value) => {
@@ -217,6 +260,7 @@ function App() {
   const [popupData,setPopupData] = useState({});
   const [access,setAccess] = useState(null);
   const [loading,setLoading] = useState(false);
+  const [request,login,logout] = useData();
 
   const mainElementRef = useRef(null);
   const menuRef = useRef(null);
@@ -225,59 +269,15 @@ function App() {
   const rightMenusRef = useRef(null);
 
   const createFileRoute = (file,key) => {
-        let route = null;
-        if(file) {
-            route = <Route key={key} path={file.name} element={<File/>}>
-                {file.children && file.children.map((subFile,i) =>
-                    createFileRoute(subFile,key+i)
-                )}
-            </Route>
-        }
-        return <Route key={key} path={currentUser?currentUser.id:'file'} element={() => <></>}/>;
-    }
-
-  const login = async (username,password) => {
-      sessionStorage.setItem("access_token",'');
-      sessionStorage.setItem("refresh_token",'');
-      let responseObject = {};
-      await axios.get("login",{params:{username:username,password:password}})
-      .then((response) => {
-          if(response.data['access_token']) {
-              sessionStorage.setItem("access_token",response.data['access_token']);
-              sessionStorage.setItem("refresh_token",response.data['refresh_token']);
-              responseObject = {status:'SUCCESSFUL'};
-              request('GET','current',null,null,true)
-              .then(async (currentResponse) => {
-                  if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                    setCurrentUser(currentResponse.content.user);
-                  } else {
-                    setCurrentUser(false);
-                  }
-              });
-          } else {
-              responseObject = response.data;
-          }
-      })
-      .catch(async (error) => {
-          if(error.response && error.response.status === 401) { 
-              if (error.response.data['error_message'] && error.response.data['error_message'].toLowerCase().includes('bad credentials')) {
-                  responseObject = {error_message:'Incorrect username or password'};
-              }else {
-                  responseObject = error.response.data;
-              }
-          } else {
-              responseObject = {error_message:error.message};
-          }
-      })
-      
-      return responseObject; 
-  }
-
-  const logout = () => {
-      sessionStorage.setItem("access_token",'');
-      sessionStorage.setItem("refresh_token",'');
-      setCurrentUser(null);
+      let route = null;
+      if(file) {
+          route = <Route key={key} path={file.name} element={<File/>}>
+              {file.children && file.children.map((subFile,i) =>
+                  createFileRoute(subFile,key+i)
+              )}
+          </Route>
+      }
+      return <Route key={key} path={currentUser?currentUser.id:'file'} element={() => <></>}/>;
   }
 
   useEffect(() => {   

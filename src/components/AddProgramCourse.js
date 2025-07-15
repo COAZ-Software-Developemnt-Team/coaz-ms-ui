@@ -5,7 +5,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import { request } from '../App';
+import { useData } from '../App';
 
 const AddProgramCourse = ({programId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -13,6 +13,7 @@ const AddProgramCourse = ({programId,reload}) => {
     const [course,setCourse] = useState(null);
     const [courses,setCourses] = useState([]);
     const [message,setMessage] = useState({content:'',success:false});
+    const [request] = useData();
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
 

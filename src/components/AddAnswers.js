@@ -6,7 +6,7 @@ import TextArea from './TextArea';
 import Message from './Message';
 import FormDialog from './FormDialog';
 import { RiCheckboxBlankLine,RiCheckboxLine,RiDeleteBin6Line } from 'react-icons/ri';
-import { request } from '../App';
+import { useData } from '../App';
 
 const AddAnswers = ({questionId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -14,6 +14,7 @@ const AddAnswers = ({questionId,reload}) => {
     const [oldAnswer,setOldAnswer] = useState('');
     const [answers,setAnswers] = useState([])
     const [message,setMessage] = useState({content:'',success:false});
+    const [request] = useData();
 
     const setCorrectAnswer = (answer) => {
         for(let ans of answers) {
