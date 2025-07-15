@@ -10,6 +10,7 @@ const AddCourse = ({reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [course,setCourse] = useState({});
     const [professionalCategories,setProfessionalCategories] = useState([]);
+    const [criteriaPaths,setCriteriaPaths] = useState([]);
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
@@ -80,6 +81,28 @@ const AddCourse = ({reload}) => {
             value:course && course.professionalCategory?course.professionalCategory:'',
             placeholder:'Select professional category...',
             onChange:(e) => handleChange(e,onChange)
+        },
+        {
+            label:'Tariff Applicable',
+            type:'checkbox',
+            name:'tariffApplicable',
+            value:course?course.tariffApplicable:false,   
+            onChange:(e) => {
+                setCourse({...course,tariffApplicable: !course.tariffApplicable});
+            }
+        },
+        {
+            label:'Criteria paths',
+            type:'select',
+            options:() => {
+                let options = [];
+                course && course.tariffApplicable && criteriaPaths.map((option,i) => options.push(<option key={i} value={option.id}>{option.id}</option>));
+                return options;
+            },
+            name:'criteriaPathItem', 
+            value:course && course.criteriaPathItem?course.criteriaPathItem.id:'',
+            disabled:course && !course.tariffApplicable,
+            onChange:(e) => handleChange(e,onCriteriaPath)
         }
     ]
 
@@ -104,6 +127,15 @@ const AddCourse = ({reload}) => {
         }
     }
 
+    const onCriteriaPath = (e) => {
+        if(e.target.value === '') {
+            setCourse({...course, [e.target.name]: null});
+        } else {
+            let value = criteriaPaths.find((path) => {return path.id === e.target.value});
+            setCourse({...course, criteriaPathItem: value});
+        }
+    }
+
     useEffect(() => {
         request('GET','professionalcategories',null,null,false)
         .then((response) => {
@@ -115,6 +147,20 @@ const AddCourse = ({reload}) => {
         })
         .catch((error) => {
             setProfessionalCategories([]);
+        })
+
+        request('GET','criteriapath/leaves',null,null,true)
+        .then((response) => {
+            if(response.status) {
+                if(response.status === 'SUCCESSFUL' && response.content && response.content.length > 0) {
+                    setCriteriaPaths(response.content);
+                    setCourse({...course, criteriaPathItem: response.content[0]});
+                } else {
+                    setCriteriaPaths([]);
+                }
+            } else  {
+                setCriteriaPaths([]);
+            }
         })
     },[]);
 

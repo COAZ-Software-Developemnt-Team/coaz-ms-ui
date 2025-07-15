@@ -1,6 +1,6 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useLocation,useParams, Outlet } from 'react-router-dom';
+import {useLocation,useParams, Outlet } from 'react-router-dom';
 import { PiUsers,PiUserPlus,PiUserFill,PiCaretDoubleLeft,PiCaretLeft,PiCaretDoubleRight,PiCaretRight,PiFunnel} from "react-icons/pi";
 import AddUser from './AddUser';
 import UserItem from './UserItem';

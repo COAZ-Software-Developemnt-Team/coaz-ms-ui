@@ -5,10 +5,12 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
+import PaymentOptions from './PaymentOptions';
+import MessageDialog from './MessageDialog';
 import { request } from '../App';
 
 const EnrollCourse = ({courseId,reload}) => {
-    const {setLoading,setDialog} = useContext(GlobalContext);
+    const {setLoading,setDialog,setAccess} = useContext(GlobalContext);
     const [course,setCourse] = useState({});
     const [classes,setCourseClasses] = useState([]);
     const [courseClass,setCourseClass] = useState(null)
@@ -20,19 +22,33 @@ const EnrollCourse = ({courseId,reload}) => {
         setMessage({content:'',success:false});
         if(course && courseClass) {
             setLoading(true);
-            
             request('POST','enrollment/course',null,{courseId:course.id,teacherId:courseClass.teacher.id},true)
             .then((response) => {
                 setLoading(false);
-                if(response.status) {
-                    if(response.status === 'SUCCESSFUL' && response.content) {
-                        reload && reload();
-                        setDialog(null);
-                    } else {
-                        setMessage({content:response.message,success:false});
-                    }
-                } else  {
-                    setMessage({content:response,success:false});
+                if(response.status && response.status === 'SUCCESSFUL' && response.content) {
+                    setDialog(null);
+                    if(!response.content.paid && response.content.tariff) {
+                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff}  reload={reload}/>});
+                    } 
+                    reload && reload()
+                } else if(response.message) {
+                    setDialog({
+                        show:true,
+                        Component:() => 
+                            <MessageDialog 
+                                title='Message' 
+                                message={response.message} 
+                            />
+                    })
+                } else {
+                    setDialog({
+                        show:true,
+                        Component:() => 
+                            <MessageDialog 
+                                title='Message' 
+                                message={response} 
+                            />
+                    })
                 }
             })
             .catch((error) => {
@@ -53,7 +69,7 @@ const EnrollCourse = ({courseId,reload}) => {
             disabled:true
         },
         {
-            label:'courseClass',
+            label:'Class',
             type:'select',
             options:() => {
                 let options = [];

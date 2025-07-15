@@ -13,6 +13,7 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
     const [courseClass,setCourseClass] = useState(null);
     const [topic,setTopic] = useState(null);
     const [file,setFile] = useState(null);
+    const [durationUnits,setDurationUnits] = useState([])
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
@@ -85,20 +86,32 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
             errors:errors
         },
         {
-            label:'Minimum view minutes',
+            label:'Duration Unit',
+            type:'select',
+            options:() => {
+                let options = [];
+                durationUnits.map((option,i) => options.push(<option key={i} value={option.id}>{option.name}</option>));
+                return options;
+            },
+            name:'durationUnit', 
+            value:resource && resource.durationUnit?resource.durationUnit.id:'',
+            onChange:(e) => handleChange(e,onDurationUnit)
+        },
+        {
+            label:'Duration',
             type:'number', 
-            name:'minViewMins',
-            value:resource && resource.minViewMins?resource.minViewMins:'',   
-            placeholder:'Enter minimum view minutes...',
+            name:'duration',
+            value:resource && resource.duration?resource.duration:'',   
+            placeholder:'Duration...',
             onChange:(e) => {handleChange(e,(e) => {
                 const value = e.target.value;
                 if(isNaN(value)) {
                     return;
                 }
-                if(value === '' && value) {
-                    setResource({...resource, minViewMins: null});
+                if(value === '') {
+                    setResource({...resource, duration: null});
                 } else {
-                    setResource({...resource, minViewMins: value});
+                    setResource({...resource, duration: value});
                 }
             })},
             register:register,
@@ -124,6 +137,15 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
             setResource({...resource, [e.target.name]: null});
         } else {
             setResource({...resource, [e.target.name]: value});
+        }
+    }
+
+    const onDurationUnit = (e) => {
+        if(e.target.value === '') {
+            setResource({...resource, durationUnit: durationUnits.length > 0?durationUnits[0]:null});
+        } else {
+            const value = durationUnits.find(units => {return units.id == e.target.value})
+            setResource({...resource, durationUnit: value});
         }
     }
 
@@ -157,6 +179,17 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
                 setDialog(null);
             })
         }
+        request('GET',`durationunits`,null,null,false)
+        .then((response) => {
+            if(response.content) {
+                setDurationUnits(response.content);
+            } else {
+                setDurationUnits([]);
+            }
+        })
+        .catch((error) => {
+            setDurationUnits([]);
+        })
     },[]);
 
     return (

@@ -38,130 +38,139 @@ import Accounts from './components/Accounts';
 import Account from './components/Account';
 import Transactions from './components/Transactions';
 import Transaction from './components/Transaction';
+import MyTransactions from './components/MyTransactions';
+import File from './components/File';
 
-//axios.defaults.baseURL = 'http://localhost:8080/api/';
+axios.defaults.baseURL = 'http://localhost:8080/api/';
 //axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
-axios.defaults.baseURL = 'http://192.168.0.162:8080/api/';
+//axios.defaults.baseURL = 'http://192.168.0.162:8080/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz_test/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
 
-export const request = async (method,url,body,params,authorization,refresh) => {
-    let response = null;
-    switch(method) {
-      case 'POST': {
-        await axios.post(url, body,{
+export function useData() {
+  const [currentUser,setCurrentUser] = useState(null);
+
+  const request = async (method,url,body,params,authorization,refresh) => {
+      let response = null;
+      switch(method) {
+        case 'POST': {
+          await axios.post(url, body,{
+              params: params,
+              headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
+          })
+          .then((postResponse) => {
+              response = postResponse.data;
+          })
+          .catch(async (error) => {
+              response = error;
+          })
+          break;
+        }
+        case 'PUT': {
+          await axios.put(url, body,{
             params: params,
             headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-        })
-        .then((postResponse) => {
+          })
+          .then((putResponse) => {
+              response = putResponse.data;
+          })
+          .catch(async (error) => {
+              response = error;
+          })
+          break;
+        }
+        case 'GET': {
+          await axios.get(url,{
+            params: params,
+            headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
+          })
+          .then((getResponse) => {
+            response = getResponse.data;
+          })
+          .catch(async (error) => {
+            response = error;
+          })
+          break;
+        }
+        case 'DELETE': {
+          await axios.delete(url,{
+            params: params,
+            headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
+          })
+          .then((postResponse) => {
             response = postResponse.data;
-        })
-        .catch(async (error) => {
+          })
+          .catch(async (error) => {
             response = error;
-        })
-        break;
+          })
+          break;
+        }
       }
-      case 'PUT': {
-        await axios.put(url, body,{
-          params: params,
-          headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-        })
-        .then((putResponse) => {
-            response = putResponse.data;
-        })
-        .catch(async (error) => {
-            response = error;
-        })
-        break;
-      }
-      case 'GET': {
-        await axios.get(url,{
-          params: params,
-          headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-        })
-        .then((getResponse) => {
-          response = getResponse.data;
-        })
-        .catch(async (error) => {
-          response = error;
-        })
-        break;
-      }
-      case 'DELETE': {
-        await axios.delete(url,{
-          params: params,
-          headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-        })
-        .then((postResponse) => {
-          response = postResponse.data;
-        })
-        .catch(async (error) => {
-          response = error;
-        })
-        break;
-      }
-    }
-    if(!response.status || response.status === 'ERROR') {
-      if(authorization && response.response && response.response.status === 403 && !refresh) {
-          await axios.get("token/refresh",{headers: {Authorization: `bearer ${sessionStorage.getItem("refresh_token")}`}})
-          .then(async (refreshResponse) => {
-              if(refreshResponse.status === 200) {
-                  sessionStorage.setItem("access_token",refreshResponse.data['access_token']);
-                  await request(method,url,body,params,authorization,true)
-                  .then((data) => {
-                      response = data;
-                  })
-                  .catch((error) => {
-                      if(error.response && error.response.data && error.response.data.message) {
+      if(!response.status || response.status === 'ERROR') {
+        if(authorization && response.response && response.response.status === 403 && !refresh) {
+            await axios.get("token/refresh",{headers: {Authorization: `bearer ${sessionStorage.getItem("refresh_token")}`}})
+            .then(async (refreshResponse) => {
+                if(refreshResponse.status === 200) {
+                    sessionStorage.setItem("access_token",refreshResponse.data['access_token']);
+                    await request(method,url,body,params,authorization,true)
+                    .then((data) => {
+                        response = data;
+                    })
+                    .catch((error) => {
+                      /* if(error.response && error.response.data && error.response.data.message) {
                           response =  error.response.data.message;
                       } else {
                           response =  error.message;
-                      }
-                  })
-              }
-          })
-          .catch((error) => {
-              if(error.response && error.response.data && error.response.data.message) {
+                      } */
+                      logout()
+                    })
+                }
+            })
+            .catch((error) => {
+                if(error.response && error.response.data && error.response.data.message) {
                   response =  error.response.data.message;
-              } else if (error.response && error.response.data && error.response.data.error_message) {
-                response = error.response.data.error_message;
-              }  else if(error.response && error.response.data && error.response.data.trace) {
-                response = error.response.data.trace;
-              } else if(error.response && error.response.data && error.response.data.error) {
-                response = error.response.data.error;
-              } else {
-                response = error.message;
-              }
-          }); 
-      } else if (response.response && response.response.data && response.response.data.message) {
-        response = response.response.data.message;
-      } else if (response.response && response.response.data && response.response.data.error_message) {
-        response = response.response.data.error_message;
-      } else if(response.response && response.response.data && response.response.data.trace) {
-        response = response.response.data.trace;
-      } else if(response.response && response.response.data && response.response.data.error) {
-        response = response.response.data.error;
-      } else {
-        response = response.message;
-      }
-    } 
-    return response;
-}
+                } else if (error.response && error.response.data && error.response.data.error_message) {
+                  response = error.response.data.error_message;
+                }  else if(error.response && error.response.data && error.response.data.trace) {
+                  response = error.response.data.trace;
+                } else if(error.response && error.response.data && error.response.data.error) {
+                  response = error.response.data.error;
+                } else {
+                  response = error.message;
+                }
+            }); 
+        } else if (response.response && response.response.data && response.response.data.message) {
+          response = response.response.data.message;
+        } else if (response.response && response.response.data && response.response.data.error_message) {
+          response = response.response.data.error_message;
+        } else if(response.response && response.response.data && response.response.data.trace) {
+          response = response.response.data.trace;
+        } else if(response.response && response.response.data && response.response.data.error) {
+          response = response.response.data.error;
+        } else {
+          response = response.message;
+        }
+      } 
+      return response;
+  }
 
-export const download = async (url,params,authorization,refresh) => {
-  let response = null;
-  await axios.get(url,{
-    responseType:'blob',
-    params:params,
-    headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-  })
-  .then((downloadResponse) => {
-      response = downloadResponse.data;
-  })
-  .catch(async (error) => {
-      response = error
-  })
-  return response;
+  const download = async (url,params,authorization,refresh) => {
+    let response = null;
+    await axios.get(url,{
+      responseType:'blob',
+      params:params,
+      headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
+    })
+    .then((downloadResponse) => {
+        response = downloadResponse.data;
+    })
+    .catch(async (error) => {
+        response = error
+    })
+    return response;
+  }
+
+  return [currentUser,setCurrentUser,request,download];
 }
 
 const convertToId = (value) => {
@@ -214,6 +223,18 @@ function App() {
   const menusParentRef = useRef(null);
   const leftMenusRef = useRef(null);
   const rightMenusRef = useRef(null);
+
+  const createFileRoute = (file,key) => {
+        let route = null;
+        if(file) {
+            route = <Route key={key} path={file.name} element={<File/>}>
+                {file.children && file.children.map((subFile,i) =>
+                    createFileRoute(subFile,key+i)
+                )}
+            </Route>
+        }
+        return <Route key={key} path={currentUser?currentUser.id:'file'} element={() => <></>}/>;
+    }
 
   const login = async (username,password) => {
       sessionStorage.setItem("access_token",'');
@@ -295,7 +316,6 @@ function App() {
 			onClick={(e) => {
 				setPopupData(null);
 			}} 
-			
 			className='flex bg-white bg-cover bg-center w-screen h-screen'>
 			<GlobalContext.Provider value={{currentUser,login,logout,mainElementRef,menuRef,menusParentRef,leftMenusRef,rightMenusRef,
 				screenSize,convertToId,dialog,setDialog,loading,setLoading,
@@ -305,6 +325,9 @@ function App() {
         <Routes>
           <Route path='/' element={<ManagementSystem/>}>
             <Route path='home/' element={<Home/>}/>
+            <Route path='profile' element={<User/>}/>
+            <Route path='my_transactions' element={<MyTransactions/>}/>
+            <Route path='file/:path?' element={<File/>}/>
             <Route path='users' element={<Users/>}>
               <Route path=':userId' element={<User/>}/>
             </Route>

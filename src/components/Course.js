@@ -2,19 +2,22 @@ import React, {useEffect,useState,useContext} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useLocation,useParams, useOutletContext } from 'react-router-dom';
 import EditCourse from './EditCourse';
-import { PiBookFill,PiPencilSimple,PiTextAlignLeft } from 'react-icons/pi';
+import { PiBookFill,PiPencilSimple,PiTextAlignLeft,PiTag } from 'react-icons/pi';
 import AddTopic from './AddTopic';
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
 import { request } from '../App';
 import TopicItem from './TopicItem';
 import Detail from './Detail';
+import AddTariff from './AddTariff';
+import Tariff from './Tariff';
 import ContentContainer from './ContentContainer';
 
 const Course = () => {
     const {setDialog} = useContext(GlobalContext);
     const [course,setCourse] = useState(null);
     const [topics,setTopics] = useState([]);
+    const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [loading,setLoading] = useState(false); 
@@ -38,27 +41,36 @@ const Course = () => {
         })
     }
 
+    const onAddTariff = (e) => {
+        e.preventDefault();
+        setDialog({
+            show:true,
+            Component:() => <AddTariff receivableId={courseId} reload={getTariffs}/>
+        })
+    }
+
     const getCourse = async () => {
+        let updateAuth = false;
+        let createTariffAuth = false;
         await request('GET','hasauthority',null,{
             contextName:'COURSE',
             authority:'UPDATE'
         },true)
         .then((response) => {
             if(response.status === 'YES') {
-                setButtons([
-                    {
-                        Icon:PiPencilSimple,
-                        name:'Edit',
-                        handler:onEdit
-                    },
-                    {
-                        Icon:PiTextAlignLeft,
-                        name:'Add Topic',
-                        handler:onAddTopic
-                    }
-                ])
+                updateAuth = true;
                 setUpdateAuthority(true);
             } 
+        })
+
+        await request('GET','hasauthority',null,{
+            contextName:'TARIFF',
+            authority:'CREATE'
+        },true)
+        .then((response) => {
+            if(response.status === 'YES') {
+                createTariffAuth = true;
+            }
         })
 
         if(courseId) {
@@ -66,6 +78,32 @@ const Course = () => {
             .then((response) => {
                 if(response.content) {
                     setCourse(response.content);
+                    let btns = [];
+                    if(updateAuth) {
+                        btns.push(
+                            {
+                                Icon:PiPencilSimple,
+                                name:'Edit',
+                                handler:onEdit
+                            }
+                        );
+                        btns.push(
+                            {
+                                Icon:PiTextAlignLeft,
+                                name:'Add Topic',
+                                handler:onAddTopic
+                            }
+                        );
+                    }
+
+                    if(response.content.tariffApplicable && updateAuth && createTariffAuth) {
+                        btns.push({
+                            Icon:PiTag,
+                            name:'Add Tariff',
+                            handler:onAddTariff
+                        })
+                    }
+                    setButtons(btns);
                 }  else {
                     setCourse(null);
                 }
@@ -90,10 +128,27 @@ const Course = () => {
         })
     }
 
+    const getTariffs = () => {
+        if(courseId) {
+            request('GET',`tariffs/${courseId}`,null,null,true)
+            .then((response) => {
+                if(response.status && response.status === 'SUCCESSFUL' && response.content) {
+                    setTariffs(response.content);
+                } else {
+                    setTariffs([]);
+                }
+            })
+            .catch((error) => {
+                setTariffs([]);
+            })
+        }
+    }
+
     const load = async () => {
         setLoading(true);
         await getCourse();
         await getTopics();
+        getTariffs();
         setLoading(false);
     }
 
@@ -105,7 +160,7 @@ const Course = () => {
         className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
         <ContentContainer previous={parentPath} buttons={buttons} Icon={PiBookFill} text={course && course.name} subText={course && course.professionalCategory?course.professionalCategory:''} loading={loading}>
             {course && 
-                <>
+                <div className='flex flex-col w-full h-auto space-y-4'>
                     <div className='flex flex-col w-full h-auto space-y-2'>
                         <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
                         <Detail label='External Id' value={course.externalId}/>
@@ -117,7 +172,13 @@ const Course = () => {
                         {topics.map((topic,i) => <TopicItem key={i} topic={topic} reload={getTopics} updateAuthority={updateAuthority}/>)}
                     </div>
                     }
-                </>
+                    {tariffs && tariffs.length > 0 &&
+                    <div className='flex flex-col w-full h-auto'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Tariffs</p>
+                        {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={getTariffs}/>)}
+                    </div>
+                    }
+                </div>
             }
         </ContentContainer>
     </div>

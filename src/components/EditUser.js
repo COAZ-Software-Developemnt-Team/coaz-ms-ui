@@ -9,7 +9,7 @@ import Inputs from './Inputs';
 import Message from './Message';
 import {request} from '../App';
 
-const EditUser = ({id,self=false,reload}) => {
+const EditUser = ({id,self,reload}) => {
     const {currentUser,setDialog,setLoading} = useContext(GlobalContext);
     const [user,setUser] = useState(null);
     const [userTypes,setUserTypes] = useState([]);
@@ -146,7 +146,6 @@ const EditUser = ({id,self=false,reload}) => {
     };
 
     const [register,handleChange,handleSubmit,errors] = useFormValidator(submit);
-
     const inputs = self?[
         {
             label:'Username',
@@ -456,7 +455,6 @@ const EditUser = ({id,self=false,reload}) => {
             } else {
                 await request('GET',`user/${id}`,null,null,true)
                 .then((response) => {
-                    setLoading(false);
                     if(response.content) {
                         response.content.dateOfBirth = new Date(response.content.dateOfBirth);
                         setUser(response.content);
@@ -466,13 +464,11 @@ const EditUser = ({id,self=false,reload}) => {
                     }
                 })
                 .catch((error) => {
-                    setLoading(false);
                     setUser(null);
                     setDialog(null);
                 })
                 await request('GET','usertypes',null,null,true)
                 .then((response) => {
-                    setLoading(false);
                     if(response.content) {
                         setUserTypes(response.content);
                     }  else {
@@ -484,7 +480,6 @@ const EditUser = ({id,self=false,reload}) => {
                 })
                 await request('GET','usergroups',null,null,true)
                 .then((response) => {
-                    setLoading(false);
                     if(response.content) {
                         setUserGroups(response.content);
                     }  else {
@@ -529,6 +524,7 @@ const EditUser = ({id,self=false,reload}) => {
             .catch((error) => {
                 setProfessionalCategories([]);
             })
+            setLoading(false);
         }
         )();
     },[]);

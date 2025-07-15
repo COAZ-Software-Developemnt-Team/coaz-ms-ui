@@ -1,7 +1,7 @@
 import React,{useState,useEffect,useContext} from 'react';
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,Outlet} from 'react-router-dom';
-import { PiUser,PiUsersFour, PiUsersThree, PiMaskHappy,PiChartLine,PiGraduationCap, PiBook, PiPath, PiCalendarDots, PiMoneyWavy, PiArrowsLeftRight, PiBank} from "react-icons/pi";
+import { PiUser,PiUsersFour, PiUsersThree, PiMaskHappy,PiChartLine,PiGraduationCap, PiBook, PiPath, PiCalendarDots, PiMoneyWavy, PiArrowsLeftRight, PiBank, PiFolder, PiUsers, PiStudent} from "react-icons/pi";
 import Menu from './Menu';
 import MobileMenu from './MobileMenu';
 import Login from './Login';
@@ -30,26 +30,80 @@ const ManagementSystem = () => {
     const load = async () => {
         setLoading(true);
         let mnus = [];
-        mnus.push({name:'Users', link:'/users', Icon:PiUser});
-        
-        let createUserType = false;
-        let readUserType = false;
-        let updateUserType = false;
-        let deleteUserType = false;
-        let current = null;
-
-        await request('GET','current',null,null,true)
-        .then((response) => {
-            if(response.content) {
-                current = response.content;
+        if(currentUser) {
+            mnus.push({name:'My Profile', link:'/profile', Icon:PiUser});
+            mnus.push({name:'My Transactions', link:'/my_transactions', Icon:PiArrowsLeftRight});
+            mnus.push({name:'My Files', link:`/file`, Icon:PiFolder});
+            let enroll = false;
+            await request('GET','hasauthority',null,{
+                contextName:'PROGRAM',
+                authority:'ENROLL'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    enroll = true;
+                    mnus.push({name:'My statistics', link:'/statistics', Icon:PiChartLine})
+                    mnus.push({name:'Enrollments', link:'/enrollments', Icon:PiStudent})
+                }
+            })
+            let settingsMenus = []
+            let createUser = false;
+            let readUser = false;
+            let updateUser = false;
+            let deleteUser = false;
+            await request('GET','hasauthority',null,{
+                contextName:'USER',
+                authority:'CREATE'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    createUser = true;
+                }
+            })
+            await request('GET','hasauthority',null,{
+                contextName:'USER',
+                authority:'READ'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    readUser = true;
+                }
+            })
+            await request('GET','hasauthority',null,{
+                contextName:'USER',
+                authority:'UPDATE'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    updateUser = true;
+                }
+            })
+            await request('GET','hasauthority',null,{
+                contextName:'USER',
+                authority:'DELETE'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    deleteUser = true;
+                }
+            })
+            if(createUser || readUser || updateUser || deleteUser) {
+                settingsMenus.push({name:'Users', link:'/users', Icon:PiUsers});
             }
-        })
-        .catch((error) => {
-            console.log(error);
-            current = null;
-        })
-
-        if(current) {
+            
+            let createUserType = false;
+            let readUserType = false;
+            let updateUserType = false;
+            let deleteUserType = false;
+            await request('GET','hasauthority',null,{
+                contextName:'USERTYPE',
+                authority:'CREATE'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    createUserType = true;
+                }
+            })
             await request('GET','hasauthority',null,{
                 contextName:'USERTYPE',
                 authority:'READ'
@@ -78,7 +132,7 @@ const ManagementSystem = () => {
                 }
             })
             if(createUserType || readUserType || updateUserType || deleteUserType) {
-                mnus.push({name:'User types', link:'/usertypes', Icon:PiUsersThree});
+                settingsMenus.push({name:'User types', link:'/usertypes', Icon:PiUsersThree});
             }
 
             let createUserGroup = false;
@@ -127,7 +181,7 @@ const ManagementSystem = () => {
             })
 
             if(createUserGroup || readUserGroup || updateUserGroup || deleteUserGroup) {
-                mnus.push({name:'User groups', link:'/usergroups', Icon:PiUsersFour});
+                settingsMenus.push({name:'User groups', link:'/usergroups', Icon:PiUsersFour});
             }
 
             let createRole = false;
@@ -176,19 +230,9 @@ const ManagementSystem = () => {
             })
 
             if(createRole || readRole || updateRole || deleteRole) {
-                mnus.push({name:'Roles', link:'/roles', Icon:PiMaskHappy});
+                settingsMenus.push({name:'Roles', link:'/roles', Icon:PiMaskHappy});
             }
-            let enroll = false;
-            await request('GET','hasauthority',null,{
-                contextName:'PROGRAM',
-                authority:'ENROLL'
-            },true)
-            .then((response) => {
-                if(response.status && response.status === 'YES') {
-                    enroll = true;
-                    mnus.push({name:'My statistics', link:'/statistics', Icon:PiChartLine})
-                }
-            })
+            
             let createProgram = false;
             let updateProgram = false;
             let deleteProgram = false;
@@ -224,7 +268,7 @@ const ManagementSystem = () => {
             })
 
             if(enroll || createProgram || updateProgram || deleteProgram) {
-                mnus.push({name:'Programs', link:'/programs', Icon:PiGraduationCap})
+                settingsMenus.push({name:'Programs', link:'/programs', Icon:PiGraduationCap})
             } 
 
             let createCourse = false;
@@ -272,10 +316,10 @@ const ManagementSystem = () => {
                 }
             })
             if(teach || createCourse || updateCourse || deleteCourse) {
-                mnus.push({name:'CPDs', link:'/courses', Icon:PiBook})
+                settingsMenus.push({name:'CPDs', link:'/courses', Icon:PiBook})
             }
             if(currentUser) {
-                mnus.push({name:'Events', link:'/events', Icon:PiCalendarDots})
+                settingsMenus.push({name:'Events', link:'/events', Icon:PiCalendarDots})
             }
             let createCriteriaPath = false;
             let deleteCriteriaPath = false;
@@ -299,7 +343,7 @@ const ManagementSystem = () => {
                 }
             })
             if(createCriteriaPath || deleteCriteriaPath) {
-                mnus.push({name:'Criteria Paths', link:'/paths', Icon:PiPath})
+                settingsMenus.push({name:'Criteria Paths', link:'/paths', Icon:PiPath})
             }
 
             await request('GET','hasauthority',null,{
@@ -308,7 +352,7 @@ const ManagementSystem = () => {
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    mnus.push({name:'Accounts', link:'/accounts', Icon:PiBank});
+                    settingsMenus.push({name:'Accounts', link:'/accounts', Icon:PiBank});
                 }
             })
 
@@ -318,9 +362,15 @@ const ManagementSystem = () => {
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    mnus.push({name:'Transactions', link:'/transactions', Icon:PiArrowsLeftRight})
+                    settingsMenus.push({name:'Transactions', link:'/transactions', Icon:PiArrowsLeftRight})
                 }
             })
+            if(settingsMenus.length > 0) {
+                mnus.push({name:'Settings', separator:true})
+                for(let menu of settingsMenus) {
+                    mnus.push(menu);
+                }
+            }
         }
     
         setMenus(mnus);

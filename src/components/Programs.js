@@ -7,7 +7,7 @@ import Scrollable from './Scrollable';
 import AddProgram from './AddProgram';
 import MessageDialog from './MessageDialog';
 import MsHeader from './Header';
-import Payment from './MobilePayment';
+import PaymentOptions from './PaymentOptions';
 import { request } from '../App';
 import ContentContainer from './ContentContainer';
 
@@ -20,6 +20,7 @@ const Programs = () => {
     const [loading,setLoading] = useState()
     const {programId} = useParams();
     const path = useLocation().pathname;
+    var loaded = false;
 
     const onAddProgram = (e) => {
         setDialog({
@@ -168,7 +169,7 @@ const ProgramItem = ({program,deleteAuthority,reload,setLoading}) => {
                             .then((response) => {
                                 if(response.status && response.status === 'SUCCESSFUL' && response.content) {
                                     if(!response.content.paid && response.content.tariff) {
-                                        setAccess({Component:() => <Payment user={response.content.student} tariff={response.content.tariff}  reload={reload}/>});
+                                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff}  reload={reload}/>});
                                     } 
                                     reload && reload()
                                 } else if(response.message) {

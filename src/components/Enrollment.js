@@ -2,12 +2,12 @@ import React, {useEffect,useState,useContext, useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams,Outlet,useOutletContext } from 'react-router-dom';
 import Scrollable from './Scrollable';
-import {PiStudentFill,PiChalkboardTeacherLight,PiBookLight,PiStudent,PiDotsThreeVertical } from "react-icons/pi";
+import {PiStudentFill,PiChalkboardTeacherLight,PiBookLight,PiStudent,PiDotsThreeVertical,PiTag } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import EnrollCourse from './EnrollCourse';
-import MsHeader from './Header';
+import ContentContainer from './ContentContainer';
 import { request } from '../App';
-import Payment from './MobilePayment';
+import PaymentOptions from './PaymentOptions';
 import Detail from './Detail';
 import MessageDialog from './MessageDialog';
 
@@ -16,6 +16,7 @@ const Enrollment = () => {
     const [enrollment,setEnrollment] = useState(null);
     const {programId,courseId} = useParams();
     const {parentPath} = useOutletContext();
+    const [loading,setLoading] = useState();
     const path = useLocation().pathname;
 
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Enrollment = () => {
                 setUpdateAuthority(false);
             }
         }) */
-
+        setLoading(true);
         if(programId) {
             await request('GET','enrollment',null,{
                 programId:programId
@@ -46,7 +47,7 @@ const Enrollment = () => {
                         }
                         setEnrollment(response.content);
                     } else if(response.content.student && response.content.tariff && response.content.program) {
-                        setAccess({Component:() => <Payment user={response.content.student} tariff={response.content.tariff} />});
+                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff} />});
                         navigate(parentPath);
                     }
                 }  else {
@@ -57,6 +58,7 @@ const Enrollment = () => {
                 console.log(error)
             })
         }
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -66,37 +68,28 @@ const Enrollment = () => {
     <>{courseId? 
             <Outlet context={{parentPath:`/programs/enrollment/${programId}`}}/>
             :
-            <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-                className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-                {enrollment && enrollment.program && enrollment.student &&
-                    <>
-                        <MsHeader previous={parentPath} Icon={PiStudentFill} text={enrollment.program.name} subText={enrollment.program.description}/>
-                        <div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-                            <Scrollable vertical={true}>
-                                <div className='flex flex-col w-full h-auto space-y-4'>
-                                    <div className='flex flex-col w-full h-auto space-y-2'>
-                                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
-                                        <Detail label='Student' value={enrollment.student.name}/>
-                                        {enrollment.startDate &&
-                                            <Detail label='Start Date' value={enrollment.startDate.toLocaleString('default', { month: 'long' })+' '+enrollment.startDate.getDate()+', '+enrollment.startDate.getFullYear()}/>
-                                        }
-                                    </div>
-                                    {enrollment.enrolled && enrollment.enrolled.length > 0 &&
-                                    <div className='flex flex-col w-full h-auto space-y-2'>
-                                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>My Courses</p>
-                                        {enrollment.enrolled.map((enrollmentCourse,i) => <EnrollmentCourseItem key={i} enrollmentCourse={enrollmentCourse} reload={getEnrollment}/>)}
-                                    </div>}
-                                    {enrollment.available && enrollment.available.length > 0 &&
-                                    <div className='flex flex-col w-full h-auto space-y-2'>
-                                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Available Courses</p>
-                                        {enrollment.available.map((availableCourse,i) => <EnrollmentCourseItem key={i} enrollmentCourse={availableCourse} reload={getEnrollment}/>)}
-                                    </div>}
-                                </div>
-                            </Scrollable>
-                        </div>
-                    </>
-                }
-            </div>
+            <ContentContainer previous={parentPath} Icon={PiStudentFill} text={enrollment && enrollment.program?enrollment.program.name:''} loading={loading}>
+                {enrollment &&
+                <div className='flex flex-col w-full h-auto space-y-4'>
+                    <div className='flex flex-col w-full h-auto space-y-2'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                        <Detail label='Student' value={enrollment.student? enrollment.student.name:''}/>
+                        {enrollment.startDate &&
+                            <Detail label='Start Date' value={enrollment.startDate.toLocaleString('default', { month: 'long' })+' '+enrollment.startDate.getDate()+', '+enrollment.startDate.getFullYear()}/>
+                        }
+                    </div>
+                    {enrollment.enrolled && enrollment.enrolled.length > 0 &&
+                    <div className='flex flex-col w-full h-auto space-y-2'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>My Courses</p>
+                        {enrollment.enrolled.map((enrollmentCourse,i) => <EnrollmentCourseItem key={i} enrollmentCourse={enrollmentCourse} reload={getEnrollment}/>)}
+                    </div>}
+                    {enrollment.available && enrollment.available.length > 0 &&
+                    <div className='flex flex-col w-full h-auto space-y-2'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Available Courses</p>
+                        {enrollment.available.map((availableCourse,i) => <EnrollmentCourseItem key={i} enrollmentCourse={availableCourse} reload={getEnrollment}/>)}
+                    </div>}
+                </div>}
+            </ContentContainer>
         }
     </>
   )
@@ -178,7 +171,7 @@ const EnrollmentCourseItem = ({enrollmentCourse,reload}) => {
             })
         }
     }
-
+   
     useEffect(() => {
         ( async () => {
             await request('GET','hasauthority',null,{
@@ -211,19 +204,27 @@ const EnrollmentCourseItem = ({enrollmentCourse,reload}) => {
                         <p className={`text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
                             {`${enrollmentCourse.course.name}`}
                         </p>
-                        <div className='flex flex-row space-x-1'>
-                            <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
+                        <div className='flex flex-row w-full space-x-1'>
+                            <p className={`w-fit text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden capitalize shrink-0`}>
                                 {`${USDecimal.format(enrollmentCourse.course.points)} Points`}
                             </p>
-                            {enrollmentCourse.courseClass &&
-                            <>
-                                <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                    {`, ${enrollmentCourse.courseClass.teacher.name}`}
-                                </p>
-                                <p className={`text-xs ${enrollmentCourse.completionPercentage < 100?'text-[rgb(145,145,145)]':'text-green-600'} font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                    {`, ${enrollmentCourse.completionPercentage < 100?`${USDecimal.format(enrollmentCourse.completionPercentage)}%`:'Complete'}`}
-                                </p>
-                            </>
+                            {enrollmentCourse.course.tariffApplicable && !enrollmentCourse.paid && enrollmentCourse.tariff?
+                                <div className='flex flex-row w-full h-fit space-x-2 text-xs items-center text-[rgb(145,145,145)] font-helveticaNeueRegular'>
+                                    ,<PiTag size={16}/>
+                                    <p>{`K ${USDecimal.format(enrollmentCourse.tariff && enrollmentCourse.tariff.price?enrollmentCourse.tariff.price:0)}`}</p>
+                                </div>
+                                :
+                            enrollmentCourse.courseClass?
+                                <>
+                                    <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
+                                        {`, ${enrollmentCourse.courseClass.teacher.name}`}
+                                    </p>
+                                    <p className={`text-xs ${enrollmentCourse.completionPercentage < 100?'text-[rgb(145,145,145)]':'text-green-600'} font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
+                                        {`, ${enrollmentCourse.completionPercentage < 100?`${USDecimal.format(enrollmentCourse.completionPercentage)}%`:'Complete'}`}
+                                    </p>
+                                </>
+                                :
+                                <></>
                             }
                         </div>
                     </div>

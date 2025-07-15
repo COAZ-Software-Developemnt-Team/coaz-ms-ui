@@ -6,7 +6,7 @@ import { Logo } from './CoazIcons';
 import UserProfile from './UserProfile';
 import MenuItem from './MenuItem';
 import MsSearch from './Search';
-import Scrollable from './Scrollable';
+import ScrollableMenus from './ScrollableMenus';
 
 const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
     const {screenSize,setPopupData} = useContext(GlobalContext);
@@ -48,18 +48,18 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
                 </div>
             </div>
             <div className={`${screenSize === 'xs'?'hidden':'flex'} flex-col w-full h-full space-y-2 overflow-hidden`}>
-                <div className='flex flex-col w-full h-full overflow-hidden'>
+                <div className='flex flex-col w-full h-full items-center overflow-hidden'>
                     <MsSearch/>
-                    <Scrollable vertical={true}>
+                    <ScrollableMenus vertical={true}>
                         <div className='flex flex-col h-fit'>
                             <MenuItem name={'Home'} link={'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
                             {user && menus && menus.length> 0 && 
-                                menus.map((menu,i) => <MenuItem key={i} name={menu.name} link={menu.link} Icon={menu.Icon} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>)
+                                menus.map((menu,i) => <MenuItem key={i} name={menu.name} link={menu.link} Icon={menu.Icon} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu} separator={menu.separator}/>)
                             }
                         </div>
-                    </Scrollable>
+                    </ScrollableMenus>
                 </div>
-                <div className='flex w-full'>
+                <div className='flex w-full px-4'>
                     {user?
                         <button ref={userProfileRef}
                             onClick={(e) => {
@@ -70,15 +70,15 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
                                     Component:<UserProfile onLogout={onLogout}/>
                                 })
                             }} 
-                            className='flex flex-row w-full h-fit px-2 space-x-2 font-helveticaNeueRegular tracking-wider rounded-xl items-center'>
+                            className='flex flex-row w-full h-fit space-x-2 font-helveticaNeueRegular tracking-wider rounded-xl items-center'>
                             <p className='flex w-10 h-10 rounded-full text-xl font-jostMedium items-center justify-center text-white bg-[rgb(0,175,240)] shrink-0'>
-                                {user.firstname.charAt(0)+user.lastname.charAt(0)}
+                                {user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase()}
                             </p>
                             <p className='flex w-auto text-sm font-helveticaNeueRegular tracking-wide whitespace-nowrap text-[rgb(68,71,70)]'>{user.firstname}</p>
                         </button>
                         :
                         <button onClick={onLogin}
-                            className='flex flex-row w-full h-fit p-2 space-x-2 font-helveticaNeueRegular tracking-wider rounded-xl items-center'>
+                            className='flex flex-row w-full h-fit space-x-2 font-helveticaNeueRegular tracking-wider rounded-xl items-center'>
                             <div className='flex w-10 h-10 items-center justify-center rounded-full bg-[rgb(0,175,240)] shrink-0'>
                                 <PiSignIn size={20} className='text-white'/>
                             </div>

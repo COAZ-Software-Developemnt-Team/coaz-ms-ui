@@ -3,16 +3,21 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import {PiTextAlignLeftLight, PiChalkboardTeacherFill, PiDotsThreeVertical, PiDownloadSimple, PiCertificateLight } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
+import ContentContainer from './ContentContainer';
+import PaymentOptions from './PaymentOptions';
 import {request} from '../App';
 import { download } from '../App';
+import Detail from './Detail';
 
 const EnrollmentCourse = () => {
+    const {setAccess} = useContext(GlobalContext);
     const [enrollmentCourse,setEnrollmentCourse] = useState(null);
+    const [loading,setLoading] = useState();
     const {programId,studentId,courseId,teacherId,topicId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
+
+    const navigate = useNavigate();
     
     const getEnrollmentCourse = async () => {
         /* await request('GET','hasauthority',null,{
@@ -26,6 +31,7 @@ const EnrollmentCourse = () => {
                 setUpdateAuthority(false);
             }
         }) */
+       setLoading(true);
         if(studentId,courseId) {            
             await request('GET','enrollment/course',null,{
                 studentId:studentId,
@@ -33,7 +39,15 @@ const EnrollmentCourse = () => {
             },true)
             .then((response) => {
                 if(response.content) {
-                    setEnrollmentCourse(response.content);
+                    if(response.content.paid) {
+                        if(response.content.startDate) {
+                            response.content.startDate = new Date(response.content.startDate);
+                        }
+                        setEnrollmentCourse(response.content);
+                    } else if(response.content.student && response.content.tariff && response.content.course) {
+                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff} />});
+                        navigate(parentPath);
+                    }
                 }  else {
                     setEnrollmentCourse(null);
                 }
@@ -42,6 +56,7 @@ const EnrollmentCourse = () => {
                 setEnrollmentCourse(null);
             })
         }
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -49,33 +64,32 @@ const EnrollmentCourse = () => {
     },[path])
   return (
     <>{teacherId && topicId?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}`}}/>:
-        <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-            className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-            {enrollmentCourse && enrollmentCourse.courseClass &&
-                <>
-                    <MsHeader previous={parentPath} Icon={PiChalkboardTeacherFill} text={enrollmentCourse.course.name}/>
-                    <div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-                        <Scrollable vertical={true}>
-                            <div className='flex flex-col w-full h-auto space-y-4'>
-                                {enrollmentCourse.certificate &&
-                                    <div className='flex flex-col w-full h-auto'>
-                                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Certificate</p>
-                                        <Certificate certificate={enrollmentCourse.certificate}/>
-                                    </div>
-                                }
-                                {enrollmentCourse.topics && enrollmentCourse.topics.length > 0 &&
-                                    <div className='flex flex-col w-full h-auto'>
-                                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>topics</p>
-                                        {enrollmentCourse.topics.map((topic,i) => <EnrollmentTopicItem key={i} enrollmentTopic={topic} reload={getEnrollmentCourse}/>)}
-                                    </div>
-                                }
-                            </div>
-                        </Scrollable>
+        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}`}}/>
+        :
+        <ContentContainer previous={parentPath} Icon={PiChalkboardTeacherFill} text={enrollmentCourse && enrollmentCourse.course?enrollmentCourse.course.name:''} loading={loading}>
+            {enrollmentCourse && enrollmentCourse.course &&
+                <div className='flex flex-col w-full h-auto space-y-4'>
+                    <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                        {enrollmentCourse.startDate && <Detail label='Start Date' value={enrollmentCourse.startDate.toLocaleString('default', { month: 'long' })+' '+enrollmentCourse.startDate.getDate()+', '+enrollmentCourse.startDate.getFullYear()+' '+enrollmentCourse.startDate.toLocaleTimeString('en-US')}/>}
                     </div>
-                </>
+                    <div className='flex flex-col w-full h-auto space-y-4'>
+                        {enrollmentCourse.certificate &&
+                            <div className='flex flex-col w-full h-auto'>
+                                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Certificate</p>
+                                <Certificate certificate={enrollmentCourse.certificate}/>
+                            </div>
+                        }
+                        {enrollmentCourse.topics && enrollmentCourse.topics.length > 0 &&
+                            <div className='flex flex-col w-full h-auto'>
+                                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>topics</p>
+                                {enrollmentCourse.topics.map((topic,i) => <EnrollmentTopicItem key={i} enrollmentTopic={topic} reload={getEnrollmentCourse}/>)}
+                            </div>
+                        }
+                    </div>
+                </div>
             }
-        </div>
+        </ContentContainer>
     }
     </>
   )

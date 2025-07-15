@@ -1,6 +1,6 @@
 import React, {useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate} from 'react-router-dom';
+import {  NavLink,useNavigate} from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical} from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import { request } from '../App';
@@ -43,27 +43,28 @@ const UserItem = ({user,deleteAuthority,reload}) => {
             <div  onMouseEnter={(e) => setHighlighted(true)} 
                     onMouseLeave={(e) => setHighlighted(false)} 
                     className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <div onClick={onOpen}
-                    className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
-                    <p className='flex w-10 h-10 shrink-0 rounded-full text-xl font-jostMedium items-center justify-center text-white bg-[rgb(0,175,240)]'>
-                        {user.firstname.charAt(0)+user.lastname.charAt(0)}
-                    </p>
-                    <div className='flex flex-col w-full h-fit'>
-                        <p className={`text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                            {user.name}
+                <NavLink to={`/users/${user.id}`} state={{parentPath:'/users'}}>
+                    <div className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
+                        <p className='flex w-10 h-10 shrink-0 rounded-full text-xl font-jostMedium items-center justify-center text-white bg-[rgb(0,175,240)]'>
+                            {user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase()}
                         </p>
-                        <div className='flex flex-row space-x-2'>
-                            {user.userType &&
-                                <p className='text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize'>
-                                    {user.userType.name}
-                                </p>
-                            }
-                            {user.status && <p className={`text-xs ${user.status === 'ACTIVE'?'text-green-600':user.status === 'OTP'?'text-yellow-400':'text-[rgb(145,145,145)]'} font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                {user.status.toLowerCase()}
-                            </p>}
+                        <div className='flex flex-col w-full h-fit'>
+                            <p className={`text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
+                                {user.name}
+                            </p>
+                            <div className='flex flex-row space-x-2'>
+                                {user.userType &&
+                                    <p className='text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize'>
+                                        {user.userType.name}
+                                    </p>
+                                }
+                                {user.status && <p className={`text-xs ${user.status === 'ACTIVE'?'text-green-600':user.status === 'OTP'?'text-yellow-400':'text-[rgb(145,145,145)]'} font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
+                                    {user.status.toLowerCase()}
+                                </p>}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </NavLink>
                 <div className='flex flex-row w-fit h-10 shrink-0'>
                     {highlighted && deleteAuthority && !user.reserved &&
                         <button ref={moreRef}

@@ -14,11 +14,11 @@ const Header = ({previous,buttons,Icon,text}) => {
         <div className='flex flex-row w-full h-fit justify-between shrink-0 space-x-2 items-center'>
             {previous && <button 
                 onClick={(e) => navigate(previous)}
-                className='flex w-12 h-12 hover:bg-[rgba(0,175,240,.1)]  shrink-0 rounded-full'
+                className='flex w-10 h-10 hover:bg-[rgba(0,175,240,.1)]  shrink-0 rounded-full'
             >
                 <PiArrowLeft size={32} className='flex m-auto'/>
             </button>}
-            {Icon && <Icon size={screenSize === 'xs'?50:50} className=' shrink-0'/>}
+            {Icon && <Icon size={40} className=' shrink-0'/>}
             <div className='flex flex-col w-full overflow-hidden'>
                 {text &&
                     <p style={{display:'-webkit-box', WebkitBoxOrient:'vertical',WebkitLineClamp:'2'}} 
@@ -51,14 +51,12 @@ const Header = ({previous,buttons,Icon,text}) => {
                                 </div>
                         })
                     }}
-                    className='flex w-12 h-12 items-center justify-center shrink-0 hover:bg-[rgba(0,175,240,.1)] rounded-full'>
+                    className='flex w-10 h-10 items-center justify-center shrink-0 hover:bg-[rgba(0,175,240,.1)] rounded-full'>
                     <PiDotsThreeVertical size={32} />
                 </button>
             }
         </div>
         <div className='flex flex-row w-full h-full items-center space-x-4'>
-            
-            
         </div>
     </div>
   )

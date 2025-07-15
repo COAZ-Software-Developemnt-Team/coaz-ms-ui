@@ -1,12 +1,12 @@
 import React, {useEffect,useState} from 'react'
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import { PiTextAlignLeftFill,PiClipboardTextLight,PiFileTextLight, PiFilePdfLight} from "react-icons/pi";
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
-import { request,download } from '../App';
+import ContentContainer from './ContentContainer';
+import { request} from '../App';
 
 const EnrollmentTopic = () => {
     const [enrollmentTopic,setEnrollmentTopic] = useState(null);
+    const [loading,setLoading] = useState();
     const {programId,studentId,courseId,teacherId,topicId,resourceId,activityId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
@@ -14,6 +14,7 @@ const EnrollmentTopic = () => {
     const navigate = useNavigate();
     
     const getEnrollmentTopic = async () => {
+        setLoading(true);
         if(teacherId && topicId) {
             await request('GET','enrollment/topic',null,{
                 teacherId:teacherId,
@@ -30,6 +31,7 @@ const EnrollmentTopic = () => {
                 navigate(parentPath)
             })
         }
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -37,39 +39,32 @@ const EnrollmentTopic = () => {
     },[path])
   return (
     <>{courseId && teacherId && topicId && (resourceId || activityId)?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}`}}/>:
-        <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-            className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
+        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}`}}/>
+        :
+        <ContentContainer previous={parentPath} Icon={PiTextAlignLeftFill} text={enrollmentTopic && enrollmentTopic.topic?enrollmentTopic.topic.name:''} loading={loading}>
             {enrollmentTopic && enrollmentTopic.topic &&
-                <>
-                    <MsHeader previous={parentPath} Icon={PiTextAlignLeftFill} text={enrollmentTopic.topic.name}/>
-                    <div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-                        <Scrollable vertical={true}>
-                            <div className='flex flex-col w-full h-auto space-y-4'>
-                                {enrollmentTopic.resources && enrollmentTopic.resources.length > 0 &&
-                                <div className='flex flex-col w-full h-auto'>
-                                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>resources</p>
-                                    {enrollmentTopic.resources.map((resource,i) => <EnrollmentMaterial key={i} enrollmentMaterial={resource} reload={getEnrollmentTopic}/>)}
-                                </div>
-                                }
-                                {enrollmentTopic.quizzes && enrollmentTopic.quizzes.length > 0 &&
-                                <div className='flex flex-col w-full h-auto'>
-                                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>quizzes</p>
-                                    {enrollmentTopic.quizzes.map((quiz,i) => <EnrollmentMaterial key={i} enrollmentMaterial={quiz} reload={getEnrollmentTopic}/>)}
-                                </div>
-                                }
-                                {enrollmentTopic.assignments && enrollmentTopic.assignments.length > 0 &&
-                                <div className='flex flex-col w-full h-auto'>
-                                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>assignments</p>
-                                    {enrollmentTopic.assignments.map((assignment,i) => <EnrollmentMaterial key={i} enrollmentMaterial={assignment} reload={getEnrollmentTopic}/>)}
-                                </div>
-                                }
-                            </div>
-                        </Scrollable>
+                <div className='flex flex-col w-full h-auto space-y-4'>
+                    {enrollmentTopic.resources && enrollmentTopic.resources.length > 0 &&
+                    <div className='flex flex-col w-full h-auto'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>resources</p>
+                        {enrollmentTopic.resources.map((resource,i) => <EnrollmentMaterial key={i} enrollmentMaterial={resource} reload={getEnrollmentTopic}/>)}
                     </div>
-                </>
+                    }
+                    {enrollmentTopic.quizzes && enrollmentTopic.quizzes.length > 0 &&
+                    <div className='flex flex-col w-full h-auto'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>quizzes</p>
+                        {enrollmentTopic.quizzes.map((quiz,i) => <EnrollmentMaterial key={i} enrollmentMaterial={quiz} reload={getEnrollmentTopic}/>)}
+                    </div>
+                    }
+                    {enrollmentTopic.assignments && enrollmentTopic.assignments.length > 0 &&
+                    <div className='flex flex-col w-full h-auto'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>assignments</p>
+                        {enrollmentTopic.assignments.map((assignment,i) => <EnrollmentMaterial key={i} enrollmentMaterial={assignment} reload={getEnrollmentTopic}/>)}
+                    </div>
+                    }
+                </div>
             }
-        </div>
+        </ContentContainer>
     }
     </>
   )
@@ -77,7 +72,7 @@ const EnrollmentTopic = () => {
 
 export default EnrollmentTopic
 
-const EnrollmentMaterial = ({enrollmentMaterial,reload}) => {
+const EnrollmentMaterial = ({enrollmentMaterial}) => {
     const path = useLocation().pathname;
 
     let USDecimal = new Intl.NumberFormat('en-US', {

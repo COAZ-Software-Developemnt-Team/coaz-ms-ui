@@ -4,36 +4,12 @@ import Message from './Message';
 import {request} from '../App'
 
 const Deposit = ({user,reload}) => {
-    const [tab,setTab] = useState(null);
     const [message,setMessage] = useState({content:'',success:false});
     const [onSubmit,setOnSubmit] = useState({method:() => {}});
 
-    useEffect(() => {
-        setTab({
-            name:'Mobile Money',
-            Component: () => <MobileMoney user={user} reload={reload} setMessage={setMessage} setOnSubmit={setOnSubmit}/>
-        })
-    },[]);
-
     return (
         <div className='flex flex-col w-[95%] sm:w-[640px] h-fit pb-4 bg-white items-center rounded-xl shadow-md overflow-hidden'>
-            <div className='flex flex-row w-full h-10 px-4 space-x-4 shrink-0 border-b'>
-                <button onClick={e => setTab({
-                        name:'Mobile Money',
-                        Component: () => <MobileMoney user={user} reload={reload} setMessage={setMessage} setOnSubmit={setOnSubmit}/>
-                    })} 
-                    className={`w-1/2 h-full ${tab && tab.name === 'Mobile Money'?'border-b-2 border-[rgb(0,175,240)]':''}`}>
-                    Mobile Money
-                </button>
-                <button onClick={e => setTab({
-                        name:'Card',
-                        Component: () => <Card/>
-                    })} 
-                    className={`w-1/2 h-full ${tab && tab.name === 'Card'?'border-b-2 border-[rgb(0,175,240)]':''}`}>
-                    Card
-                </button>
-            </div>
-            {tab && <tab.Component/>}
+            <MobileMoney user={user} reload={reload} setMessage={setMessage} setOnSubmit={setOnSubmit}/>
             <Message message={message}/>
             <button onClick={(e) => onSubmit.method()} 
                 className='w-72 h-10 rounded-lg shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
@@ -45,8 +21,8 @@ const Deposit = ({user,reload}) => {
 
 export default Deposit
 
-const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
-    const {setLoading,setAccess} = useContext(GlobalContext);
+const MobileMoney = ({user,setMessage,setOnSubmit}) => {
+    const {setLoading} = useContext(GlobalContext);
     const [amount,setAmount] = useState(0);
     const [phoneNumber,setPhoneNumber] = useState({
         part1:'260',
@@ -57,6 +33,7 @@ const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
 
     const onAmount =(e) => {
         e.preventDefault();
+        e.stopPropagation();
         let value = e.target.value;
         if(isNaN(value)) {
             return;
@@ -79,6 +56,11 @@ const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
         setLoading(true);
         if(!user) {
             setLoading(false);
+            return;
+        }
+        if(amount < 1) {
+            setLoading(false);
+            setMessage({content:'Amount must be greater than 0',success:false});
             return;
         }
         if(phoneNumber.part1 === '') {
@@ -131,7 +113,7 @@ const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
 
     useEffect(() => {
         setOnSubmit({method:()=>confirm()});
-    },[phoneNumber])
+    },[amount,phoneNumber])
 
     return (
         <div className='flex flex-col space-y-6 w-full h-fit p-8'>
@@ -154,9 +136,10 @@ const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
                         id='amount'
                         name='amount'
                         type='number'
+                        inputMode='numeric'
                         value={amount}
                         onChange={onAmount}
-                        className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border rounded-lg`}
+                        className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${amount === '' || amount < 1?'border-red-500':''} rounded-lg`}
                     />
                 </div>
             </div>
@@ -211,10 +194,4 @@ const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
             </div>
         </div>
     )
-}
-
-const Card = () => {
-  return (
-    <div>Card</div>
-  )
 }

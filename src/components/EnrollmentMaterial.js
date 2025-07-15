@@ -3,14 +3,19 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import { PiTarget , PiFileTextFill, PiTargetLight } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
+import ContentContainer from './ContentContainer';
+import Detail from './Detail';
 import { request } from '../App';
 
 const EnrollmentMaterial = () => {
     const {setDialog} = useContext(GlobalContext);
     const [enrollmentMaterial,setEnrollmentMaterial] = useState(null);
     const [buttons,setButtons] = useState([]);
+    const [loading,setLoading] = useState();
+    const [attempts,setAttempts] = useState(0);
+    const [attempted,setAttempted] = useState(0);
+    const [passGrade,setPassGrade] = useState(0);
+    const [highestGrade,setHighestGrade] = useState(0);
     const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
     const path = useLocation().pathname;
     const {parentPath} = useOutletContext();
@@ -43,6 +48,7 @@ const EnrollmentMaterial = () => {
     }
 
     const getEnrollmentMaterial = async () => {
+        setLoading(true);
         if(activityId) {
             await request('GET','enrollment/material',null,{
                 materialId:activityId
@@ -57,12 +63,24 @@ const EnrollmentMaterial = () => {
                         },true)
                         .then((accessResponse) => {
                             if(accessResponse.content && accessResponse.content === 'STUDENT') {
-                                if(response.content.enrollmentAttempts.length < response.content.material.attempts) {
-                                    setButtons([{
-                                        Icon:PiTarget,
-                                        name:'Attempt',
-                                        handler:onAttempt
-                                    }])
+                                if(response.content.material && response.content.material.classname.toLowerCase() == 'quiz') {
+                                    setAttempts(response.content.material.attempts);
+                                    setAttempted(response.content.enrollmentAttempts.length);
+                                    setPassGrade(response.content.material.passGrade);
+                                    let highest = 0;
+                                    for(let attempt of response.content.enrollmentAttempts) {
+                                        if(attempt.grade > highest) {
+                                            highest = attempt.grade;
+                                        }
+                                    }
+                                    setHighestGrade(highest);
+                                    if(response.content.enrollmentAttempts.length < response.content.material.attempts) {
+                                        setButtons([{
+                                            Icon:PiTarget,
+                                            name:'Attempt',
+                                            handler:onAttempt
+                                        }])
+                                    }
                                 }
                             }
                         })
@@ -75,6 +93,7 @@ const EnrollmentMaterial = () => {
                 setEnrollmentMaterial(null);
             })
         }
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -83,25 +102,26 @@ const EnrollmentMaterial = () => {
 
   return (
     <>{programId && courseId && teacherId && topicId && activityId && attemptId?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}/attempts/${activityId}`}}/>:
-        <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-            className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-            {enrollmentMaterial && enrollmentMaterial.student && enrollmentMaterial.material &&
-            <>
-                <MsHeader previous={parentPath} buttons={buttons} Icon={PiFileTextFill} text={enrollmentMaterial.material.name} subText='My attempts'/>
-                <div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-                    <Scrollable vertical={true}>
-                        {enrollmentMaterial.enrollmentAttempts && enrollmentMaterial.enrollmentAttempts.length > 0 &&
-                        <div className='flex flex-col w-full h-auto space-y-2'>
-                            <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Attempts</p>
-                            {enrollmentMaterial.enrollmentAttempts.map((enrollmentAttempt,i) => <EnrollmentAttemptItem key={i} enrollmentAttempt={enrollmentAttempt} reload={getEnrollmentMaterial}/>)}
-                        </div>
-                        }
-                    </Scrollable>
+        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}/attempts/${activityId}`}}/>
+        :
+        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiFileTextFill} text={enrollmentMaterial && enrollmentMaterial.material?enrollmentMaterial.material.name:''} loading={loading}>
+            {enrollmentMaterial &&
+            <div className='flex flex-col w-full h-auto space-y-4'>
+                <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                    <Detail label='Maximum Attempts' value={attempts}/>
+                    <Detail label='Attempted' value={attempted}/>
+                    <Detail label='Pass Grade' value={`${passGrade}%`}/>
+                    <Detail label='Highest Grade' value={`${highestGrade}%`}/>
                 </div>
-            </>
-            }
-        </div>
+                {enrollmentMaterial.enrollmentAttempts && enrollmentMaterial.enrollmentAttempts.length > 0 &&
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Attempts</p>
+                    {enrollmentMaterial.enrollmentAttempts.map((enrollmentAttempt,i) => <EnrollmentAttemptItem key={i} enrollmentAttempt={enrollmentAttempt} reload={getEnrollmentMaterial}/>)}
+                </div>
+                }
+            </div>}
+        </ContentContainer>
     }
     </>
   )

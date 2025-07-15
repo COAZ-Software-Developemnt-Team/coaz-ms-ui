@@ -10,7 +10,7 @@ const Resource = () => {
     const {parentPath} = useOutletContext();
     const [iframeSrc, setIframeSrc] = useState(null);
     const [viewed,setViewed] = useState(null);
-    const [minViewMins,setMinViewMins] = useState(null);
+    const [duration,setDuration] = useState(null);
     const [loading,setLoading] = useState()
     const viewedRef = useRef(viewed);
 
@@ -31,10 +31,15 @@ const Resource = () => {
 
                     await request('GET',`resource/${resourceId}`,null,null,true) 
                     .then((resourceResponse) => {
-                        setMinViewMins(resourceResponse && resourceResponse.content?resourceResponse.content.minViewMins:0);
+                        if(resourceResponse && resourceResponse.content.duration && resourceResponse.content.durationUnit) {
+                            let durationInMs = resourceResponse.content.duration * resourceResponse.content.durationUnit.milliseconds;
+                            setDuration(durationInMs);
+                        } else {
+                            setDuration(0)
+                        }
                     })
                     .catch((error) => {
-                        setMinViewMins(null);
+                        setDuration(0);
                     })
 
                     await request('GET','resource/view/my',null,{resourceId:resourceId},true) 
@@ -42,7 +47,7 @@ const Resource = () => {
                         setViewed(viewResponse && viewResponse.content? viewResponse.content.viewed:0);
                     })
                     .catch((error) => {
-                        setViewed(null);
+                        setViewed(0);
                     })
                 }
             })
@@ -61,7 +66,8 @@ const Resource = () => {
     {loading?
         <div className='flex w-full h-full bg-white items-center justify-center'>
             <LoadingIcons.ThreeDots width={32} height={64} fill="rgb(0,175,240)"/>
-        </div>:
+        </div>
+        :
         <div className='relative w-full h-full bg-white overflow-hidden'>
             <div className='flex flex-row w-full h-10 shrink-0 px-2 items-center justify-center'>
                 <button onClick={(e) => navigate(parentPath)} className='absolute flex left-0 w-10 h-10 items-center justify-center text-[rgb(68,71,70)]'>
@@ -70,12 +76,12 @@ const Resource = () => {
                 <div className='flex flex-row w-fit h-fit px-2 py-1 items-center border rounded-full'>
                     <div className='flex flex-row space-x-1 w-fit h-fit items-center text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular'>
                         <p>Viewed :</p>
-                        <Timer timer={viewed} setTimer={setViewed} minMins={minViewMins}/>
+                        <Timer timer={viewed} setTimer={setViewed} minMs={duration}/>
                     </div>
                     &nbsp;&nbsp;&nbsp;
                     <div className='flex flex-row space-x-1 w-fit h-fit items-center text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular'>
-                        <p>Minimum :</p>
-                        <FormatedTime time={minViewMins * 60000}/>
+                        <p>Duration :</p>
+                        <FormatedTime time={duration}/>
                     </div>
                 </div>
             </div>
@@ -94,9 +100,8 @@ const Resource = () => {
 
 export default Resource
 
-const Timer = ({timer,setTimer,minMins}) => {
+const Timer = ({timer,setTimer,minMs}) => {
     const start = new Date();
-    const minimum = minMins? minMins * 60000:0;
 
     useEffect(() => {
         const timerId = setTimeout(() => {
@@ -109,7 +114,7 @@ const Timer = ({timer,setTimer,minMins}) => {
     },[timer]);
 
     return (
-        <FormatedTime time={timer} minimum={minimum}/>
+        <FormatedTime time={timer} minimum={minMs}/>
     )
 }
 
@@ -125,7 +130,7 @@ const FormatedTime = ({time, minimum}) => {
 
     return (
         <p className={`text-sm ${minimum && (minimum === 0 || time > minimum)?'text-green-600':'text-[rgb(68,70,71)]' }`}>
-            {`${hours}:${minutes}:${seconds}`}
+            {`${days}:${hours}:${minutes}:${seconds}`}
         </p>
     )
 }
