@@ -5,7 +5,7 @@ import {PiTextAlignLeftLight, PiChalkboardTeacherFill, PiDotsThreeVertical, PiDo
 import YesNoDialog from './YesNoDialog';
 import ContentContainer from './ContentContainer';
 import PaymentOptions from './PaymentOptions';
-import {useData} from '../App';
+import {useData} from '../data';
 import { download } from '../App';
 import Detail from './Detail';
 
@@ -13,7 +13,7 @@ const EnrollmentCourse = () => {
     const {setAccess} = useContext(GlobalContext);
     const [enrollmentCourse,setEnrollmentCourse] = useState(null);
     const [loading,setLoading] = useState();
-    const [request] = useData();
+    const {request} = useData();
     const {programId,studentId,courseId,teacherId,topicId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
@@ -99,7 +99,7 @@ const EnrollmentCourse = () => {
 export default EnrollmentCourse
 
 const EnrollmentTopicItem = ({enrollmentTopic,reload}) => {
-    const [request] = useData();
+    const {request} = useData();
     const {setDialog} = useContext(GlobalContext);
     const path = useLocation().pathname;
 

@@ -3,7 +3,7 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useLocation,useParams, Outlet, useNavigate } from 'react-router-dom';
 import { PiCaretDoubleLeft,PiCaretLeft,PiCaretDoubleRight,PiCaretRight,PiFunnel, PiArrowsLeftRightFill, PiHandDeposit} from "react-icons/pi";
 import TransactionFilter from './TransactionFilter';
-import { request } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 import TransactionItem from './TransactionItem';
 import Deposit from './Deposit';
@@ -11,7 +11,8 @@ import YesNoDialog from './YesNoDialog';
 import Detail from './Detail';
 
 const MyTransactions = () => {
-    const {currentUser,setDialog,transactionFilter,setAccess} = useContext(GlobalContext);
+    const {setDialog,transactionFilter,setAccess} = useContext(GlobalContext);
+    const [currentUser,setCurrentUser] = useState(null);
     const [transactions,setTransactions] = useState([]);
     const [account,setAccount] = useState(null);
     const [balance,setBalance] = useState(0);
@@ -22,6 +23,7 @@ const MyTransactions = () => {
     const [totalElements,setTotalElements] = useState(0);
     const [totalPages,setTotalPages] = useState(0);
     const [last,setLast] = useState(true);
+    const {request} = useData();
     const [page,setPage] = useState({
         pageNo:0,
         pageSize:10,
@@ -155,6 +157,18 @@ const MyTransactions = () => {
 
     const load = async (filter) => {
         setLoading(true);
+        await request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                setCurrentUser(currentResponse.content.user);
+            } else {
+                setCurrentUser(false);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        })
         await getTransactions(filter,page);
         setButtons([
             {

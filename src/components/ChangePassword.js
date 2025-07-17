@@ -3,7 +3,7 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { PiLockKeyOpen } from "react-icons/pi";
 import Message from './Message';
 import Login from './Login';
-import {useData} from '../App'
+import {useData} from '../data'
 
 const ChangePassword = ({user,reload}) => {
     const {setLoading,setAccess,logout} = useContext(GlobalContext);
@@ -11,7 +11,7 @@ const ChangePassword = ({user,reload}) => {
     const [newPassword, setNewPassword] = useState(""); 
     const [confirmPassword, setConfirmPassword] = useState(""); 
     const [message,setMessage] = useState({content:'',success:false}); 
-    const [request] = useData();
+    const {request} = useData();
     
     const submit = async (e) => {
         setMessage({content:'',success:false});

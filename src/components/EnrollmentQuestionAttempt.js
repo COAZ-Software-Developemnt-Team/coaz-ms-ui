@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react'
 import { RiCheckboxBlankLine,RiCheckboxLine } from 'react-icons/ri';
-import {useData} from '../App'
+import {useData} from '../data'
 
 const EnrollmentQuestionAttempt = ({number,enrollmentQuestionAttempt, action,reload}) => {
     const [attemptAnswer,setAttemptAnswer] = useState(null);

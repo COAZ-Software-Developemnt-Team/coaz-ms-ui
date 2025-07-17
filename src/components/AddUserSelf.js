@@ -6,7 +6,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import Login from './Login';
-import { useData } from '../App';
+import {useData} from '../data';
 
 const AddUserSelf = ({reload}) => {
     const {setLoading,setAccess} = useContext(GlobalContext);
@@ -19,7 +19,7 @@ const AddUserSelf = ({reload}) => {
     const [inputWidth,setInputWidth] = useState(minWidth);
     const [message,setMessage] = useState({content:'',success:false});
     const [user,setUser] = useState({});
-    const [request] = useData();
+    const {request} = useData();
     const onChange = (e) => {
         const value = e.target.value;
         if(value === '') {

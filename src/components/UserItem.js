@@ -3,12 +3,12 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import {  NavLink,useNavigate} from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical} from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import { useData } from '../App';
+import {useData} from '../data';
 
 const UserItem = ({user,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const moreRef = useRef(null);
 
     const navigate = useNavigate();

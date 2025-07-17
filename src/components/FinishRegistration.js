@@ -5,7 +5,7 @@ import Message from './Message'
 import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Login2 from './Login';
-import { request } from '../App';
+import {useData} from '../data';
 
 const FinishRegistration = ({user,reload}) => {
     const {setLoading,setAccess} = useContext(GlobalContext);
@@ -17,6 +17,7 @@ const FinishRegistration = ({user,reload}) => {
     const [message,setMessage] = useState({content:'',success:false}); 
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
+    const {request} = useData();
 
     const submit = async (e) => {
         setLoading(true);

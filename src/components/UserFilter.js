@@ -6,7 +6,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App'
+import {useData} from '../data'
 
 const UserFilter = ({reload}) => {
     const {setDialog,setLoading,userFilter,setUserFilter} = useContext(GlobalContext);
@@ -20,6 +20,7 @@ const UserFilter = ({reload}) => {
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
     const [message,setMessage] = useState({content:'',success:false});
+    const {request} = useData();
 
     const onChange = (e) => {
         if(userFilter && setUserFilter) {

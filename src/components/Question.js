@@ -2,11 +2,12 @@ import React,{useEffect,useState,useContext} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import AddAnswers from './AddAnswers';
 import { RiCheckboxBlankLine,RiCheckboxLine } from 'react-icons/ri';
-import {request} from '../App'
+import {useData} from '../data'
 
 const Question = ({number,question}) => {
 	const {setDialog} = useContext(GlobalContext);
 	const [answers,setAnswers] = useState([]);
+    const {request} = useData();
 
 	const getAnswers = async () => {
 		if(question) {

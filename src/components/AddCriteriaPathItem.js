@@ -4,7 +4,7 @@ import FormValidator, {useFormValidator} from './FormValidator';
 import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {useData} from '../App';
+import {useData} from '../data';
 
 const AddCriteriaPathItem = ({previouId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);

@@ -5,7 +5,7 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {useData} from '../App'
+import {useData} from '../data'
 
 const AddTopic = ({courseId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -14,7 +14,7 @@ const AddTopic = ({courseId,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
-    const [request] = useData();
+    const {request} = useData();
     const submit = async (e) => {
         setMessage({content:'',success:false});
         if(course) {

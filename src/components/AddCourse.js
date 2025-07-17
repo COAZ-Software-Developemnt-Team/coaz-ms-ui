@@ -4,7 +4,7 @@ import FormValidator, {useFormValidator} from './FormValidator';
 import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {useData} from '../App';
+import {useData} from '../data';
 
 const AddCourse = ({reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -14,7 +14,7 @@ const AddCourse = ({reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
-    const [request] = useData();
+    const {request} = useData();
 
     const submit = async (e) => {
         setMessage({content:'',success:false});

@@ -1,11 +1,12 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import JSZip from 'jszip';
-import { download } from '../App';
+import {useData} from '../data';
 
 const HtmlResource = () => {
     const {resourceId} = useParams();
     const [iframeSrc, setIframeSrc] = useState(null);
+    const [download] = useData();
 
     const getMimeType = (filename) => {
         const ext = filename.split('.').pop().toLowerCase();

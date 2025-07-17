@@ -6,14 +6,15 @@ import Menu from './Menu';
 import MobileMenu from './MobileMenu';
 import Login from './Login';
 import LoadingIcons from 'react-loading-icons'
-import { request } from '../App';
+import {useData} from '../data';
 
 const ManagementSystem = () => {
     const path = useLocation().pathname;
-    const {setAccess,currentUser,logout} = useContext(GlobalContext)
+    const {setAccess} = useContext(GlobalContext);
     const [menus,setMenus] = useState([]);
-    const [openMobileMenu,setOpenMobileMenu] = useState(false)
+    const [openMobileMenu,setOpenMobileMenu] = useState(false);
     const [loading,setLoading] = useState(false);
+    const {request,logout} = useData();
 
     const navigate = useNavigate();
 
@@ -29,8 +30,21 @@ const ManagementSystem = () => {
 
     const load = async () => {
         setLoading(true);
+        let user = null;
+        await request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                user = currentResponse.content.user;
+            } else {
+                user = false;
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        })
         let mnus = [];
-        if(currentUser) {
+        if(user) {
             mnus.push({name:'My Profile', link:'/profile', Icon:PiUser});
             mnus.push({name:'My Transactions', link:'/my_transactions', Icon:PiArrowsLeftRight});
             mnus.push({name:'My Files', link:`/file`, Icon:PiFolder});
@@ -318,7 +332,7 @@ const ManagementSystem = () => {
             if(teach || createCourse || updateCourse || deleteCourse) {
                 settingsMenus.push({name:'CPDs', link:'/courses', Icon:PiBook})
             }
-            if(currentUser) {
+            if(user) {
                 settingsMenus.push({name:'Events', link:'/events', Icon:PiCalendarDots})
             }
             let createCriteriaPath = false;
@@ -378,11 +392,11 @@ const ManagementSystem = () => {
     }
 
     useEffect(() => {
-        if(path === '/m' || !currentUser) {
+        if(path === '/') {
             navigate('/home')
         }
         load();
-    },[currentUser]);
+    },[path]);
 
   return (
     <div className='flex w-full h-full bg-[url(/public/images/bg_cpd.jpg)] bg-cover bg-center overflow-hidden'>
@@ -393,11 +407,11 @@ const ManagementSystem = () => {
                 </div>
                 :
                 <>
-                    <Menu user={currentUser} menus={menus} openMobileMenu={openMobileMenu} setOpenMobileMenu={setOpenMobileMenu} onLogin={onLogin} onLogout={onLogout}/>
+                    <Menu menus={menus} openMobileMenu={openMobileMenu} setOpenMobileMenu={setOpenMobileMenu} onLogin={onLogin} onLogout={onLogout}/>
                     <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
                         className='flex flex-col w-full h-full bg-white overflow-hidden'>
                         <div style={{transition:'height 1s ease-in-out'}} className={`w-full ${openMobileMenu?'h-full':'h-0'} overflow-hidden`}>
-                            <MobileMenu user={currentUser} menus={menus} openMobileMenu={openMobileMenu} setOpenMobileMenu={setOpenMobileMenu} onLogin={onLogin} onLogout={onLogout}/>
+                            <MobileMenu menus={menus} openMobileMenu={openMobileMenu} setOpenMobileMenu={setOpenMobileMenu} onLogin={onLogin} onLogout={onLogout}/>
                         </div>
                         <div style={{transition:'height 1s ease-in-out'}} className={`w-full ${!openMobileMenu?'h-full':'h-0'} overflow-hidden`}>
                             <Outlet/>

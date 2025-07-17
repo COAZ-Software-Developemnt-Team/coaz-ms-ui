@@ -1,7 +1,7 @@
 import React, {useEffect,useState} from 'react'
 import { useNavigate } from 'react-router-dom';
 import {PiArrowsLeftRightLight} from "react-icons/pi";
-import { request } from '../App';
+import {useData} from '../data';
 
 const TransactionItem = ({transaction}) => {
     const [user,setUser] = useState(null);
@@ -9,7 +9,7 @@ const TransactionItem = ({transaction}) => {
     const [debitAccount,setDebitAccount] = useState(null);
     const [creditAccount,setCreditAccount] = useState(null);
     const [date,setDate] = useState(null);
-
+    const {request} = useData();
     const navigate = useNavigate();
 
     useEffect(() => {

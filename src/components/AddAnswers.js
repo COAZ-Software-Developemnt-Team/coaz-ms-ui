@@ -6,15 +6,15 @@ import TextArea from './TextArea';
 import Message from './Message';
 import FormDialog from './FormDialog';
 import { RiCheckboxBlankLine,RiCheckboxLine,RiDeleteBin6Line } from 'react-icons/ri';
-import { useData } from '../App';
+import {useData} from '../data';
 
 const AddAnswers = ({questionId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [newAnswer,setNewAnswer] = useState('');
     const [oldAnswer,setOldAnswer] = useState('');
-    const [answers,setAnswers] = useState([])
+    const [answers,setAnswers] = useState([]);
     const [message,setMessage] = useState({content:'',success:false});
-    const [request] = useData();
+    const {request} = useData();
 
     const setCorrectAnswer = (answer) => {
         for(let ans of answers) {
@@ -25,42 +25,41 @@ const AddAnswers = ({questionId,reload}) => {
     }
 
     const submit = async (e) => {
-            let corrects = 0;
-            for(let answer of answers) {
-                if(answer.correct) {
-                    corrects++;
-                }
+        let corrects = 0;
+        for(let answer of answers) {
+            if(answer.correct) {
+                corrects++;
             }
-            if(corrects === 0 || corrects > 1) {
-                setMessage({content:'No correct answer or multiple correct answers',success:false});
-                return;
-            }
-            setMessage({content:'',success:false});
-            setLoading(true);
-            await request('POST','answers',answers,{
-                questionId:questionId
-            },true)
-            .then((response) => {
-                setLoading(false);
-                if(response.status) {
-                    if(response.status === 'SUCCESSFUL' && response.content) {
-                        reload && reload();
-                        setDialog(null);
-                    } else {
-                        setMessage({content:response.message,success:false});
-                    }
-                } else  {
-                    setMessage({content:response,success:false});
+        }
+        if(corrects === 0 || corrects > 1) {
+            setMessage({content:'No correct answer or multiple correct answers',success:false});
+            return;
+        }
+        setMessage({content:'',success:false});
+        setLoading(true);
+        await request('POST','answers',answers,{
+            questionId:questionId
+        },true)
+        .then((response) => {
+            setLoading(false);
+            if(response.status) {
+                if(response.status === 'SUCCESSFUL' && response.content) {
+                    reload && reload();
+                    setDialog(null);
+                } else {
+                    setMessage({content:response.message,success:false});
                 }
-            })
-            .catch((error) => {
-                setMessage({content:error.message,success:false});
-                setLoading(false);
-            });
-        };
-
+            } else  {
+                setMessage({content:response,success:false});
+            }
+        })
+        .catch((error) => {
+            setMessage({content:error.message,success:false});
+            setLoading(false);
+        });
+    };
+    
     const [register,handleChange,handleSubmit,errors] = useFormValidator(submit);
-
     const getAnswers = async () => {
         if(questionId) {
             await request ('GET',`answers/${questionId}`,null,null,true)

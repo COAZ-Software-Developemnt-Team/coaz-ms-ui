@@ -9,7 +9,7 @@ import AddTariff from './AddTariff';
 import AddContextRole from './AddContextRole';
 import Tariff from './Tariff';
 import MsHeader from './Header';
-import { useData } from '../App';
+import {useData} from '../data';
 import Detail from './Detail';
 import ContentContainer from './ContentContainer';
 
@@ -20,7 +20,7 @@ const UserType = () => {
     const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const {userTypeId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
@@ -32,7 +32,7 @@ const UserType = () => {
             Component:() => <EditUserType id={userTypeId} reload={load}/>
         })
     }
-const [request] = useData;
+    
     const onAssignRole = (e) => {
         e.preventDefault();
         setDialog({
@@ -208,7 +208,7 @@ const ObjectContextRole = ({objectContextRole,reload}) => {
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [deleteContextRoleAuth,setDeleteContextRoleAuth] = useState(false);
     const [highlighted,setHighlighted] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const path = useLocation().pathname;
     const moreRef = useRef(null)
 

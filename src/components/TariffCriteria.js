@@ -2,13 +2,14 @@ import React,{useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { LiaAngleDownSolid } from "react-icons/lia";
 import { RiDeleteBin6Line } from "react-icons/ri"
-import {request} from '../App'
+import {useData} from '../data'
 
 const TariffCriteria = ({receivableId,criteria,setCriteria}) => {
     const [newKey,setNewkey] = useState(null);
     const [newValue,setNewValue] = useState(null);
     const [keys,setKeys] = useState([]);
     const [values,setValues] = useState([]);
+    const {request} = useData();
 
     const onNewKey = async (option) => {
         setNewkey(option);

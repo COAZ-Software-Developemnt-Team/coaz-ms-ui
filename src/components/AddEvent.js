@@ -5,7 +5,7 @@ import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {useData} from '../App';
+import {useData} from '../data';
 import TextArea from './TextArea';
 
 const AddEvent = ({reload}) => {

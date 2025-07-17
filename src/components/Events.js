@@ -3,14 +3,14 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams, Outlet } from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical,PiTag, PiCalendarDot, PiCalendarDotLight, PiUserPlus, PiCalendarDotsFill, PiCalendarPlus, PiCalendarCheckLight, PiCalendarCheck } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import {useData} from '../App'
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 import AddEvent from './AddEvent';
 import Payment from './MobilePayment';
 import PaymentOptions from './PaymentOptions';
 
 const Events = () => {
-    const {currentUser,setDialog} = useContext(GlobalContext);
+    const {setDialog} = useContext(GlobalContext);
     const [registeredEvents,setRegisteredEvents] = useState([]);
     const [availableEvents,setAvailableEvents] = useState([]);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
@@ -28,7 +28,15 @@ const Events = () => {
     }
 
     const getEvents = async () => {
-        if(!currentUser) {
+        let user = null;
+        await request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                user = currentResponse.content.user
+            }
+        })
+        if(!user) {
             setRegisteredEvents([]);
             setAvailableEvents([]);
             return;
@@ -42,7 +50,7 @@ const Events = () => {
         })
 
         let eventUsers = [];
-        await request('GET','event/users/user',null,{userId:currentUser.id},false)
+        await request('GET','event/users/user',null,{userId:user.id},false)
         .then((response) => {
             if(response.content) {
                 setRegisteredEvents(response.content);
@@ -123,10 +131,11 @@ const Events = () => {
 export default Events
 
 const EventItem = ({event,user,deleteAuthority,reload,setLoading}) => {
-    const {currentUser,setDialog,setPopupData,setAccess} = useContext(GlobalContext);
+    const [currentUser,setCurrentUser] = useState(null);
+    const {setDialog,setPopupData,setAccess} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const [tariff,setTariff] = useState(null);
-    const [request] = useData();
+    const {request} = useData();
     const moreRef = useRef(null);
 
     let USDecimal = new Intl.NumberFormat('en-US',{
@@ -202,6 +211,18 @@ const EventItem = ({event,user,deleteAuthority,reload,setLoading}) => {
     }
 
     useEffect(() => {
+        request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                setCurrentUser(currentResponse.content.user);
+            } else {
+                setCurrentUser(false);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        })
         getTariff();
     },[event])
 

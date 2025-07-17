@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react'
 import {BsGraphUpArrow,BsGraphUp} from "react-icons/bs";
 import Scrollable from './Scrollable';
 import { useRef } from 'react';
-import { request } from '../App';
+import {useData} from '../data';
 import { PiBook, PiBookThin, PiChartLine, PiChartLineThin, PiGraduationCap, PiGraduationCapLight, PiGraduationCapThin } from 'react-icons/pi';
 
 const MyStatistics = () => {
@@ -11,6 +11,7 @@ const MyStatistics = () => {
     const [points,setPoints] = useState(0.0);
     const [completedPrograms,setCompletedPrograms] = useState(0.0);
     const [completedCourses,setCompletedCourses] = useState(0.0);
+    const {request} = useData();
     const programsRef = useRef(null);
     const coursesRef = useRef(null);
     const padding = 16;

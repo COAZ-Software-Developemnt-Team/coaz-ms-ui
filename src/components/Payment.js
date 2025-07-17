@@ -1,7 +1,7 @@
 import React, {useEffect,useState,useContext, Component} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import Message from './Message';
-import {request} from '../App'
+import {useData} from '../data'
 import { GiPayMoney } from 'react-icons/gi';
 
 const Payment = ({user,tariff,reload}) => {
@@ -9,6 +9,7 @@ const Payment = ({user,tariff,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const [password,setPassword] = useState('');
     const [balance,setBalance] = useState(0);
+    const {request} = useData();
 
     let USDecimal = new Intl.NumberFormat('en-US',{
         minimumFractionDigits: 2,

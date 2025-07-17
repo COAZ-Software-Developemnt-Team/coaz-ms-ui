@@ -6,12 +6,12 @@ import AddUser from './AddUser';
 import UserItem from './UserItem';
 import AddUsers from './AddUsers';
 import TransactionFilter from './TransactionFilter';
-import { useData } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 import User from './User';
 
 const Accounts = () => {
-    const {currentUser,setDialog} = useContext(GlobalContext);
+    const {setDialog} = useContext(GlobalContext);
     const [accounts,setAccounts] = useState([]);
     const [readAuthority,setReadAuthority] = useState(false);
     const {accountId} = useParams();
@@ -28,7 +28,7 @@ const Accounts = () => {
         sortDir:'asc'
     })
     const [loading,setLoading] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const path = useLocation().pathname;
 
     const handleFirst = (e) => {
@@ -61,13 +61,25 @@ const Accounts = () => {
 
     const getAccounts = async (page) => {
         setLoading(true);
-        
+        let user = null;
+        await request('GET','current',null,null,true)
+        .then((currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                user = currentResponse.content.user;
+            } else {
+                user = false;
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        })
         await request ('GET','hasauthority',null,{
             contextName:'ACCOUNT',
             authority:'READ'
         },true)
         .then(async response => {
-            if(currentUser && response.status === 'YES') {
+            if(user && response.status === 'YES') {
                 await request('GET','accounts',null,null,true)
                 .then((response) => {
                     if(response.content) {
@@ -84,7 +96,7 @@ const Accounts = () => {
                 .catch((error) => {
                     setAccounts(null);
                 });
-            } else if(currentUser) {
+            } else if(user) {
                 await request('GET','account/my',null,null,true)
                 .then((response) => {
                     if(response.content) {
@@ -174,7 +186,7 @@ export default Accounts
 
 const AccountItem = ({account}) => {
     const [balance,setBalance] = useState(0);
-    const [request] = useData();
+    const {request} = useData();
 
     let USDecimal = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,

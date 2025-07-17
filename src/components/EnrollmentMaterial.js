@@ -5,7 +5,7 @@ import { PiTarget , PiFileTextFill, PiTargetLight } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import ContentContainer from './ContentContainer';
 import Detail from './Detail';
-import {useData} from '../App';
+import {useData} from '../data';
 
 const EnrollmentMaterial = () => {
     const {setDialog} = useContext(GlobalContext);

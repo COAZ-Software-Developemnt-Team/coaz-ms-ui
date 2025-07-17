@@ -5,14 +5,15 @@ import EditUser from './EditUser';
 import {PiLockKeyOpen ,PiPencilSimple,PiCaretDoubleLeft,PiCaretLeft,PiCaretDoubleRight,PiCaretRight, PiFunnel,PiFolderLight } from 'react-icons/pi';
 import ResetPassword from './ResetPassword';
 import Detail from './Detail';
-import {useData} from '../App';
+import {useData} from '../data';
 import TransactionFilter from './TransactionFilter';
 import TransactionItem from './TransactionItem';
 import ContentContainer from './ContentContainer';
 
 const User = () => {
-    const {currentUser,setDialog,setAccess} = useContext(GlobalContext);
+    const {setDialog,setAccess} = useContext(GlobalContext);
     const [user,setUser] = useState(null);
+    const [currentUser,setCurrentUser] = useState(null);
     const [expiryDate,setExpiryDate] = useState(null);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
@@ -21,7 +22,7 @@ const User = () => {
     const { state } = location;
     const path = useLocation().pathname;
 
-    const [request] = useData();
+    const {request} = useData();
 
     const onEdit = async (e) => {
         e.preventDefault();
@@ -45,7 +46,16 @@ const User = () => {
     const navigate = useNavigate();
 
     const getUser = async () => {
-        if(!currentUser) {
+        let currentUsr = null;
+        await request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                currentUsr = currentResponse.content.user;
+                setCurrentUser(currentUsr);
+            }
+        })
+        if(!currentUsr) {
             return
         }
         setLoading(true);
@@ -72,7 +82,7 @@ const User = () => {
         })
         let usr = null;
         let slf = false;
-        if(readAuth && userId && userId != currentUser.id) {
+        if(readAuth && userId && userId != currentUsr.id) {
             await request('GET',`user/${userId}`,null,null,true)
             .then(async (response) => {
                 if(response.content) {
@@ -96,12 +106,12 @@ const User = () => {
                 navigate(state?state.parentPath:'/users')
             })
         } else {
-            usr = currentUser;
-            setUser(currentUser);
+            usr = currentUsr;
+            setUser(currentUsr);
             slf = true;
             await request('GET','expirydate',null,{
-                receivableId:currentUser.userType.id,
-                userId:currentUser.id
+                receivableId:currentUsr.userType.id,
+                userId:currentUsr.id
             },true)
             .then((response) => {
                 if(response.content) {
@@ -211,7 +221,7 @@ const User = () => {
 export default User
 
 /* const Transactions = ({user,readAuthority}) => {
-    const {currentUser,setDialog, setPopupData,transactionFilter,setTransactionFilter} = useContext(GlobalContext);
+    const {setDialog, setPopupData,transactionFilter,setTransactionFilter} = useContext(GlobalContext);
     const [transactions,setTransactions] = useState([]);
     const [pageNo,setPageNo] = useState(0);
     const [pageSize,setPageSize] = useState(0);

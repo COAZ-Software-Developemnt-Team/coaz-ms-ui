@@ -1,6 +1,6 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
-import { request,download } from '../App';
+import {useData} from '../data';
 import { PiArrowLeftLight } from 'react-icons/pi';
 import LoadingIcons from 'react-loading-icons'
 
@@ -11,7 +11,8 @@ const Resource = () => {
     const [iframeSrc, setIframeSrc] = useState(null);
     const [viewed,setViewed] = useState(null);
     const [duration,setDuration] = useState(null);
-    const [loading,setLoading] = useState()
+    const [loading,setLoading] = useState();
+    const [request,download] = useData();
     const viewedRef = useRef(viewed);
 
     const navigate = useNavigate();

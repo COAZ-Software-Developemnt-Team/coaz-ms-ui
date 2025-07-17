@@ -6,11 +6,11 @@ import AddUser from './AddUser';
 import UserItem from './UserItem';
 import AddUsers from './AddUsers';
 import Filter from './UserFilter';
-import { useData } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const Users = () => {
-    const {currentUser,setDialog,userFilter} = useContext(GlobalContext);
+    const {setDialog,userFilter} = useContext(GlobalContext);
     const [users,setUsers] = useState([]);
     const [readAuthority,setReadAuthority] = useState(false);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
@@ -27,9 +27,8 @@ const Users = () => {
         sortBy:'id',
         sortDir:'asc'
     })
-    const [request] = useData;
     const [loading,setLoading] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const path = useLocation().pathname;
 
     const onAddUser = (e) => {

@@ -8,7 +8,7 @@ import AddProgram from './AddProgram';
 import MessageDialog from './MessageDialog';
 import MsHeader from './Header';
 import PaymentOptions from './PaymentOptions';
-import { request } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const Programs = () => {
@@ -17,6 +17,7 @@ const Programs = () => {
     const [availablePrograms,setAvailablePrograms] = useState([]);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
+    const {request} = useData();
     const [loading,setLoading] = useState()
     const {programId} = useParams();
     const path = useLocation().pathname;
@@ -127,6 +128,7 @@ const ProgramItem = ({program,deleteAuthority,reload,setLoading}) => {
     const [userType,setUserType] = useState(null);
     const [tariff,setTariff] = useState(null);
     const [paid,setPaid] = useState(false);
+    const {request} = useData();
     const moreRef = useRef(null);
 
     let USDecimal = new Intl.NumberFormat('en-US', {

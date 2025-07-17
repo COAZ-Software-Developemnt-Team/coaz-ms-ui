@@ -4,7 +4,7 @@ import { useLocation,useParams, useOutletContext } from 'react-router-dom';
 import { PiPath, PiPathFill } from 'react-icons/pi';
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
-import { useData } from '../App';
+import {useData} from '../data';
 import AddCriteriaPathItem from './AddCriteriaPathItem';
 import CriteriaPathItem from './CriteriaPathItem';
 import Detail from './Detail';
@@ -15,7 +15,7 @@ const CriteriaPath = () => {
 	const [deleteAuthority,setDeleteAuthority] = useState(false);
 	const [children,setChildren] = useState([]);
 	const [buttons,setButtons] = useState([]);
-	const [request] = useData();
+	const {request} = useData();
 	const {pathId} = useParams();
 	const {parentPath} = useOutletContext();
 	const path = useLocation().pathname;

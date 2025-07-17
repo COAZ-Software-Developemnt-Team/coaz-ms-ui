@@ -5,7 +5,7 @@ import {useFormValidator} from './FormValidator';
 import Input from './Input';
 import Table from './Table';
 import Select from './Select';
-import { useData } from '../App';
+import {useData} from '../data';
 
   const AddUsersTable = ({pages,setResults,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -15,7 +15,7 @@ import { useData } from '../App';
     const [userGroup,setUserGroup] = useState(null);
     const [userTypes,setUserTypes] = useState([]);
     const [userGroups,setUserGroups] = useState([]);
-    const [request] = useData();
+    const {request} = useData();
     const columns = [
         {
             id:'username',

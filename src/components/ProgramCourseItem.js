@@ -4,12 +4,13 @@ import { useNavigate,useLocation } from 'react-router-dom';
 import { PiBookLight,PiChalkboardTeacherLight,PiDotsThreeVertical,PiPen,PiTrash } from 'react-icons/pi';
 import YesNoDialog from './YesNoDialog';
 import EditProgramCourse from './EditProgramCourse';
-import { request } from '../App';
+import {useData} from '../data';
 
 const ProgramCourseItem = ({programCourse,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [highlighted,setHighlighted] = useState(false);
+    const {request} = useData();
     const moreRef = useRef(null)
 
     let USDecimal = new Intl.NumberFormat('en-US', {

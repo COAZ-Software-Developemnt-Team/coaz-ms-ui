@@ -7,50 +7,50 @@ import Payment from './MobilePayment';
 import FinishRegistration from './FinishRegistration';
 import ChangePassword from './ChangePassword';
 import AddUserSelf from './AddUserSelf';
-import {request} from '../App'
+import { useData } from '../data';
 
 const Login = ({reload}) => {
-    const {setDialog,setLoading,setAccess,login,logout} = useContext(GlobalContext);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState(""); 
+    const {setDialog,setLoading,setAccess} = useContext(GlobalContext);
+    const [username,setUsername] = useState("");
+    const [password,setPassword] = useState(""); 
     const [message,setMessage] = useState({content:'',success:false});
-   
+    const {request,login,logout} = useData();
+    
     const onLogin = async (e) => {
         setLoading(true);
         e.preventDefault();
         setMessage({content:'',success:false});
-        await login(username,password)
-        .then(async (response) => {
-            if(response.status) {
-                setLoading(false);
-                if(response.status === 'SUCCESSFUL') {
-                    setAccess(null);
-                } else if(response.status === 'PENDING_PAYMENT' && response.user && response.tariff) {
-                    setAccess({Component:() => <Payment user={response.user} tariff={response.tariff}  reload={reload}/>});
-                } else if(response.status === 'OTP' && response.user) {
-                    setAccess({Component:() => <ChangePassword user={response.user} reload={reload}/>});
-                } else if(response.status === 'INCOMPLETE_REGISTRATION' && response.user) {
-                    setAccess({Component:() => <FinishRegistration user={response.user} reload={reload}/>});
+        if(login) {
+            await login(username,password)
+            .then( (response) => {
+                if(response.status) {
+                    if(response.status === 'SUCCESSFUL') {
+                        setAccess(null);
+                    } else if(response.status === 'PENDING_PAYMENT' && response.user && response.tariff) {
+                        setAccess({Component:() => <Payment user={response.user} tariff={response.tariff}  reload={reload}/>});
+                    } else if(response.status === 'OTP' && response.user) {
+                        setAccess({Component:() => <ChangePassword user={response.user} reload={reload}/>});
+                    } else if(response.status === 'INCOMPLETE_REGISTRATION' && response.user) {
+                        setAccess({Component:() => <FinishRegistration user={response.user} reload={reload}/>});
+                    } else {
+                        setMessage({content:response,success:false});
+                    }
+                } else if(response.error_message) {
+                    setMessage({content:response.error_message,success:false});
+                    logout()
                 } else {
                     setMessage({content:response,success:false});
+                    logout()
                 }
-            } else if(response.error_message) {
-                setLoading(false);
-                setMessage({content:response.error_message,success:false});
+                reload && reload()
+            })
+            .catch((error) => {
+                setMessage({content:error.message,success:false});
                 logout()
-            } else {
-                setLoading(false);
-                setMessage({content:response,success:false});
-                logout()
-            }
-            reload && reload()
-        })
-        .catch((error) => {
-            setMessage({content:error.message,success:false});
-            logout()
+                reload && reload()
+            })
             setLoading(false);
-            reload && reload()
-        })
+        }
     }; 
 
     const onCreateAccount = (e) => {

@@ -6,7 +6,7 @@ import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import FormDialog from './FormDialog';
 import Message from './Message';
-import {request} from '../App'
+import {useData} from '../data'
 
 const ResetPassword = ({userId}) => {
     const {setLoading,setDialog,logout} = useContext(GlobalContext);
@@ -15,6 +15,7 @@ const ResetPassword = ({userId}) => {
     const [newPassword, setNewPassword] = useState(''); 
     const [confirmPassword, setConfirmPassword] = useState(''); 
     const [message,setMessage] = useState({content:'',success:false}); 
+    const {request} = useData();
 
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);

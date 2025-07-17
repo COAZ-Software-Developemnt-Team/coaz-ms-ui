@@ -2,7 +2,7 @@ import React, {useEffect,useState} from 'react'
 import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
 import { PiTextAlignLeftFill,PiClipboardTextLight,PiFileTextLight, PiFilePdfLight} from "react-icons/pi";
 import ContentContainer from './ContentContainer';
-import {useData} from '../App';
+import {useData} from '../data';
 
 const EnrollmentTopic = () => {
     const [enrollmentTopic,setEnrollmentTopic] = useState(null);

@@ -1,11 +1,12 @@
 import React, {useEffect,useState,useContext, Component} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import Message from './Message';
-import {request} from '../App'
+import {useData} from '../data'
 
 const MobilePayment = ({user,tariff,reload}) => {
     const {setLoading} = useContext(GlobalContext);
     const [message,setMessage] = useState({content:'',success:false});
+    const {request} = useData();
 
     const [phoneNumber,setPhoneNumber] = useState({
         part1:'260',
@@ -173,6 +174,7 @@ export default MobilePayment
 
 const MobileMoney = ({user,tariff,reload,setMessage,setOnSubmit}) => {
     const {setLoading,setAccess} = useContext(GlobalContext);
+    const {request} = useData();
     const [phoneNumber,setPhoneNumber] = useState({
         part1:'260',
         part2:'',

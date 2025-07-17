@@ -7,7 +7,7 @@ import AddResource from './AddResource';
 import AddQuiz from './AddQuiz';
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
-import { request,download } from '../App';
+import {useData} from '../data';
 import AddHtmlResource from './AddHtmlResource';
 import ContentContainer from './ContentContainer';
 
@@ -20,6 +20,7 @@ const Topic = () => {
     const [quizzes,setQuizzes] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const {request} = useData();
     const {courseId,teacherId,topicId,resourceId,activityId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;
@@ -200,6 +201,7 @@ export default Topic
 const Material = ({material,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {request} = useData();
     const path = useLocation().pathname;
     const moreRef = useRef(null)
 

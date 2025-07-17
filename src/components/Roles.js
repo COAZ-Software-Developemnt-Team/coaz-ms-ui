@@ -6,7 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddRole from './AddRole';
 import MsHeader from './Header';
-import { request } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const Roles = () => {
@@ -15,6 +15,7 @@ const Roles = () => {
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const {request} = useData();
     const {roleId} = useParams();
     const path = useLocation().pathname;
 
@@ -89,6 +90,7 @@ export default Roles
 const RoleItem = ({role,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {request} = useData();
     const moreRef = useRef(null)
 
     const navigate = useNavigate();

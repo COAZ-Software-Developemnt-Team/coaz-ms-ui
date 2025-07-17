@@ -6,14 +6,14 @@ import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import { useData } from '../App';
+import {useData} from '../data';
 import TextArea from './TextArea';
 
 const EditEventDay = ({eventDayId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [eventDay,setEventDay] = useState({});
     const [message,setMessage] = useState({content:'',success:false});
-    const [request] = useData();
+    const {request} = useData();
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
 

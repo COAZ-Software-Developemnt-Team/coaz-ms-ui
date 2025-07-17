@@ -6,7 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddCourse from './AddCourse';
 import MsHeader from './Header';
-import { useData } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const Courses = () => {
@@ -16,7 +16,7 @@ const Courses = () => {
     const [buttons,setButtons] = useState([]);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [loading,setLoading] = useState();
-    const [request] = useData();
+    const {request} = useData();
     const {courseId} = useParams();
     const path = useLocation().pathname;
 
@@ -107,7 +107,7 @@ export default Courses
 const CourseItem = ({course,deleteAuthority,reload, setLoading}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const moreRef = useRef(null)
 
     let USDecimal = new Intl.NumberFormat('en-US', {

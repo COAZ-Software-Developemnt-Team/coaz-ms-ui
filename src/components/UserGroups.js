@@ -7,7 +7,7 @@ import Scrollable from './Scrollable';
 import AddUserGroup from './AddUserGroup';
 import MsHeader from './Header';
 import EditUserGroup from './EditUserGroup';
-import { request } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const UserGroups = () => {
@@ -16,6 +16,7 @@ const UserGroups = () => {
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
+    const {request} = useData();
     const {userGroupId} = useParams();
     const path = useLocation().pathname;
 
@@ -106,6 +107,7 @@ export default UserGroups
 const UserGroupItem = ({userGroup,updateAuthority,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {request} = useData();
     const moreRef = useRef(null)
 
     const onEdit = (e) => {

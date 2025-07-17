@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import FormDialog from './FormDialog'
 import Input from './Input'
-import { useData } from '../App'
+import {useData} from '../data'
 import CriteriaPathItem from './CriteriaPathItem2'
 
 const CriteriaPaths = ({receivableId}) => {
     const [criteriaPaths,setCriteriaPaths] = useState([]);
-    const [request] = useData();
+    const {request} = useData();
 
     const load = async () => {
         request('GET','criteriapath/roots',null,{id:receivableId},false) 

@@ -5,7 +5,7 @@ import { PiPencilSimple, PiMaskHappyFill, PiShieldCheckeredLight } from 'react-i
 import Scrollable from './Scrollable';
 import EditRole from './EditRole';
 import MsHeader from './Header';
-import { request } from '../App';
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const Role = () => {
@@ -14,6 +14,7 @@ const Role = () => {
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const {request} = useData();
     const {roleId} = useParams();
     const {parentPath} = useOutletContext();
     const path = useLocation().pathname;

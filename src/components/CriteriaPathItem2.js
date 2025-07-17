@@ -1,5 +1,5 @@
 import React,{ useEffect,useState,useRef, useContext } from 'react'
-import { useData } from '../App';
+import {useData} from '../data';
 import { PiArrowRight, PiCircle, PiCircleFill, PiCircleLight, PiPath, PiTrash } from 'react-icons/pi';
 import AddCriteriaPathItem from './AddCriteriaPathItem';
 import { GlobalContext } from '../contexts/GlobalContext';
@@ -7,7 +7,7 @@ import { GlobalContext } from '../contexts/GlobalContext';
 const CriteriaPathItem = ({criteriaPathItem,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext)
     const [children,setChildren] = useState([]);
-    const [request] = useData();
+    const {request} = useData();
     const buttonRef = useRef(null);
 
     const onAddPath = (e) => {

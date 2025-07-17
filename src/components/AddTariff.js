@@ -6,7 +6,7 @@ import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
 import TariffCriteria from './TariffCriteria';
-import {useData} from '../App'
+import {useData} from '../data'
 
 const AddTariff = ({receivableId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
@@ -19,7 +19,7 @@ const AddTariff = ({receivableId,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
-    const [request] = useData();
+    const {request} = useData();
     const submit = async (e) => {
         setMessage({content:'',success:false});
         if(receivable && criteria) {

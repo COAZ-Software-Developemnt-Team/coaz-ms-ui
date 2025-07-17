@@ -6,7 +6,7 @@ import AddUsersResultsTable from './AddUsersResultsTable';
 import FormDialog from './FormDialog';
 import { usePapaParse } from 'react-papaparse';
 import { sex } from '../constants';
-import { useData } from '../App';
+import {useData} from '../data';
 
 const AddUsers = ({reload}) => {
     const {setDialog} = useContext(GlobalContext);
@@ -18,7 +18,7 @@ const AddUsers = ({reload}) => {
     const [districts,setDistricts] = useState([]);
     const [nationalities,setNationalities] = useState([]);
     const [professionalCategories,setProfessionalCategories] = useState([]);
-    const [request] = useData();
+    const {request} = useData();
     const mainContainerRef = useRef(null);
 
     const { readString } = usePapaParse();

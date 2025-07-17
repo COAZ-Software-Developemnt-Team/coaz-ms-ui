@@ -2,7 +2,6 @@
 import { Routes,Route, useNavigate } from 'react-router-dom';
 import React, {useState, useEffect,useRef} from 'react';
 import './App.css';
-import axios from "axios";
 import { GlobalContext } from './contexts/GlobalContext';
 import Popup from './components/Popup';
 import Home from './components/Home';
@@ -40,182 +39,7 @@ import Transactions from './components/Transactions';
 import Transaction from './components/Transaction';
 import MyTransactions from './components/MyTransactions';
 import File from './components/File';
-
-axios.defaults.baseURL = 'http://localhost:8080/api/';
-//axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
-//axios.defaults.baseURL = 'http://192.168.0.162:8080/api/';
-//axios.defaults.baseURL = 'https://coaz.org:8085/coaz_test/api/';
-//axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
-
-export function useData() {
-  const [currentUser,setCurrentUser] = useState(null);
-
-  const request = async (method,url,body,params,authorization,refresh) => {
-      let response = null;
-      switch(method) {
-        case 'POST': {
-          await axios.post(url, body,{
-              params: params,
-              headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-          })
-          .then((postResponse) => {
-              response = postResponse.data;
-          })
-          .catch(async (error) => {
-              response = error;
-          })
-          break;
-        }
-        case 'PUT': {
-          await axios.put(url, body,{
-            params: params,
-            headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-          })
-          .then((putResponse) => {
-              response = putResponse.data;
-          })
-          .catch(async (error) => {
-              response = error;
-          })
-          break;
-        }
-        case 'GET': {
-          await axios.get(url,{
-            params: params,
-            headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-          })
-          .then((getResponse) => {
-            response = getResponse.data;
-          })
-          .catch(async (error) => {
-            response = error;
-          })
-          break;
-        }
-        case 'DELETE': {
-          await axios.delete(url,{
-            params: params,
-            headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-          })
-          .then((postResponse) => {
-            response = postResponse.data;
-          })
-          .catch(async (error) => {
-            response = error;
-          })
-          break;
-        }
-      }
-      if(!response.status || response.status === 'ERROR') {
-        if(authorization && response.response && response.response.status === 403 && !refresh) {
-            await axios.get("token/refresh",{headers: {Authorization: `bearer ${sessionStorage.getItem("refresh_token")}`}})
-            .then(async (refreshResponse) => {
-                if(refreshResponse.status === 200) {
-                    sessionStorage.setItem("access_token",refreshResponse.data['access_token']);
-                    await request(method,url,body,params,authorization,true)
-                    .then((data) => {
-                        response = data;
-                    })
-                    .catch((error) => {
-                      /* if(error.response && error.response.data && error.response.data.message) {
-                          response =  error.response.data.message;
-                      } else {
-                          response =  error.message;
-                      } */
-                    })
-                }
-            })
-            .catch((error) => {
-                if(error.response && error.response.data && error.response.data.message) {
-                  response =  error.response.data.message;
-                } else if (error.response && error.response.data && error.response.data.error_message) {
-                  response = error.response.data.error_message;
-                }  else if(error.response && error.response.data && error.response.data.trace) {
-                  response = error.response.data.trace;
-                } else if(error.response && error.response.data && error.response.data.error) {
-                  response = error.response.data.error;
-                } else {
-                  response = error.message;
-                }
-            }); 
-        } else if (response.response && response.response.data && response.response.data.message) {
-          response = response.response.data.message;
-        } else if (response.response && response.response.data && response.response.data.error_message) {
-          response = response.response.data.error_message;
-        } else if(response.response && response.response.data && response.response.data.trace) {
-          response = response.response.data.trace;
-        } else if(response.response && response.response.data && response.response.data.error) {
-          response = response.response.data.error;
-        } else {
-          response = response.message;
-        }
-      } 
-      return response;
-  }
-
-  const download = async (url,params,authorization,refresh) => {
-    let response = null;
-    await axios.get(url,{
-      responseType:'blob',
-      params:params,
-      headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
-    })
-    .then((downloadResponse) => {
-        response = downloadResponse.data;
-    })
-    .catch(async (error) => {
-        response = error
-    })
-    return response;
-  }
-
-  const login = async (username,password) => {
-      sessionStorage.setItem("access_token",'');
-      sessionStorage.setItem("refresh_token",'');
-      let responseObject = {};
-      await axios.get("login",{params:{username:username,password:password}})
-      .then((response) => {
-          if(response.data['access_token']) {
-              sessionStorage.setItem("access_token",response.data['access_token']);
-              sessionStorage.setItem("refresh_token",response.data['refresh_token']);
-              responseObject = {status:'SUCCESSFUL'};
-              request('GET','current',null,null,true)
-              .then(async (currentResponse) => {
-                  if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                    setCurrentUser(currentResponse.content.user);
-                  } else {
-                    setCurrentUser(false);
-                  }
-              });
-          } else {
-              responseObject = response.data;
-          }
-      })
-      .catch(async (error) => {
-          if(error.response && error.response.status === 401) { 
-              if (error.response.data['error_message'] && error.response.data['error_message'].toLowerCase().includes('bad credentials')) {
-                  responseObject = {error_message:'Incorrect username or password'};
-              }else {
-                  responseObject = error.response.data;
-              }
-          } else {
-              responseObject = {error_message:error.message};
-          }
-      })
-      
-      return responseObject; 
-  }
-
-  const logout = () => {
-      sessionStorage.setItem("access_token",'');
-      sessionStorage.setItem("refresh_token",'');
-      setCurrentUser(null);
-  }
-
-  return [currentUser,setCurrentUser,request,download,login,logout];
-}
-
+import { useData } from './data';
 const convertToId = (value) => {
   return value.replace(/ /g,'_').toLowerCase();
 }
@@ -249,7 +73,7 @@ const getTextWidth = (text,font,fontSize) => {
 } 
 
 function App() { 
-  const [currentUser,setCurrentUser] = useState(null);
+//  const [setCurrentUser] = useState(null);
   const [userFilter,setUserFilter] = useState({});
   const [transactionFilter,setTransactionFilter] = useState({});
   const [dialog,setDialog] = useState(null);
@@ -260,7 +84,7 @@ function App() {
   const [popupData,setPopupData] = useState({});
   const [access,setAccess] = useState(null);
   const [loading,setLoading] = useState(false);
-  const [request,login,logout] = useData();
+  const {request,login,logout} = useData();
 
   const mainElementRef = useRef(null);
   const menuRef = useRef(null);
@@ -268,7 +92,7 @@ function App() {
   const leftMenusRef = useRef(null);
   const rightMenusRef = useRef(null);
 
-  const createFileRoute = (file,key) => {
+  /* const createFileRoute = (file,key) => {
       let route = null;
       if(file) {
           route = <Route key={key} path={file.name} element={<File/>}>
@@ -278,10 +102,10 @@ function App() {
           </Route>
       }
       return <Route key={key} path={currentUser?currentUser.id:'file'} element={() => <></>}/>;
-  }
+  } */
 
-  useEffect(() => {   
-      request('GET','current',null,null,true)
+  useEffect(() => { 
+      /* request('GET','current',null,null,true)
       .then(async (currentResponse) => {
           if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
             currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
@@ -292,7 +116,7 @@ function App() {
       })
       .catch((error) => {
           console.error(error);
-      })
+      }) */
       const observer = new ResizeObserver(entries => {
         for (let entry of entries) {
             let rect = entry.target.getBoundingClientRect();
@@ -317,11 +141,12 @@ function App() {
 				setPopupData(null);
 			}} 
 			className='flex bg-white bg-cover bg-center w-screen h-screen'>
-			<GlobalContext.Provider value={{currentUser,login,logout,mainElementRef,menuRef,menusParentRef,leftMenusRef,rightMenusRef,
+			<GlobalContext.Provider value={{login,logout,mainElementRef,menuRef,menusParentRef,leftMenusRef,rightMenusRef,
 				screenSize,convertToId,dialog,setDialog,loading,setLoading,
 				dropMainMenuIndex,setDropMainMenuIndex,showDropMainMenu,setShowDropMainMenu,
 				dropMainMenuIndexs,setDropMainMenuIndexs,getTextWidth,
-				popupData,setPopupData,userFilter,setUserFilter,transactionFilter,setTransactionFilter,access,setAccess,request}}>
+				popupData,setPopupData,userFilter,setUserFilter,transactionFilter,setTransactionFilter
+        ,access,setAccess,request}}>
         <Routes>
           <Route path='/' element={<ManagementSystem/>}>
             <Route path='home/' element={<Home/>}/>

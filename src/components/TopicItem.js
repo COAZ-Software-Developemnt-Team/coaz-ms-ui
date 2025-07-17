@@ -3,11 +3,12 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams} from 'react-router-dom';
 import { PiTextAlignLeftLight,PiTrash,PiDotsThreeVertical } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
-import { request } from '../App';
+import {useData} from '../data';
 
 const TopicItem = ({topic,reload,updateAuthority}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {request} = useData();
     const {courseId,teacherId} = useParams();
     const path = useLocation().pathname;
     const moreRef = useRef(null)

@@ -1,9 +1,7 @@
 import React, { useContext } from 'react'
 import FormDialog from './FormDialog'
 import { GlobalContext } from '../contexts/GlobalContext'
-import { PiDeviceMobile, PiLaptop } from 'react-icons/pi';
 import { useState } from 'react';
-import { BiLogoVisa } from 'react-icons/bi';
 import RadioButton from './RadioButton';
 import Payment from './Payment';
 import MobilePayment from './MobilePayment';

@@ -7,10 +7,13 @@ import UserProfile from './UserProfile';
 import MenuItem from './MenuItem';
 import MsSearch from './Search';
 import ScrollableMenus from './ScrollableMenus';
+import {useData} from '../data'
 
-const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
+const Menu = ({menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
+    const [user,setUser] = useState(null);
     const {screenSize,setPopupData} = useContext(GlobalContext);
     const [expanded,setExpanded] = useState(true);
+    const {request} = useData();
     const userProfileRef = useRef(null);
     const menuRef = useRef(null);
 
@@ -24,6 +27,15 @@ const Menu = ({user,menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) =>
     }
 
     useEffect(() => {
+        request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                setUser(currentResponse.content.user);
+            } else {
+                setUser(false);
+            }
+        })
         setOpenMobileMenu && setOpenMobileMenu(false);
         if(screenSize === 'xs') {
             setExpanded(false);

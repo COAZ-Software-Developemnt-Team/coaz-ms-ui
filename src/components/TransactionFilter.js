@@ -6,15 +6,15 @@ import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
 import FormDialog from './FormDialog';
-import {request} from '../App'
+import {useData} from '../data'
 
 const TransactionFilter = ({userId,reload}) => {
-    const {currentUser,setDialog,setLoading,transactionFilter,setTransactionFilter} = useContext(GlobalContext);
+    const {setDialog,setLoading,transactionFilter,setTransactionFilter} = useContext(GlobalContext);
     const [readAuthority,setReadAuthority] = useState(false);
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
     const [message,setMessage] = useState({content:'',success:false});
-
+    const {request} = useData();
     const paymentTypes = ['Mobile','Card'];
     const currencies = ['ZMW','USD','GBP','EUR','ZAR']; 
     const statuses = ['SUCCESSFUL','PENDING','FAILED']; 

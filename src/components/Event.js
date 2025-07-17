@@ -5,7 +5,7 @@ import { PiDotsThreeVertical,PiTag,PiTrash, PiPencilSimple, PiMaskHappy, PiCalen
 import YesNoDialog from './YesNoDialog';
 import AddTariff from './AddTariff';
 import Tariff from './Tariff';
-import { useData} from '../App';
+import {useData} from '../data';
 import Detail from './Detail';
 import ContentContainer from './ContentContainer';
 import EditEvent from './EditEvent';
@@ -237,7 +237,7 @@ export default Event
 const EventDay = ({eventDay,updateAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const path = useLocation().pathname;
     const moreRef = useRef(null)
 

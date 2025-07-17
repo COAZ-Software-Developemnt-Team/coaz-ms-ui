@@ -6,13 +6,13 @@ import { PiArrowLeft,PiQuestion } from 'react-icons/pi';
 import Scrollable from './Scrollable';
 import AddQuestion from './AddQuestion';
 import Question from './Question';
-import { useData } from '../App';
+import {useData} from '../data';
 
 const ActivityQuestions = () => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [activity,setActivity] = useState(null);
     const [questions,setQuestions] = useState([]);
-    const [request] = useData();
+    const {request} = useData();
     const {activityId} = useParams();
     const {parentPath} = useOutletContext();
     const moreRef = useRef(null);

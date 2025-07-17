@@ -7,10 +7,10 @@ import FormValidator from './FormValidator';
 import Scrollable from './Scrollable';
 import Inputs from './Inputs';
 import Message from './Message';
-import {useData} from '../App';
+import {useData} from '../data';
 
 const EditUser = ({id,self,reload}) => {
-    const {currentUser,setDialog,setLoading} = useContext(GlobalContext);
+    const {setDialog,setLoading} = useContext(GlobalContext);
     const [user,setUser] = useState(null);
     const [userTypes,setUserTypes] = useState([]);
     const [userGroups,setUserGroups] = useState([]);
@@ -24,7 +24,7 @@ const EditUser = ({id,self,reload}) => {
     const [newPassword,setNewPassword] = useState('');
     const [confirmPassword,setConfirmPassword] = useState('');
     const [oldPassword,setOldPassword] = useState('');
-    const [request] = useData();
+    const {request} = useData();
 
     const onChange = (e) => {
         const value = e.target.value;
@@ -452,7 +452,18 @@ const EditUser = ({id,self,reload}) => {
         ( async () => {
             setLoading(true);
             if(self) {
-                setUser(currentUser);
+                request('GET','current',null,null,true)
+                .then(async (currentResponse) => {
+                    if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                        currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                        setUser(currentResponse.content.user);
+                    } else {
+                        setUser(false);
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                })
             } else {
                 await request('GET',`user/${id}`,null,null,true)
                 .then((response) => {
@@ -502,7 +513,6 @@ const EditUser = ({id,self,reload}) => {
             .catch((error) => {
                 setDistricts([]);
             })
-            let nationality = null
             await request('GET','nationalities',null,null,false)
             .then((response) => {
                 if(response.content) {

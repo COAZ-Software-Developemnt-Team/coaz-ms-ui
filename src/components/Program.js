@@ -10,7 +10,7 @@ import Tariff from './Tariff';
 import Scrollable from './Scrollable';
 import MsHeader from './Header';
 import Detail from './Detail';
-import {request} from '../App'
+import {useData} from '../data'
 
 const Program = () => {
     const {setDialog} = useContext(GlobalContext);
@@ -18,6 +18,7 @@ const Program = () => {
     const [programCourses,setProgramCourses] = useState([]);
     const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
+    const {request} = useData();
     const {programId,courseId} = useParams();
     const {parentPath} = useOutletContext();
     const patn = useLocation().pathname;

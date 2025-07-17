@@ -2,7 +2,7 @@ import React,{useContext, useEffect,useState} from 'react'
 import {BsGraphUpArrow,BsGraphUp} from "react-icons/bs";
 import Scrollable from './Scrollable';
 import { useRef } from 'react';
-import { useData } from '../App';
+import {useData} from '../data';
 import { PiArrowLeftLight, PiChartLineDownThin, PiChartLineUpThin, PiMoneyWavyThin } from 'react-icons/pi';
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
@@ -10,7 +10,7 @@ import Deposit from './Deposit';
 import YesNoDialog from './YesNoDialog';
 
 const Account = () => {
-    const {currentUser,setDialog,setAccess} = useContext(GlobalContext);
+    const {setDialog,setAccess} = useContext(GlobalContext);
     const [account,setAccount] = useState(null)
     const [transactions,setTransactions] = useState([]);
     const [debits,setDebits] = useState(0);
@@ -21,13 +21,13 @@ const Account = () => {
     const transactionsRef = useRef(null);
     const padding = 16;
     const [contentSize,setContentSize] = useState({width:0,height:0});
-    const [request] = useData();
+    const {request} = useData();
 
     const navigate = useNavigate();
 
-    const onDeposit = (e) => {
+    /* const onDeposit = (e) => {
         e.preventDefault();
-        if(!currentUser) {
+        if(!user) {
             return;
         }
         setDialog({
@@ -37,22 +37,35 @@ const Account = () => {
                     title='Deposit' 
                     message='Are you sure you want to deposit into your account?' 
                     onYes={async (e) => {
-                        setAccess({Component:() => <Deposit user={currentUser}/>});
+                        setAccess({Component:() => <Deposit user={user}/>});
                     }}
                 />
         })
-    }
+    } */
 
     useEffect(() => {
       (async () => {
-        if(accountId && currentUser) {
+        let usr = null;
+        await request('GET','current',null,null,true)
+        .then(async (currentResponse) => {
+            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                usr = currentResponse.content.user;
+            } else {
+                usr = false;
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+        })
+        if(accountId && usr) {
             let acc = null;
             await request ('GET','hasauthority',null,{
                 contextName:'ACCOUNT',
                 authority:'READ'
             },true)
             .then(async response => {
-                if(currentUser && response.status === 'YES') {
+                if(usr && response.status === 'YES') {
                     await request('GET',`account/${accountId}`,null,null,true)
                     .then((response) => {
                         if(response.content) {
@@ -67,7 +80,7 @@ const Account = () => {
                 } else {
                     await request ('GET','account/my',null,null,true)
                     .then((response) => {
-                        if(response.content && response.content.holder && currentUser && currentUser.id === response.content.holder.id) {
+                        if(response.content && response.content.holder && usr && usr.id === response.content.holder.id) {
                             acc = response.content;
                         } else {
                             navigate(parentPath);

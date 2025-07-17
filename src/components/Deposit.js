@@ -1,7 +1,7 @@
 import React, {useEffect,useState,useContext, Component} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import Message from './Message';
-import {useData} from '../App'
+import {useData} from '../data'
 
 const Deposit = ({user,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
@@ -24,7 +24,7 @@ export default Deposit
 const MobileMoney = ({user,setMessage,setOnSubmit}) => {
     const {setLoading} = useContext(GlobalContext);
     const [amount,setAmount] = useState(0);
-    const [request] = useData();
+    const {request} = useData();
     const [phoneNumber,setPhoneNumber] = useState({
         part1:'260',
         part2:'',

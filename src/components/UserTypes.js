@@ -6,7 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddUserType from './AddUserType';
 import MsHeader from './Header';
-import {useData} from '../App'
+import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
 const UserTypes = () => {
@@ -15,7 +15,7 @@ const UserTypes = () => {
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
-    const [request] = useData();
+    const {request} = useData();
     const {userTypeId} = useParams();
     const path = useLocation().pathname;
 
@@ -26,7 +26,6 @@ const UserTypes = () => {
                 <AddUserType reload={load}/>
         })
     }
-    const [request] = useData;
 
     const getUserTypes = async () => {
         await request('GET','usertypes',null,null,false)
@@ -96,7 +95,7 @@ const UserTypeItem = ({userType,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const [tariff,setTariff] = useState(null);
-    const [request] = useData();
+    const {request} = useData();
     const moreRef = useRef(null)
 
     let USDecimal = new Intl.NumberFormat('en-US', {
