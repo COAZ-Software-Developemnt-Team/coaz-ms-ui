@@ -59,7 +59,7 @@ export function useLogin () {
   const logout = () => {
       sessionStorage.setItem("access_token",'');
       sessionStorage.setItem("refresh_token",'');
-      navigate(`/home`)
+      navigate(`/home`);
   }
 
   return {login:login,logout:logout}
