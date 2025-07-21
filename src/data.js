@@ -1,7 +1,4 @@
 import axios from "axios";
-import { useContext } from "react";
-import { GlobalContext } from "./contexts/GlobalContext";
-
 axios.defaults.baseURL = 'http://localhost:8080/api/';
 //axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
 //axios.defaults.baseURL = 'http://192.168.0.162:8080/api/';
@@ -9,7 +6,7 @@ axios.defaults.baseURL = 'http://localhost:8080/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
 
 export function useData() {
-      const request = async (method,url,body,params,authorization,refresh) => {
+    const request = async (method,url,body,params,authorization,refresh) => {
       let response = null;
       switch(method) {
         case 'POST': {
@@ -128,45 +125,8 @@ export function useData() {
     return response;
   }
 
-  const login = async (username,password) => {
-    sessionStorage.setItem("access_token",'');
-    sessionStorage.setItem("refresh_token",'');
-    let responseObject = {};
-    await axios.get("login",{params:{username:username,password:password}})
-    .then((response) => {
-        if(response.data['access_token']) {
-            sessionStorage.setItem("access_token",response.data['access_token']);
-            sessionStorage.setItem("refresh_token",response.data['refresh_token']);
-            responseObject = {status:'SUCCESSFUL'};
-        } else {
-            responseObject = response.data;
-        }
-    })
-    .catch((error) => {
-        if(error.response && error.response.status === 401) { 
-            if (error.response.data['error_message'] && error.response.data['error_message'].toLowerCase().includes('bad credentials')) {
-                responseObject = {error_message:'Incorrect username or password'};
-            }else {
-                responseObject = error.response.data;
-            }
-        } else {
-            responseObject = {error_message:error.message};
-        }
-    })
-    
-    return responseObject; 
-  }
-
-  const logout = () => {
-      sessionStorage.setItem("access_token",'');
-      sessionStorage.setItem("refresh_token",'');
-      //setCurrentUser(null);
-  }
-
   return {
     request:request,
-    download:download,
-    login:login,
-    logout:logout
+    download:download
   };
 }

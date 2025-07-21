@@ -7,19 +7,18 @@ import Detail from './Detail';
 import ContentContainer from './ContentContainer';
 
 const File = () => {
-    const [currentUser,setCurrentUser] = useState(null);
     const [loading,setLoading] = useState(false);
     const [parent,setParent] = useState('');
     const location = useLocation();
     const pathname = useLocation().pathname;
-    const {path} = useParams();
+    const {currentUserId,path} = useParams();
     const [file,setFile] = useState(null);
     const {request} = useData();
     const { state } = location;
 
-    const getFile = async (user) => {
-        if(user) {
-            await request('GET','file',null,{path:path?path:user.id},true)
+    const getFile = async () => {
+        if(currentUserId) {
+            await request('GET','file',null,{path:path?path:currentUserId},true)
             .then((response) => {
                 if(response.content) {
                     console.log(response.content)
@@ -36,7 +35,7 @@ const File = () => {
 
     const load = async () => {
         let user = null
-        await request('GET','current',null,null,true)
+      /*   await request('GET','current',null,null,true)
         .then(async (currentResponse) => {
             if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
                 currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
@@ -48,9 +47,9 @@ const File = () => {
         })
         .catch((error) => {
             console.error(error);
-        })
+        }) */
         setLoading(true);
-        getFile(user);
+        await getFile();
         setParent(pathname.replace(/^(.*)\-.*$/,'$1')) // Remove last string after '-'
         setLoading(false);
     }
@@ -60,7 +59,7 @@ const File = () => {
     },[path])
 
   return (
-    <ContentContainer previous={parent && parent != pathname?parent:''} Icon={PiFolderFill} text={currentUser && file && currentUser.id == file.name?'My Files':file?file.name:''} loading={loading}>
+    <ContentContainer previous={parent && parent != pathname?parent:''} Icon={PiFolderFill} text={file && currentUserId == file.name?'My Files':file?file.name:''} loading={loading}>
         {file &&
             <div className='flex flex-col w-full h-fit space-y-4'>
                 <div className='flex flex-col w-full h-auto space-y-2'>
@@ -78,6 +77,7 @@ export default File
 
 const FileItem = ({file}) => {
     const [highlighted,setHighlighted] = useState(false);
+    const {currentUserId} = useParams();
     const {download} = useData();
 
     const onDownload = (e) => {
@@ -112,7 +112,7 @@ const FileItem = ({file}) => {
                 onMouseLeave={(e) => setHighlighted(false)} 
                 className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
                 {file.children && file.children.length > 0? 
-                <NavLink to={`/file/${file.path}`}>
+                <NavLink to={`/${currentUserId}/file/${file.path}`}>
                     <div className='flex flex-row w-fit items-center space-x-2 shrink-0'>
                         <FileIcon filename={file.name} size={40} className='text-[rgb(0,175,240)] shrink-0'/>
                         <div className='flex flex-col w-full h-fit items-start'>

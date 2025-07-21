@@ -13,7 +13,7 @@ import TransactionItem from './TransactionItem';
 const Transactions = () => {
     const {setDialog,transactionFilter} = useContext(GlobalContext);
     const [transactions,setTransactions] = useState([]);
-    const {transactionId} = useParams();
+    const {currentUserId,transactionId} = useParams();
     const [buttons,setButtons] = useState([]);
     const [pageNo,setPageNo] = useState(0);
     const [pageSize,setPageSize] = useState(0);
@@ -68,21 +68,12 @@ const Transactions = () => {
 
     const getTransactions = async (filter,page) => {
         setLoading(true);
-        let user = null;
-        await request('GET','current',null,null,true)
-        .then(async (currentResponse) => {
-            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                user = currentResponse.content.user;
-            }
-        })
-
         await request ('GET','hasauthority',null,{
             contextName:'TRANSACTION',
             authority:'READ'
         },true)
         .then(async response => {
-            if(user && response.status === 'YES') {
+            if(currentUserId && response.status === 'YES') {
                 await request('GET','transactions',null,{
                     userId:filter.userId,
                     paymentType:filter.paymentType,
@@ -113,7 +104,7 @@ const Transactions = () => {
                 .catch((error) => {
                     setTransactions(null);
                 });
-            } else if(user) {
+            } else if(currentUserId) {
                 await request('GET','transactions/my',null,{
                     paymentType:filter.paymentType,
                     currency:filter.currency,

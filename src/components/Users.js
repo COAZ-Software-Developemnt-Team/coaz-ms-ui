@@ -14,7 +14,7 @@ const Users = () => {
     const [users,setUsers] = useState([]);
     const [readAuthority,setReadAuthority] = useState(false);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
-    const {userId} = useParams();
+    const {currentUserId,userId} = useParams();
     const [buttons,setButtons] = useState([]);
     const [pageNo,setPageNo] = useState(0);
     const [pageSize,setPageSize] = useState(0);
@@ -91,7 +91,7 @@ const Users = () => {
             authority:'READ'
         },true)
         .then(async response => {
-            if(currentUser && response.status === 'YES') {
+            if(currentUserId && response.status === 'YES') {
                 await request('GET','users',null,{
                     username:filter.username,
                     userTypeId:filter.userTypeId,
@@ -147,9 +147,7 @@ const Users = () => {
                 .catch((error) => {
                     setUsers(null);
                 });
-            } else if(currentUser) {
-                setUsers([currentUser])
-            } else {
+            }  else {
                 setUsers(null);
             }
             setLoading(false);

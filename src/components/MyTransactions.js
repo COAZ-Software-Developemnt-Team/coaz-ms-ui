@@ -12,11 +12,10 @@ import Detail from './Detail';
 
 const MyTransactions = () => {
     const {setDialog,transactionFilter,setAccess} = useContext(GlobalContext);
-    const [currentUser,setCurrentUser] = useState(null);
     const [transactions,setTransactions] = useState([]);
     const [account,setAccount] = useState(null);
     const [balance,setBalance] = useState(0);
-    const {transactionId} = useParams();
+    const {currentUserId,transactionId} = useParams();
     const [buttons,setButtons] = useState([]);
     const [pageNo,setPageNo] = useState(0);
     const [pageSize,setPageSize] = useState(0);
@@ -32,6 +31,7 @@ const MyTransactions = () => {
     })
     const [loading,setLoading] = useState(false);
     const path = useLocation().pathname;
+    const navigate = useNavigate();
 
     let USDecimal = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
@@ -42,7 +42,7 @@ const MyTransactions = () => {
         setDialog({
             show:true,
             Component:() => 
-                <TransactionFilter userId={currentUser.id} reload={load}/>
+                <TransactionFilter userId={currentUserId} reload={load}/>
         })
     }
 
@@ -76,24 +76,11 @@ const MyTransactions = () => {
 
     const onDeposit = (e) => {
         e.preventDefault();
-        if(!currentUser) {
-            return;
-        }
-        setDialog({
-            show:true,
-            Component:() =>                       
-                <YesNoDialog 
-                    title='Deposit' 
-                    message='Are you sure you want to deposit into your account?' 
-                    onYes={async (e) => {
-                        setAccess({Component:() => <Deposit user={currentUser}/>});
-                    }}
-                />
-        })
+        navigate(`/deposit/${currentUserId}`);
     }
 
     const getTransactions = async (filter,page) => {
-        if(!currentUser) {
+        if(!currentUserId) {
             return;
         }
         await request('GET','transactions/my',null,{
@@ -128,11 +115,11 @@ const MyTransactions = () => {
     }
 
     const getAccount = async () => {
-        if(!currentUser) {
+        if(!currentUserId) {
             return;
         }
         await request('GET','account/my',null,null,true)
-        .then((response) => {
+        .then(async (response) => {
             if(response.content) {
                 setAccount(response.content);
                 request('GET',`account/balance/${response.content.id}`,null,null,true)
@@ -147,7 +134,28 @@ const MyTransactions = () => {
                     setBalance(0);
                 })
             } else {
-                setAccount(null);
+                await request('GET',`user/account/${currentUserId}`,null,null,true)
+                .then((createResponse) => {
+                    if(createResponse.content) {
+                        setAccount(createResponse.content);
+                        request('GET',`account/balance/${createResponse.content.id}`,null,null,true)
+                        .then((balance) => {
+                            if(balance && balance.content && !isNaN(balance.content)) {
+                                setBalance(Math.abs(balance.content));
+                            } else {
+                                setBalance(0);
+                            }
+                        })
+                        .catch((error) => {
+                            setBalance(0);
+                        })
+                    } else {
+                        setAccount(null);
+                    }
+                })
+                .catch((error) => {
+                    setAccount(null);
+                })
             }
         })
         .catch((error) => {
@@ -157,18 +165,6 @@ const MyTransactions = () => {
 
     const load = async (filter) => {
         setLoading(true);
-        await request('GET','current',null,null,true)
-        .then(async (currentResponse) => {
-            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                setCurrentUser(currentResponse.content.user);
-            } else {
-                setCurrentUser(false);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        })
         await getTransactions(filter,page);
         setButtons([
             {

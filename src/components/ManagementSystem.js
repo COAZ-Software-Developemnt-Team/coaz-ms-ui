@@ -1,31 +1,32 @@
 import React,{useState,useEffect,useContext} from 'react';
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate,useLocation,Outlet} from 'react-router-dom';
+import { useParams,useNavigate,useLocation,Outlet} from 'react-router-dom';
 import { PiUser,PiUsersFour, PiUsersThree, PiMaskHappy,PiChartLine,PiGraduationCap, PiBook, PiPath, PiCalendarDots, PiMoneyWavy, PiArrowsLeftRight, PiBank, PiFolder, PiUsers, PiStudent} from "react-icons/pi";
 import Menu from './Menu';
 import MobileMenu from './MobileMenu';
 import Login from './Login';
 import LoadingIcons from 'react-loading-icons'
 import {useData} from '../data';
+import { useLogin } from './Login';
 
 const ManagementSystem = () => {
     const path = useLocation().pathname;
-    const {setAccess} = useContext(GlobalContext);
     const [menus,setMenus] = useState([]);
     const [openMobileMenu,setOpenMobileMenu] = useState(false);
     const [loading,setLoading] = useState(false);
-    const {request,logout} = useData();
-
+    const {currentUserId} = useParams();
+    const {request} = useData();
+    const {logout} = useLogin();
     const navigate = useNavigate();
 
     const onLogin = (e) => {
         e.preventDefault();
-        setAccess({Component:() => <Login reload={load}/>})
+        navigate('/login')
     }
 
     const onLogout = (e) => {
+        e.preventDefault();
         logout();
-        navigate('/')
     }
 
     const load = async () => {
@@ -44,10 +45,10 @@ const ManagementSystem = () => {
             console.error(error);
         })
         let mnus = [];
-        if(user) {
-            mnus.push({name:'My Profile', link:'/profile', Icon:PiUser});
-            mnus.push({name:'My Transactions', link:'/my_transactions', Icon:PiArrowsLeftRight});
-            mnus.push({name:'My Files', link:`/file`, Icon:PiFolder});
+        if(currentUserId && currentUserId == user.id) {
+            mnus.push({name:'My Profile', link:`/${currentUserId}/profile`, Icon:PiUser});
+            mnus.push({name:'My Transactions', link:`/${currentUserId}/my_transactions`, Icon:PiArrowsLeftRight});
+            mnus.push({name:'My Files', link:`/${currentUserId}/file`, Icon:PiFolder});
             let enroll = false;
             await request('GET','hasauthority',null,{
                 contextName:'PROGRAM',
@@ -56,8 +57,8 @@ const ManagementSystem = () => {
             .then((response) => {
                 if(response.status && response.status === 'YES') {
                     enroll = true;
-                    mnus.push({name:'My statistics', link:'/statistics', Icon:PiChartLine})
-                    mnus.push({name:'Enrollments', link:'/enrollments', Icon:PiStudent})
+                    mnus.push({name:'My statistics', link:`/${currentUserId}/statistics`, Icon:PiChartLine})
+                    mnus.push({name:'Enrollments', link:`/${currentUserId}/enrollments`, Icon:PiStudent})
                 }
             })
             let settingsMenus = []
@@ -102,7 +103,7 @@ const ManagementSystem = () => {
                 }
             })
             if(createUser || readUser || updateUser || deleteUser) {
-                settingsMenus.push({name:'Users', link:'/users', Icon:PiUsers});
+                settingsMenus.push({name:'Users', link:`/${currentUserId}/users`, Icon:PiUsers});
             }
             
             let createUserType = false;
@@ -146,7 +147,7 @@ const ManagementSystem = () => {
                 }
             })
             if(createUserType || readUserType || updateUserType || deleteUserType) {
-                settingsMenus.push({name:'User types', link:'/usertypes', Icon:PiUsersThree});
+                settingsMenus.push({name:'User types', link:`/${currentUserId}/usertypes`, Icon:PiUsersThree});
             }
 
             let createUserGroup = false;
@@ -195,7 +196,7 @@ const ManagementSystem = () => {
             })
 
             if(createUserGroup || readUserGroup || updateUserGroup || deleteUserGroup) {
-                settingsMenus.push({name:'User groups', link:'/usergroups', Icon:PiUsersFour});
+                settingsMenus.push({name:'User groups', link:`/${currentUserId}/usergroups`, Icon:PiUsersFour});
             }
 
             let createRole = false;
@@ -244,7 +245,7 @@ const ManagementSystem = () => {
             })
 
             if(createRole || readRole || updateRole || deleteRole) {
-                settingsMenus.push({name:'Roles', link:'/roles', Icon:PiMaskHappy});
+                settingsMenus.push({name:'Roles', link:`/${currentUserId}/roles`, Icon:PiMaskHappy});
             }
             
             let createProgram = false;
@@ -282,7 +283,7 @@ const ManagementSystem = () => {
             })
 
             if(enroll || createProgram || updateProgram || deleteProgram) {
-                settingsMenus.push({name:'Programs', link:'/programs', Icon:PiGraduationCap})
+                settingsMenus.push({name:'Programs', link:`/${currentUserId}/programs`, Icon:PiGraduationCap})
             } 
 
             let createCourse = false;
@@ -330,10 +331,10 @@ const ManagementSystem = () => {
                 }
             })
             if(teach || createCourse || updateCourse || deleteCourse) {
-                settingsMenus.push({name:'CPDs', link:'/courses', Icon:PiBook})
+                settingsMenus.push({name:'CPDs', link:`/${currentUserId}/courses`, Icon:PiBook})
             }
-            if(user) {
-                settingsMenus.push({name:'Events', link:'/events', Icon:PiCalendarDots})
+            if(currentUserId) {
+                settingsMenus.push({name:'Events', link:`/${currentUserId}/events`, Icon:PiCalendarDots})
             }
             let createCriteriaPath = false;
             let deleteCriteriaPath = false;
@@ -357,7 +358,7 @@ const ManagementSystem = () => {
                 }
             })
             if(createCriteriaPath || deleteCriteriaPath) {
-                settingsMenus.push({name:'Criteria Paths', link:'/paths', Icon:PiPath})
+                settingsMenus.push({name:'Criteria Paths', link:`/${currentUserId}/paths`, Icon:PiPath})
             }
 
             await request('GET','hasauthority',null,{
@@ -366,7 +367,7 @@ const ManagementSystem = () => {
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    settingsMenus.push({name:'Accounts', link:'/accounts', Icon:PiBank});
+                    settingsMenus.push({name:'Accounts', link:`/${currentUserId}/accounts`, Icon:PiBank});
                 }
             })
 
@@ -376,7 +377,7 @@ const ManagementSystem = () => {
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    settingsMenus.push({name:'Transactions', link:'/transactions', Icon:PiArrowsLeftRight})
+                    settingsMenus.push({name:'Transactions', link:`/${currentUserId}/transactions`, Icon:PiArrowsLeftRight})
                 }
             })
             if(settingsMenus.length > 0) {
@@ -385,6 +386,8 @@ const ManagementSystem = () => {
                     mnus.push(menu);
                 }
             }
+        } else {
+            logout();
         }
     
         setMenus(mnus);
@@ -392,11 +395,8 @@ const ManagementSystem = () => {
     }
 
     useEffect(() => {
-        if(path === '/') {
-            navigate('/home')
-        }
         load();
-    },[path]);
+    },[currentUserId]);
 
   return (
     <div className='flex w-full h-full bg-[url(/public/images/bg_cpd.jpg)] bg-cover bg-center overflow-hidden'>

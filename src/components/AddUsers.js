@@ -37,15 +37,15 @@ const AddUsers = ({reload}) => {
                     let page = [];
                     for(let j = 0;j < pageSize;j++) {
                         if(i < results.data.length) {
-                            let gendar = null;
+                            let gender = null;
                             let nationality = null;
                             let professionalCategory = null;
                             let district = null;
 
                             if(results.data[i].sex && sex && sex.length > 0) {
-                                gendar = sex.find((sx) => {return sx.trim().toLowerCase() == results.data[i].sex.trim().toLowerCase()});
+                                gender = sex.find((sx) => {return sx.trim().toLowerCase() == results.data[i].sex.trim().toLowerCase()});
                             } else {
-                                gendar = null;
+                                gender = null;
                             }
                             
                             if(results.data[i].nationality && nationalities && nationalities.length > 0) {
@@ -72,7 +72,7 @@ const AddUsers = ({reload}) => {
                                 firstname:results.data[i].firstname?results.data[i].firstname:'',
                                 lastname:results.data[i].lastname?results.data[i].lastname:'',
                                 middlename:results.data[i].middlename?results.data[i].middlename:'',
-                                sex:gendar,
+                                sex:gender,
                                 dateOfBirth: new Date(Date.UTC(results.data[i].dobYear?results.data[i].dobYear:0,results.data[i].dobMonth?results.data[i].dobMonth - 1:0,results.data[i].dobDay?results.data[i].dobDay:0)),
                                 idType:results.data[i].idType?results.data[i].idType.toUpperCase():null,
                                 idNumber:results.data[i].idNumber?results.data[i].idNumber:'',

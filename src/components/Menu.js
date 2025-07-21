@@ -1,5 +1,5 @@
 import React,{useState,useEffect,useRef,useContext} from 'react'
-import { NavLink} from 'react-router-dom';
+import { useParams,NavLink} from 'react-router-dom';
 import { GlobalContext } from '../contexts/GlobalContext';
 import { PiHouseSimple,PiList,PiSignIn} from "react-icons/pi";
 import { Logo } from './CoazIcons';
@@ -13,6 +13,7 @@ const Menu = ({menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
     const [user,setUser] = useState(null);
     const {screenSize,setPopupData} = useContext(GlobalContext);
     const [expanded,setExpanded] = useState(true);
+    const {currentUserId} = useParams();
     const {request} = useData();
     const userProfileRef = useRef(null);
     const menuRef = useRef(null);
@@ -27,18 +28,20 @@ const Menu = ({menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
     }
 
     useEffect(() => {
-        request('GET','current',null,null,true)
-        .then(async (currentResponse) => {
-            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                setUser(currentResponse.content.user);
-            } else {
-                setUser(false);
+        if(currentUserId) {
+            request('GET','current',null,null,true)
+            .then(async (currentResponse) => {
+                if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                    setUser(currentResponse.content.user);
+                } else {
+                    setUser(false);
+                }
+            })
+            setOpenMobileMenu && setOpenMobileMenu(false);
+            if(screenSize === 'xs') {
+                setExpanded(false);
             }
-        })
-        setOpenMobileMenu && setOpenMobileMenu(false);
-        if(screenSize === 'xs') {
-            setExpanded(false);
         }
     },[menus]);
 
@@ -50,7 +53,7 @@ const Menu = ({menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
                 <button onClick={onMenu} className={`flex w-10 h-10 items-center justify-center text-[rgb(68,71,70)] ${screenSize !== 'xs'?'hover:bg-[rgba(0,175,240,.2)]':''} rounded-xl shrink-0`}>
                     <PiList size={20}/>
                 </button>
-                <NavLink to={'/home'}>
+                <NavLink to={currentUserId?`/${currentUserId}/home`:'/home'}>
                     <button className='flex w-10 h-10 rounded-full items-center justify-center shrink-0'>
                         <Logo fill={'rgb(0,175,240'} size={40}/>
                     </button>
@@ -64,7 +67,7 @@ const Menu = ({menus,openMobileMenu,setOpenMobileMenu,onLogin,onLogout}) => {
                     <MsSearch/>
                     <ScrollableMenus vertical={true}>
                         <div className='flex flex-col h-fit'>
-                            <MenuItem name={'Home'} link={'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
+                            <MenuItem name={'Home'} link={currentUserId?`/${currentUserId}/home`:'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
                             {user && menus && menus.length> 0 && 
                                 menus.map((menu,i) => <MenuItem key={i} name={menu.name} link={menu.link} Icon={menu.Icon} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu} separator={menu.separator}/>)
                             }

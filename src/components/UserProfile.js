@@ -14,11 +14,12 @@ const UserProfile = ({onLogout}) => {
                 currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
                 setUser(currentResponse.content.user);
             } else {
-                setUser(false);
+                setUser(null);
             }
         })
         .catch((error) => {
             console.error(error);
+            setUser(null);
         })
     },[])
   return (

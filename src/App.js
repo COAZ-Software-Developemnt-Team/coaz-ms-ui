@@ -40,6 +40,9 @@ import Transaction from './components/Transaction';
 import MyTransactions from './components/MyTransactions';
 import File from './components/File';
 import { useData } from './data';
+import Login from './components/Login';
+import Deposit from './components/Deposit';
+
 const convertToId = (value) => {
   return value.replace(/ /g,'_').toLowerCase();
 }
@@ -149,6 +152,11 @@ function App() {
         ,access,setAccess,request}}>
         <Routes>
           <Route path='/' element={<ManagementSystem/>}>
+            <Route path='home/' element={<Home/>}/>
+          </Route>
+          <Route path='/login' element={<Login/>}/>
+          <Route path='/deposit/:currentUserId' element={<Deposit/>}/>
+          <Route path='/:currentUserId' element={<ManagementSystem/>}>
             <Route path='home/' element={<Home/>}/>
             <Route path='profile' element={<User/>}/>
             <Route path='my_transactions' element={<MyTransactions/>}/>
