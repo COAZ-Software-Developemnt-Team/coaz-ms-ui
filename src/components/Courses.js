@@ -107,6 +107,7 @@ export default Courses
 const CourseItem = ({course,deleteAuthority,reload, setLoading}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {currentUserId} = useParams();
     const {request} = useData();
     const moreRef = useRef(null)
 
@@ -119,10 +120,10 @@ const CourseItem = ({course,deleteAuthority,reload, setLoading}) => {
 
     const onOpen = (e) => {
         e.preventDefault();
-        if(course.course && course.teacher) {
-            navigate(`/courses/class/${course.course.id}/${course.teacher.id}`)
-        } else if(course.course) {
-            navigate(`/courses/${course.course.id}`)
+        if(currentUserId && course.course && course.teacher) {
+            navigate(`/${currentUserId}/courses/class/${course.course.id}/${course.teacher.id}`)
+        } else if(currentUserId && course.course) {
+            navigate(`/${currentUserId}/courses/${course.course.id}`)
         }
     }
 
