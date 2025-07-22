@@ -1,7 +1,7 @@
 import React,{useState,useEffect,useContext} from 'react';
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useParams,useNavigate,useLocation,Outlet} from 'react-router-dom';
-import { PiUser,PiUsersFour, PiUsersThree, PiMaskHappy,PiChartLine,PiGraduationCap, PiBook, PiPath, PiCalendarDots, PiMoneyWavy, PiArrowsLeftRight, PiBank, PiFolder, PiUsers, PiStudent} from "react-icons/pi";
+import { PiUser,PiUsersFour, PiUsersThree, PiMaskHappy,PiChartLine,PiGraduationCap, PiBook, PiPath, PiCalendarDots, PiMoneyWavy, PiArrowsLeftRight, PiBank, PiFolder, PiUsers, PiStudent, PiChalkboardTeacher} from "react-icons/pi";
 import Menu from './Menu';
 import MobileMenu from './MobileMenu';
 import Login from './Login';
@@ -59,6 +59,7 @@ const ManagementSystem = () => {
                     enroll = true;
                     mnus.push({name:'My statistics', link:`/${currentUserId}/statistics`, Icon:PiChartLine})
                     mnus.push({name:'Enrollments', link:`/${currentUserId}/enrollments`, Icon:PiStudent})
+                    mnus.push({name:'My Classes', link:`/${currentUserId}/classes`, Icon:PiChalkboardTeacher})
                 }
             })
             let settingsMenus = []

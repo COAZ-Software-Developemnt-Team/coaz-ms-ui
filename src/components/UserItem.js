@@ -1,6 +1,6 @@
 import React, {useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import {  NavLink,useNavigate} from 'react-router-dom';
+import { useParams,NavLink,useNavigate} from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical} from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import {useData} from '../data';
@@ -8,6 +8,7 @@ import {useData} from '../data';
 const UserItem = ({user,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {currentUserId} = useParams();
     const {request} = useData();
     const moreRef = useRef(null);
 
@@ -42,9 +43,9 @@ const UserItem = ({user,deleteAuthority,reload}) => {
         <div className='flex flex-row w-full h-auto'>
             {user &&
             <div  onMouseEnter={(e) => setHighlighted(true)} 
-                    onMouseLeave={(e) => setHighlighted(false)} 
-                    className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <NavLink to={`/users/${user.id}`} state={{parentPath:'/users'}}>
+                onMouseLeave={(e) => setHighlighted(false)} 
+                className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
+                <NavLink to={`/${currentUserId}/users/${user.id}`} state={{parentPath:`/${currentUserId}/users`}}>
                     <div className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
                         <p className='flex w-10 h-10 shrink-0 rounded-full text-xl font-jostMedium items-center justify-center text-white bg-[rgb(0,175,240)]'>
                             {user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase()}

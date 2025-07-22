@@ -42,6 +42,7 @@ import File from './components/File';
 import { useData } from './data';
 import Login from './components/Login';
 import Deposit from './components/Deposit';
+import Enrollments from './components/Enrollments';
 
 const convertToId = (value) => {
   return value.replace(/ /g,'_').toLowerCase();
@@ -172,7 +173,7 @@ function App() {
               <Route path=':roleId' element={<Role/>}/>
             </Route>
             <Route path='statistics/' element={<MyStatistics/>}/>
-            <Route path='programs' element={<Programs/>}>
+            <Route path='enrollments' element={<Enrollments/>}>
               <Route path=':programId' element={<Program/>}>
                 <Route path=':courseId' element={<Course/>}/>
               </Route>
@@ -188,6 +189,7 @@ function App() {
                 <Route path=':courseId' element={<Course/>}/>
               </Route>
             </Route>
+            <Route path='classes' element={() => <div>Classes</div>}/>
             <Route path='courses' element={<Courses/>}>
               <Route path=':courseId' element={<Course/>}/>
               <Route path='class/:courseId/:teacherId' element={<CourseClass/>}>

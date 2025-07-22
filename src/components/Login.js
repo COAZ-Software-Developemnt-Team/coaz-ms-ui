@@ -32,6 +32,7 @@ export function useLogin () {
                 sessionStorage.setItem("refresh_token",response.data['refresh_token']);
                 request('GET','current',null,null,true)
                 .then(async (currentResponse) => {
+                    console.log(currentResponse);
                     if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
                         navigate(`/${currentResponse.content.user.id}/home`)
                     }
@@ -72,6 +73,8 @@ const Login = ({reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const {request} = useData();
     const {login,logout} = useLogin();
+
+    const navigate = useNavigate();
     
     const onLogin = async (e) => {
         setLoading(true);
@@ -82,9 +85,9 @@ const Login = ({reload}) => {
             .then( (response) => {
                 if(response.status) {
                     if(response.status === 'SUCCESSFUL') {
-                        setAccess(null);
+                        
                     } else if(response.status === 'PENDING_PAYMENT' && response.user && response.tariff) {
-                        setAccess({Component:() => <Payment user={response.user} tariff={response.tariff}  reload={reload}/>});
+                        //setAccess({Component:() => <Payment user={response.user} tariff={response.tariff}  reload={reload}/>});
                     } else if(response.status === 'OTP' && response.user) {
                         setAccess({Component:() => <ChangePassword user={response.user} reload={reload}/>});
                     } else if(response.status === 'INCOMPLETE_REGISTRATION' && response.user) {
@@ -94,12 +97,9 @@ const Login = ({reload}) => {
                     }
                 } else if(response.error_message) {
                     setMessage({content:response.error_message,success:false});
-                    logout()
                 } else {
                     setMessage({content:response,success:false});
-                    logout()
                 }
-                reload && reload()
             })
             .catch((error) => {
                 setMessage({content:error.message,success:false});

@@ -17,7 +17,7 @@ const User = () => {
     const [expiryDate,setExpiryDate] = useState(null);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
-    const {userId} = useParams();
+    const {currentUserId,userId} = useParams();
     const location = useLocation();
     const { state } = location;
     const path = useLocation().pathname;
@@ -27,12 +27,12 @@ const User = () => {
     const onEdit = async (e) => {
         e.preventDefault();
         let self = false;
-        if(!userId || userId == currentUser.id) {
+        if(!userId || userId == currentUserId) {
             self = true
         }
         setDialog({
             show:true,
-            Component:() => <EditUser id={self?currentUser.id:userId} self={self} reload={getUser}/>
+            Component:() => <EditUser id={self?currentUserId:userId} self={self} reload={getUser}/>
         })
     }
 
@@ -145,77 +145,73 @@ const User = () => {
     useEffect(() => {
         getUser();
     },[path])
-
-    if(user) {
-        return (
-            <ContentContainer 
-                previous={state?state.parentPath:'/home'} 
-                buttons={buttons} 
-                Icon={() => <div className='flex w-10 h-10 items-center justify-center shrink-0 rounded-full bg-[rgb(0,175,240)] shadow-lg'>
-                            {user && <p className='flex w-fit h-auto m-auto text-white text-xl font-jostMedium'>
+    return (
+        <ContentContainer 
+            previous={state?state.parentPath:`/${currentUserId}/home`} 
+            buttons={buttons} 
+            Icon={() => <div className='flex w-10 h-10 items-center justify-center shrink-0 rounded-full bg-[rgb(0,175,240)] shadow-lg'>
+                        {user && 
+                            <p className='flex w-fit h-auto m-auto text-white text-xl font-jostMedium'>
                                     {user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase()}
-                            </p>}
-                        </div>} 
-                text={user.name} 
-                loading={loading}
-            >
-                <div className='flex flex-col w-full h-auto space-y-4'>
-                    <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>System Details</p>
-                        <Detail label='Username' value={user.username}/>
-                        <Detail label='Email' value={user.email}/>
-                        <Detail label='User Type' value={user.userType?user.userType.name:''} capitalize={true}/>
-                        {user.userGroup && <Detail label='User Group' value={user.userGroup.name}/>}
-                        {expiryDate && <Detail label='Expiry date' value={expiryDate.toLocaleString('default', { month: 'long' })+' '+expiryDate.getDate()+', '+expiryDate.getFullYear()+' '+expiryDate.toLocaleTimeString('en-US')}/>}
-                    </div>
-                    <div className='flex flex-col w-full h-auto space-y-2'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Personal Details</p>
-                        <Detail label='Firstname' value={user.firstname} capitalize={true}/>
-                        <Detail label='Lastname' value={user.lastname} capitalize={true}/>
-                        {user.middlename && user.middlename !== '' && <Detail label='Middle' value={user.middlename} capitalize={true}/>}
-                        {user.sex && user.sex !== '' && <Detail label='Sex' value={user.sex}/>}
-                        {user.dateOfBirth && user.dateOfBirth !== '' && <Detail label='Date of Birth' value={user.dateOfBirth.toLocaleString('default', { month: 'long' })+' '+user.dateOfBirth.getDate()+', '+user.dateOfBirth.getFullYear()}/>}
-                        {user.idType && user.idType !== '' && <Detail label='ID Type' value={user.idType}/>}
-                        {user.idNumber && user.idNumber !== '' && <Detail label='ID Number' value={user.idNumber}/>}
-                        {user.nationality && user.nationality !== '' && <Detail label='Nationality' value={user.nationality}/>}
-                    </div>
-                    {((user.phone1 && user.phone1 !== '') || (user.phone2 && user.phone2 !== '') || (user.physicalAddress && user.physicalAddress !== '') ||
-                        (user.postalAddress && user.postalAddress !== '') || (user.district && user.district.name) || (user.district && user.district.province)) && 
-                        <div className='flex flex-col w-full h-auto space-y-2'>
-                            <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Contact Details</p>
-                            {user.phone1 && user.phone1 !== '' && <Detail label='Phone 1' value={user.phone1}/>}
-                            {user.phone2 && user.phone2 !== '' && <Detail label='phone 2' value={user.phone2}/>}
-                            {user.physicalAddress && user.physicalAddress !== '' && <Detail label='Physical Address' value={user.physicalAddress} capitalize={true}/>}
-                            {user.postalAddress && user.postalAddress !== '' && <Detail label='Postal Address' value={user.postalAddress} capitalize={true}/>}
-                            {user.district && user.district.name && <Detail label='District' value={user.district.name}/>}
-                            {user.district && user.district.province && <Detail label='Province' value={user.district.province}/>}
-                        </div>
-                    }
-                    {((user.program && user.program !== '') || (user.institution && user.institution !== '') || (user.professionalCategory && user.professionalCategory !== '')) &&
-                        <div className='flex flex-col w-full h-auto space-y-2'>
-                            <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Educational Details</p>
-                            {user.program && user.program !== '' && <Detail label='Program' value={user.program}/>}
-                            {user.institution && user.institution !== '' && <Detail label='Institution' value={user.institution}/>}
-                            {user.professionalCategory && user.professionalCategory !== '' && <Detail label='Professional Category' value={user.professionalCategory}/>}
-                        </div>
-                    }
-                    {user.employed &&
-                    <div className='flex flex-col w-full h-auto space-y-2'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Employment Details</p>
-                        <Detail label='Employed' value={user.employed?'Yes':'No'}/>
-                        {user.employer && user.employer !== '' && <Detail label='Employer' value={user.employer}/>}
-                        {user.organizationalUnit && user.organizationalUnit !== '' && <Detail label='Organizational Unit' value={user.organizationalUnit}/>}
-                        {user.currentPosition && user.currentPosition !== '' && <Detail label='Current Position' value={user.currentPosition}/>}
-                        {user.facility && user.facility !== '' && <Detail label='Facility' value={user.facility}/>}
-                    </div>}
+                            </p>
+                        }
+                    </div>} 
+            text={user && user.name} 
+            loading={loading}
+        >{user &&
+            <div className='flex flex-col w-full h-auto space-y-4'>
+                <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>System Details</p>
+                    <Detail label='Username' value={user.username}/>
+                    <Detail label='Email' value={user.email}/>
+                    <Detail label='User Type' value={user.userType?user.userType.name:''} capitalize={true}/>
+                    {user.userGroup && <Detail label='User Group' value={user.userGroup.name}/>}
+                    {expiryDate && <Detail label='Expiry date' value={expiryDate.toLocaleString('default', { month: 'long' })+' '+expiryDate.getDate()+', '+expiryDate.getFullYear()+' '+expiryDate.toLocaleTimeString('en-US')}/>}
                 </div>
-            </ContentContainer>
-        )
-    } else {
-        return (
-            <></>
-        )
-    }
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Personal Details</p>
+                    <Detail label='Firstname' value={user.firstname} capitalize={true}/>
+                    <Detail label='Lastname' value={user.lastname} capitalize={true}/>
+                    {user.middlename && user.middlename !== '' && <Detail label='Middle' value={user.middlename} capitalize={true}/>}
+                    {user.sex && user.sex !== '' && <Detail label='Sex' value={user.sex}/>}
+                    {user.dateOfBirth && user.dateOfBirth !== '' && <Detail label='Date of Birth' value={user.dateOfBirth.toLocaleString('default', { month: 'long' })+' '+user.dateOfBirth.getDate()+', '+user.dateOfBirth.getFullYear()}/>}
+                    {user.idType && user.idType !== '' && <Detail label='ID Type' value={user.idType}/>}
+                    {user.idNumber && user.idNumber !== '' && <Detail label='ID Number' value={user.idNumber}/>}
+                    {user.nationality && user.nationality !== '' && <Detail label='Nationality' value={user.nationality}/>}
+                </div>
+                {((user.phone1 && user.phone1 !== '') || (user.phone2 && user.phone2 !== '') || (user.physicalAddress && user.physicalAddress !== '') ||
+                    (user.postalAddress && user.postalAddress !== '') || (user.district && user.district.name) || (user.district && user.district.province)) && 
+                    <div className='flex flex-col w-full h-auto space-y-2'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Contact Details</p>
+                        {user.phone1 && user.phone1 !== '' && <Detail label='Phone 1' value={user.phone1}/>}
+                        {user.phone2 && user.phone2 !== '' && <Detail label='phone 2' value={user.phone2}/>}
+                        {user.physicalAddress && user.physicalAddress !== '' && <Detail label='Physical Address' value={user.physicalAddress} capitalize={true}/>}
+                        {user.postalAddress && user.postalAddress !== '' && <Detail label='Postal Address' value={user.postalAddress} capitalize={true}/>}
+                        {user.district && user.district.name && <Detail label='District' value={user.district.name}/>}
+                        {user.district && user.district.province && <Detail label='Province' value={user.district.province}/>}
+                    </div>
+                }
+                {((user.program && user.program !== '') || (user.institution && user.institution !== '') || (user.professionalCategory && user.professionalCategory !== '')) &&
+                    <div className='flex flex-col w-full h-auto space-y-2'>
+                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Educational Details</p>
+                        {user.program && user.program !== '' && <Detail label='Program' value={user.program}/>}
+                        {user.institution && user.institution !== '' && <Detail label='Institution' value={user.institution}/>}
+                        {user.professionalCategory && user.professionalCategory !== '' && <Detail label='Professional Category' value={user.professionalCategory}/>}
+                    </div>
+                }
+                {user.employed &&
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Employment Details</p>
+                    <Detail label='Employed' value={user.employed?'Yes':'No'}/>
+                    {user.employer && user.employer !== '' && <Detail label='Employer' value={user.employer}/>}
+                    {user.organizationalUnit && user.organizationalUnit !== '' && <Detail label='Organizational Unit' value={user.organizationalUnit}/>}
+                    {user.currentPosition && user.currentPosition !== '' && <Detail label='Current Position' value={user.currentPosition}/>}
+                    {user.facility && user.facility !== '' && <Detail label='Facility' value={user.facility}/>}
+                </div>}
+            </div>
+        }
+        </ContentContainer>
+    )
 }
 
 export default User

@@ -59,7 +59,7 @@ const File = () => {
     },[path])
 
   return (
-    <ContentContainer previous={parent && parent != pathname?parent:''} Icon={PiFolderFill} text={file && currentUserId == file.name?'My Files':file?file.name:''} loading={loading}>
+    <ContentContainer previous={parent && parent != pathname?parent:`/${currentUserId}/home`} Icon={PiFolderFill} text={file && currentUserId == file.name?'My Files':file?file.name:''} loading={loading}>
         {file &&
             <div className='flex flex-col w-full h-fit space-y-4'>
                 <div className='flex flex-col w-full h-auto space-y-2'>

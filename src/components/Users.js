@@ -221,7 +221,7 @@ const Users = () => {
   return (
     <>{userId?
         <Outlet context={{parentPath:`/users`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiUserFill} text='Users' loading={loading}>
+        <ContentContainer previous={`/${currentUserId}/home`} buttons={buttons} Icon={PiUserFill} text='Users' loading={loading}>
             {readAuthority && users  && totalElements >  pageSize &&
                 <div className='flex flex-wrap w-full h-fit justify-between items-center'>
                     <p className='text-xs font-helveticaNeueRegular text-[rgb(145,145,145)] tracking-wider'>
