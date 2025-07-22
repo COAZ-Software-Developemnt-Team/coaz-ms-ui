@@ -11,9 +11,9 @@ import AddUserSelf from './AddUserSelf';
 import { useData } from '../data';
 import axios from "axios";
 
-axios.defaults.baseURL = 'http://localhost:8080/api/';
-//axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
-//axios.defaults.baseURL = 'http://192.168.0.162:8080/api/';
+// axios.defaults.baseURL = 'http://localhost:8080/api/';
+axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
+// axios.defaults.baseURL = 'http://192.168.0.161:8080/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz_test/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
 
