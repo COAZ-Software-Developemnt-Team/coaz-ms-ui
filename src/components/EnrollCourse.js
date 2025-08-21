@@ -1,37 +1,45 @@
 import React, {useEffect,useState, useContext, useRef} from 'react';
+import { useLocation,useNavigate,useParams } from 'react-router-dom';
 import { GlobalContext } from '../contexts/GlobalContext';
 import FormValidator, {useFormValidator} from './FormValidator';
 import Inputs from './Inputs';
 import Scrollable from './Scrollable';
 import Message from './Message';
-import FormDialog from './FormDialog';
-import PaymentOptions from './PaymentOptions';
 import MessageDialog from './MessageDialog';
 import {useData} from '../data';
+import Access from './Access';
+import { PiStudentDuotone } from 'react-icons/pi';
 
-const EnrollCourse = ({courseId,reload}) => {
-    const {setLoading,setDialog,setAccess} = useContext(GlobalContext);
+const EnrollCourse = () => {
+    const {setLoading,setDialog} = useContext(GlobalContext);
     const [course,setCourse] = useState({});
-    const [classes,setCourseClasses] = useState([]);
-    const [courseClass,setCourseClass] = useState(null)
+    const [courseTeachers,setCourseTeachers] = useState([]);
+    const [courseTeacher,setCourseTeacher] = useState(null)
     const [message,setMessage] = useState({content:'',success:false});
+    const {currentUserId,courseId} = useParams();
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
+    const location = useLocation();
+    const state = location.state;
+    const path = useLocation().pathname;
     const {request} = useData();
+
+    const navigate = useNavigate();
 
     const submit = async (e) => {
         setMessage({content:'',success:false});
-        if(course && courseClass) {
+        if(course && courseTeacher) {
             setLoading(true);
-            request('POST','enrollment/course',null,{courseId:course.id,teacherId:courseClass.teacher.id},true)
+            request('POST','enrollment/course',null,{courseId:course.id,teacherId:courseTeacher.teacher.id},true)
             .then((response) => {
                 setLoading(false);
                 if(response.status && response.status === 'SUCCESSFUL' && response.content) {
                     setDialog(null);
                     if(!response.content.paid && response.content.tariff) {
-                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff}  reload={reload}/>});
-                    } 
-                    reload && reload()
+                        navigate(`/payment_options/${currentUserId}/${response.content.tariff.receivableId}/${response.content.tariff.criteriaId}`,{state:{parentPath:path}})
+                    } else if(response.content.paid) {
+                        close();
+                    }
                 } else if(response.message) {
                     setDialog({
                         show:true,
@@ -70,27 +78,32 @@ const EnrollCourse = ({courseId,reload}) => {
             disabled:true
         },
         {
-            label:'Class',
+            label:'Teacher',
             type:'select',
             options:() => {
                 let options = [];
-                classes && classes.map((option,i) => options.push(<option key={i} value={option.teacher.id}>{option.teacher.name}</option>));
+                courseTeachers && courseTeachers.map((option,i) => options.push(<option key={i} value={option.teacher.id}>{option.teacher.name}</option>));
                 return options;
             },
-            name:'courseClass', 
-            value:courseClass && courseClass.teacher?courseClass.teacher.id:'',
+            name:'courseTeacher', 
+            value:courseTeacher && courseTeacher.teacher?courseTeacher.teacher.id:'',
             onChange:(e) => handleChange(e,onChange),
             register:register,
             errors:errors
         }
     ]
 
+    const close = () => {
+        navigate(state && state.parentPath?state.parentPath:currentUserId?`/${currentUserId}/home`:'/home')
+    }
+
+
     const onChange = (e) => {
         if(e.target.value === '') {
-            setCourseClass(null);
+            setCourseTeacher(null);
         } else {
-            let value = classes.find((clas) => {return clas.teacher.id == e.target.value});
-            setCourseClass(value);
+            let value = courseTeachers.find((clas) => {return clas.teacher.id == e.target.value});
+            setCourseTeacher(value);
         }
     }
 
@@ -107,27 +120,30 @@ const EnrollCourse = ({courseId,reload}) => {
                 setCourse(null);
             }
         })
-        request('GET','classes/course',null,{courseId:courseId},true)
+        request('GET','courseteachers/course',null,{courseId:courseId},true)
         .then((response) => {
             if(response.status) {
                 if(response.status === 'SUCCESSFUL' && response.content && response.content.length > 0) {
-
-                    setCourseClasses(response.content);
-                    setCourseClass(response.content[0]);
+                    setCourseTeachers(response.content);
+                    setCourseTeacher(response.content[0]);
                 } else {
-                    setCourseClasses([]);
+                    setCourseTeachers([]);
                 }
             } else  {
-                setCourseClasses([]);
+                setCourseTeachers([]);
             }
         })
     },[courseId]);
 
     return (
         <div>
-            <FormDialog title='Enroll'>
+            <Access onClose={close}>
                 <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
+                    <div className='flex flex-col w-[95%] sm:w-[640px] h-fit p-4 space-y-8 bg-white shadow-lg rounded-md'>
+                        <div className='flex flex-col w-full h-fit items-center justify-center text-[rgb(0,175,240)]'>
+                            <PiStudentDuotone size={64}/>
+                            <span className='text-lg font-helveticaNeueRegular uppercase tracking-wider'>CPD Enrollment</span>
+                        </div>
                         <Scrollable vertical={true}>
                             <div className='flex flex-col w-full h-auto space-y-4 shrink-0'>
                                 <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='enroll_course' setCalcWidth={setInputWidth}/>
@@ -140,7 +156,7 @@ const EnrollCourse = ({courseId,reload}) => {
                         </Scrollable>
                     </div>
                 </FormValidator>
-            </FormDialog>
+            </Access>
         </div>
       )
 }

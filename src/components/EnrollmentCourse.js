@@ -6,17 +6,21 @@ import YesNoDialog from './YesNoDialog';
 import ContentContainer from './ContentContainer';
 import PaymentOptions from './PaymentOptions';
 import {useData} from '../data';
-import { download } from '../App';
 import Detail from './Detail';
 
 const EnrollmentCourse = () => {
     const {setAccess} = useContext(GlobalContext);
     const [enrollmentCourse,setEnrollmentCourse] = useState(null);
     const [loading,setLoading] = useState();
+    const [parentPath,setParentPath] = useState(null)
     const {request} = useData();
-    const {programId,studentId,courseId,teacherId,topicId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,programId,studentId,courseId,teacherId,topicId} = useParams();
     const path = useLocation().pathname;
+    const location = useLocation();
+    const state = location.state;
+    
+    const ENROLLMENTS = 'enrollments';
+    const PROGRAMS = 'programs';
 
     const navigate = useNavigate();
     
@@ -32,22 +36,25 @@ const EnrollmentCourse = () => {
                 setUpdateAuthority(false);
             }
         }) */
-       setLoading(true);
+        setLoading(true);
         if(studentId,courseId) {            
             await request('GET','enrollment/course',null,{
+                programId:programId,
                 studentId:studentId,
                 courseId:courseId
             },true)
             .then((response) => {
                 if(response.content) {
                     if(response.content.paid) {
-                        if(response.content.startDate) {
-                            response.content.startDate = new Date(response.content.startDate);
+                        response.content.startDate = response.content.startDate?new Date(response.content.startDate):null;
+                        if(response.content.course) {
+                            response.content.course.availableFrom = response.content.course.availableFrom?new Date(response.content.course.availableFrom):null;
+                            response.content.course.availableTo = response.content.course.availableTo?new Date(response.content.course.availableTo):null;
                         }
                         setEnrollmentCourse(response.content);
                     } else if(response.content.student && response.content.tariff && response.content.course) {
                         setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff} />});
-                        navigate(parentPath);
+                        navigate(state && state.parentPath?state.parentPath:currentUserId?`/${currentUserId}/home`:'/home');
                     }
                 }  else {
                     setEnrollmentCourse(null);
@@ -61,24 +68,37 @@ const EnrollmentCourse = () => {
     }
 
     useEffect(() => {
+        if((!teacherId || !topicId) && state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         getEnrollmentCourse();
     },[path])
   return (
     <>{teacherId && topicId?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}`}}/>
+        <Outlet/>
         :
-        <ContentContainer previous={parentPath} Icon={PiChalkboardTeacherFill} text={enrollmentCourse && enrollmentCourse.course?enrollmentCourse.course.name:''} loading={loading}>
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            Icon={PiChalkboardTeacherFill} 
+            text={enrollmentCourse && enrollmentCourse.course?enrollmentCourse.course.name:''} 
+            loading={loading}>
             {enrollmentCourse && enrollmentCourse.course &&
                 <div className='flex flex-col w-full h-auto space-y-4'>
                     <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
                         <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                        {enrollmentCourse.course.description && <Detail label='Description' value={enrollmentCourse.course.description}/>}
+                        <Detail label='External Id' value={enrollmentCourse.course.externalId}/>
+                        <Detail label='Points' value={enrollmentCourse.course.points}/>
+                        {enrollmentCourse.course.program && <Detail label='Program' value={enrollmentCourse.course.program.name}/>}
+                        {enrollmentCourse.course.availableFrom && <Detail label='Available from' value={enrollmentCourse.course.availableFrom.toLocaleString('default', { month: 'long' })+' '+enrollmentCourse.course.availableFrom.getDate()+', '+enrollmentCourse.course.availableFrom.getFullYear()}/>}
+                        {enrollmentCourse.course.availableTo && <Detail label='Available upto' value={enrollmentCourse.course.availableTo.toLocaleString('default', { month: 'long' })+' '+enrollmentCourse.course.availableTo.getDate()+', '+enrollmentCourse.course.availableTo.getFullYear()}/>}
+                        <Detail label='Available' value={enrollmentCourse.course.available?'Yes':'No'}/>
                         {enrollmentCourse.startDate && <Detail label='Start Date' value={enrollmentCourse.startDate.toLocaleString('default', { month: 'long' })+' '+enrollmentCourse.startDate.getDate()+', '+enrollmentCourse.startDate.getFullYear()+' '+enrollmentCourse.startDate.toLocaleTimeString('en-US')}/>}
                     </div>
                     <div className='flex flex-col w-full h-auto space-y-4'>
                         {enrollmentCourse.certificate &&
                             <div className='flex flex-col w-full h-auto'>
                                 <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Certificate</p>
-                                <Certificate certificate={enrollmentCourse.certificate}/>
+                                <Certificate student={enrollmentCourse.student} certificate={enrollmentCourse.certificate}/>
                             </div>
                         }
                         {enrollmentCourse.topics && enrollmentCourse.topics.length > 0 &&
@@ -113,7 +133,7 @@ const EnrollmentTopicItem = ({enrollmentTopic,reload}) => {
     const onOpen = (e) => {
         e.preventDefault();
         if(enrollmentTopic.topic && enrollmentTopic.teacher) {
-            navigate(`${path}/${enrollmentTopic.teacher.id}/${enrollmentTopic.topic.id}`);
+            navigate(`${path}/${enrollmentTopic.teacher.id}/${enrollmentTopic.topic.id}`,{state:{parentPath:path}});
         }
     }
 
@@ -204,16 +224,16 @@ const EnrollmentTopicItem = ({enrollmentTopic,reload}) => {
     )
 }
 
-const Certificate = ({certificate}) => {
+const Certificate = ({student,certificate}) => {
     const {setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
-    const [download] = useData();
+    const {download} = useData();
     const moreRef = useRef();
 
     const onDownload = (e) => {
         e.preventDefault();
-        if(certificate) {
-            download(`certificate/${certificate}`,null,true)
+        if(student && certificate) {
+            download('certificate',{studentId:student.id,fileName:certificate},true)
             .then((response) => {
                 if(response instanceof Blob) {
                     const href = URL.createObjectURL(response);

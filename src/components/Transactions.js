@@ -158,8 +158,11 @@ const Transactions = () => {
     },[path,page])
   return (
     <>{transactionId?
-        <Outlet context={{parentPath:`/transactions`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiArrowsLeftRightFill} text='Transactions' loading={loading}>
+        <Outlet/>:
+        <ContentContainer previous={currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={buttons} 
+            Icon={PiArrowsLeftRightFill} 
+            text='Transactions' loading={loading}>
             {transactions  && totalElements >  pageSize &&
                 <div className='flex flex-wrap w-full h-fit justify-between items-center'>
                     <p className='text-xs font-helveticaNeueRegular text-[rgb(145,145,145)] tracking-wider'>

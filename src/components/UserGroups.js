@@ -16,8 +16,8 @@ const UserGroups = () => {
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
+    const {currentUserId} = useParams();
     const {request} = useData();
-    const {userGroupId} = useParams();
     const path = useLocation().pathname;
 
     const onAddUserGroup = (e) => {
@@ -88,17 +88,13 @@ const UserGroups = () => {
         load();
     },[path])
   return (
-    <>{userGroupId?
-        <Outlet context={{parentPath:`/usergroups`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiUsersFourFill} text='User Groups'>
-            {userGroups && userGroups.length > 0 &&
-            <div className='flex flex-col w-full h-auto space-y-2'>
-                {userGroups.map((userGroup,i) => <UserGroupItem key={i} userGroup={userGroup} updateAuthority={updateAuthority} deleteAuthority={deleteAuthority} reload={load}/>)}
-            </div>
-            }
-        </ContentContainer>
-    }
-    </>
+    <ContentContainer previous={currentUserId?`/${currentUserId}/home`:'/home'} buttons={buttons} Icon={PiUsersFourFill} text='User Groups'>
+        {userGroups && userGroups.length > 0 &&
+        <div className='flex flex-col w-full h-auto space-y-2'>
+            {userGroups.map((userGroup,i) => <UserGroupItem key={i} userGroup={userGroup} updateAuthority={updateAuthority} deleteAuthority={deleteAuthority} reload={load}/>)}
+        </div>
+        }
+    </ContentContainer>
   )
 }
 

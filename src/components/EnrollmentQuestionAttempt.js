@@ -7,7 +7,10 @@ const EnrollmentQuestionAttempt = ({number,enrollmentQuestionAttempt, action,rel
     const [textAnswer,setTextAnswer] = useState('');
     const [questionAttemptMarks,setQuestionAttemptMarks] = useState('');
     const [marks,setMarks] = useState('');
-    const [request] = useData;
+    const {request} = useData();
+
+    const MARKING = 'MARKING';
+    const ATTEMPTING = 'ATTEMPTING';
 
     useEffect(() => {
         if(enrollmentQuestionAttempt && enrollmentQuestionAttempt.questionAttempt) {

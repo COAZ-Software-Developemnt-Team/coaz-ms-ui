@@ -13,7 +13,8 @@ const Header = ({previous,buttons,Icon,text}) => {
         className='flex flex-row w-[95%] h-fit p-2 sm:p-4 mt-[2%] text-[rgb(0,175,240)] bg-[rgba(0,175,240,.2)] rounded-2xl shadow-xl overflow-hidden shrink-0'>
         <div className='flex flex-row w-full h-fit justify-between shrink-0 space-x-2 items-center'>
             {previous && <button 
-                onClick={(e) => navigate(previous)}
+                onClick={(e) => {
+                    navigate(previous)}}
                 className='flex w-10 h-10 hover:bg-[rgba(0,175,240,.1)]  shrink-0 rounded-full'
             >
                 <PiArrowLeft size={32} className='flex m-auto'/>

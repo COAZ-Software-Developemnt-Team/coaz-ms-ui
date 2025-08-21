@@ -1,12 +1,11 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useNavigate,useLocation,useParams, Outlet } from 'react-router-dom';
-import {PiGraduationCap,PiGraduationCapFill,PiGraduationCapLight, PiStudent,PiStudentLight,PiTrash,PiDotsThreeVertical,PiTag, PiStudentFill } from "react-icons/pi";
+import {PiGraduationCap,PiGraduationCapFill,PiGraduationCapLight, PiStudent,PiStudentLight,PiTrash,PiDotsThreeVertical,PiTag, PiStudentFill, PiUserPlus, PiUserMinus } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import Scrollable from './Scrollable';
 import AddProgram from './AddProgram';
 import MessageDialog from './MessageDialog';
-import MsHeader from './Header';
 import PaymentOptions from './PaymentOptions';
 import {useData} from '../data';
 import ContentContainer from './ContentContainer';
@@ -15,21 +14,10 @@ const Enrollments = () => {
     const {setDialog} = useContext(GlobalContext);
     const [enrolledPrograms,setEnrolledPrograms] = useState([]);
     const [availablePrograms,setAvailablePrograms] = useState([]);
-    const [deleteAuthority,setDeleteAuthority] = useState(false);
-    const [buttons,setButtons] = useState([]);
     const {request} = useData();
     const [loading,setLoading] = useState()
     const {currentUserId,programId} = useParams();
     const path = useLocation().pathname;
-    var loaded = false;
-
-    const onAddProgram = (e) => {
-        setDialog({
-            show:true,
-            Component:() => 
-                <AddProgram reload={getAvailablePrograms}/>
-        })
-    }
 
     const getEnrolledPrograms = async () => {
         await request('GET','enrollments/my',null,null,true)
@@ -61,31 +49,6 @@ const Enrollments = () => {
 
     const load = async () => {
         setLoading(true);
-        await request('GET','hasauthority',null, {
-            contextName:'PROGRAM',
-            authority:'CREATE'
-        },true)
-        .then((response) => {
-            if(response.status && response.status === 'YES') {
-                setButtons([
-                    {
-                        Icon:PiGraduationCap,
-                        name:'Add Program',
-                        handler:onAddProgram
-                    }
-                ])
-            }
-        })
-        
-        await request('GET','hasauthority',null,{
-            contextName:'PROGRAM',
-            authority:'DELETE'
-        },true)
-        .then((response) => {
-            if(response.status && response.status === 'YES') {
-                setDeleteAuthority(true);
-            }
-        })
         await getEnrolledPrograms();
         await getAvailablePrograms();
         setLoading(false);
@@ -96,24 +59,26 @@ const Enrollments = () => {
     },[path])
   return (
     <>{programId?
-        <Outlet context={{parentPath:`/${currentUserId}/enrollments`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiStudentFill} text='Enrollments' loading={loading}>
-            {enrolledPrograms && enrolledPrograms.length > 0 &&
-            <div className='flex flex-col w-full h-auto space-y-2'>
-                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>
-                    Enrolled Programs
-                </p>
-                {enrolledPrograms.map((enrollment,i) => <EnrollmentItem key={i} enrollment={enrollment} deleteAuthority={deleteAuthority} reload={load} setLoading={setLoading}/>)}
+        <Outlet/>:
+        <ContentContainer previous={`/${currentUserId}/home`} Icon={PiStudentFill} text='Enrollments' loading={loading}>
+            <div className='flex flex-col w-full h-auto space-y-4'>
+                {enrolledPrograms && enrolledPrograms.length > 0 &&
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>
+                        Enrolled Programs
+                    </p>
+                    {enrolledPrograms.map((enrollment,i) => <EnrollmentItem key={i} enrollment={enrollment} reload={load} setLoading={setLoading}/>)}
+                </div>
+                }
+                {availablePrograms && availablePrograms.length > 0 &&
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>
+                        Available Programs
+                    </p>
+                    {availablePrograms.map((enrollment,i) => <EnrollmentItem key={i} enrollment={enrollment} reload={load} setLoading={setLoading}/>)}
+                </div>
+                }
             </div>
-            }
-            {availablePrograms && availablePrograms.length > 0 &&
-            <div className='flex flex-col w-full h-auto space-y-2'>
-                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>
-                    Available Programs
-                </p>
-                {availablePrograms.map((enrollment,i) => <EnrollmentItem key={i} enrollment={enrollment} deleteAuthority={deleteAuthority} reload={load} setLoading={setLoading}/>)}
-            </div>
-            }
         </ContentContainer>
     }
     </>
@@ -122,12 +87,12 @@ const Enrollments = () => {
 
 export default Enrollments
 
-const EnrollmentItem = ({enrollment,deleteAuthority,reload,setLoading}) => {
-    const {setDialog,setPopupData,screenSize,setAccess} = useContext(GlobalContext);
+const EnrollmentItem = ({enrollment,reload,setLoading}) => {
+    const {setDialog,screenSize,setAccess} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const {currentUserId} = useParams();
+    const path = useLocation().pathname;
     const {request} = useData();
-    const moreRef = useRef(null);
 
     let USDecimal = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
@@ -139,16 +104,9 @@ const EnrollmentItem = ({enrollment,deleteAuthority,reload,setLoading}) => {
     const onOpen = (e) => {
         e.preventDefault();
         if(enrollment.program && enrollment.student) {
-            navigate(`/${currentUserId}/enrollments/enrollment/${enrollment.program.id}`);
-            /* if(paid) {
-                navigate(`/programs/enrollment/${program.program.id}`);
-            } else {
-                if(program.program && userType && tariff) {
-                    setAccess({Component:() => <Payment user={program.student} tariff={tariff}  reload={reload}/>});
-                } 
-            } */
+            navigate(`/${currentUserId}/enrollments/enrollment/${enrollment.program.id}`,{state:{parentPath:path}});
         } else if(enrollment.program) {
-            navigate(`/${currentUserId}/enrollments//programs/${enrollment.program.id}`)
+            navigate(`/${currentUserId}/enrollments/${enrollment.program.id}`,{state:{parentPath:path}})
         }
     }
 
@@ -168,8 +126,9 @@ const EnrollmentItem = ({enrollment,deleteAuthority,reload,setLoading}) => {
                             },true)
                             .then((response) => {
                                 if(response.status && response.status === 'SUCCESSFUL' && response.content) {
-                                    if(!response.content.paid && response.content.tariff) {
-                                        setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff}  reload={reload}/>});
+                                    if(!response.content.paid && response.content.tariff && response.content.tariff.receivableId && response.content.tariff.criteriaId) {
+                                        navigate(`/payment_options/${currentUserId}/${response.content.tariff.receivableId}/${response.content.tariff.criteriaId}`,{state:{parentPath:path}})
+                                        /* setAccess({Component:() => <PaymentOptions user={response.content.student} tariff={response.content.tariff}  reload={reload}/>}); */
                                     } 
                                     reload && reload()
                                 } else if(response.message) {
@@ -248,28 +207,6 @@ const EnrollmentItem = ({enrollment,deleteAuthority,reload,setLoading}) => {
         }
     }
 
-    const onDelete = (e) => {
-        e.preventDefault();
-        if(enrollment.program) {
-            setDialog({
-                show:true,
-                Component:() =>                       
-                    <YesNoDialog 
-                        title='Delete Program' 
-                        message={`Are you sure you want to delete ${enrollment.program.name}?`} 
-                        onYes={async (e) => {
-                            setLoading(true)
-                            await request('DELETE',`program/${enrollment.program.id}`,null,null,true)
-                            .then(response => {
-                                reload && reload();
-                            })
-                            setLoading(false)
-                        }}
-                    />
-            })
-        }
-    }
-
     return (
         <div className='flex flex-row w-full h-auto'>
             {enrollment && enrollment.program &&
@@ -307,49 +244,19 @@ const EnrollmentItem = ({enrollment,deleteAuthority,reload,setLoading}) => {
                     </div>
                 </div>
                 <div className='flex flex-row w-fit h-10 shrink-0 overflow-hidden'>
-                    {(highlighted || screenSize === 'xs') && 
-                        <button ref={moreRef}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setPopupData({
-                                    show:true,
-                                    parentElement:moreRef.current,
-                                    Component:
-                                        <div className='flex flex-col w-fit h-fit text-left text-sm font-[arial] text-[rgb(68,71,70)]'>
-                                            {enrollment.student?
-                                                <button 
-                                                    onClick={onUnenroll}
-                                                    className='flex flex-row w-full px-2 h-8 space-x-2 items-center hover:bg-[rgb(234,235,239)] shrink-0'>
-                                                    <PiStudent  size={20} className='flex shrink-0'/>
-                                                    <p className='w-full text-left whitespace-nowrap overflow-hidden overflow-ellipsis'>
-                                                        Unenroll
-                                                    </p>
-                                                </button>:
-                                                <button 
-                                                    onClick={onEnroll}
-                                                    className='flex flex-row w-full px-2 h-8 space-x-2 items-center hover:bg-[rgb(234,235,239)] shrink-0'>
-                                                    <PiStudent  size={20} className='flex shrink-0'/>
-                                                    <p className='w-full text-left whitespace-nowrap overflow-hidden overflow-ellipsis'>
-                                                        Enroll
-                                                    </p>
-                                                </button>
-                                            }
-                                            {deleteAuthority && 
-                                                <button 
-                                                    onClick={onDelete}
-                                                    className='flex flex-row w-full px-2 h-8 space-x-2 items-center hover:bg-[rgb(234,235,239)] shrink-0'>
-                                                    <PiTrash size={20} className='flex shrink-0'/>
-                                                    <p className='w-full text-left whitespace-nowrap overflow-hidden overflow-ellipsis'>
-                                                        Delete
-                                                    </p>
-                                                </button>
-                                            }
-                                        </div>
-                                })
-                            }}
-                            className='flex w-10 h-10 items-center justify-center shrink-0 hover:bg-[rgba(0,0,0,.06)] rounded-full'>
-                            <PiDotsThreeVertical size={20} />
+                    {((highlighted || screenSize === 'xs') && enrollment.student)? 
+                        <button onClick={onUnenroll}
+                            className='flex w-10 h-10 items-center justify-center shrink-0 text-[rgb(68,71,70)] hover:bg-[rgba(0,0,0,.06)] hover:text-red-500 rounded-full'>
+                            <PiUserMinus size={20} />
                         </button>
+                        :
+                        highlighted || screenSize === 'xs'? 
+                        <button onClick={onEnroll}
+                            className='flex w-10 h-10 items-center justify-center shrink-0 text-[rgb(68,71,70)] hover:bg-[rgba(0,0,0,.06)] hover:text-[rgb(0,175,240)] rounded-full'>
+                            <PiUserPlus size={20} />
+                        </button>
+                        :
+                        <></>
                     }
                 </div>
             </div>}

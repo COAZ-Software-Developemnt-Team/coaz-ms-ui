@@ -9,15 +9,18 @@ import YesNoDialog from './YesNoDialog';
 import MessageDialog from './MessageDialog';
 import EnrollmentQuestionAttempt from './EnrollmentQuestionAttempt';
 import {useData} from '../data';
+import AttemptFeedback from './AttemptFeedback';
 
 const EnrollmentAttempt = () => {
     const path = useLocation().pathname;
-    const {user,parentPath} = useOutletContext();
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [enrollmentAttempt,setEnrollmentAttempt] = useState(null);
     const [date,setDate] = useState(null);
     const [action,setAction] = useState('');
-    const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
+    const {currentUserId,programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
+    const [parentPath,setParentPath] = useState(null);
+    const location = useLocation();
+    const state = location.state;
     const [message,setMessage] = useState({content:'',success:false});
     const {request} = useData();
     const moreRef = useRef(null);
@@ -44,6 +47,10 @@ const EnrollmentAttempt = () => {
             .then( async (response) => {
                 if(response.status && response.status === 'SUCCESSFUL') {
                     getAttempt();
+                    setDialog({
+                        show:true,
+                        Component:() => <AttemptFeedback attempt={enrollmentAttempt.attempt} message={response.message}/>
+                    })
                 } else {
                     setMessage({content:response,success:false});
                 }
@@ -60,7 +67,6 @@ const EnrollmentAttempt = () => {
             })
             navigate(parentPath);
         }
-        
     }
 
     const getAttempt = async () => {
@@ -71,10 +77,9 @@ const EnrollmentAttempt = () => {
         .then( async (response) => {
             if(response.status && response.status === 'SUCCESSFUL' && response.content && response.content.attempt) {
                 let attempt = response.content.attempt;
-                console.log()
                 if(attempt.status === 'NEW' && studentId && studentId == attempt.user.id) {
                     setAction(ATTEMPTING);
-                } else if(attempt.status === 'PENDING' && teacherId && teacherId == attempt.activity.courseClass.teacherId) {
+                } else if(attempt.status === 'PENDING' && teacherId && teacherId == attempt.activity.courseTeacher.teacherId) {
                     setAction(MARKING);
                 }
                 setDate(new Date(response.content.attempt.createdOn))
@@ -110,6 +115,9 @@ const EnrollmentAttempt = () => {
     }
 
     useEffect(() => {
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         getAttempt();
     },[path])
   return (

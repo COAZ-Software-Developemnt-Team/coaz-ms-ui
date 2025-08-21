@@ -1,29 +1,54 @@
 import React,{useState,useEffect,useRef,useContext} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { PiHouseSimple,PiSignIn} from "react-icons/pi";
+import { useParams,NavLink} from 'react-router-dom';
 import UserProfile from './UserProfile';
-import MsMenuItem from './MenuItem';
+import MenuItem from './MenuItem';
+import ScrollableMenus from './ScrollableMenus';
 import MsSearch from './Search';
+import {useData} from '../data'
 
-const MobileMenu = ({user,menus,onLogin,onLogout,openMobileMenu, setOpenMobileMenu}) => {
+const MobileMenu = ({menus,onLogin,onLogout,openMobileMenu, setOpenMobileMenu}) => {
     const {setPopupData} = useContext(GlobalContext);
+    const [user,setUser] = useState(null);
     const [expanded,setExpanded] = useState(true);
+    const {currentUserId} = useParams();
+    const {request} = useData();
     const userProfileRef = useRef(null);
 
     useEffect(() => {
-    },[]);
+        if(currentUserId) {
+            request('GET','current',null,null,true)
+            .then(async (currentResponse) => {
+                if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                    setUser(currentResponse.content.user);
+                } else {
+                    setUser(false);
+                }
+            })
+        }
+    },[menus]);
   return (
     <div style={{backdropFilter:'blur(20px)'}}
         className={`flex flex-col w-full h-full py-4 space-y-1 overflow-hidden overflow-y-auto shrink-0 bg-[rgba(208,241,252)] shadow-xl rounded-b-2xl`}>
         <div className={`flex flex-col w-full h-full justify-between overflow-hidden `}>
-            <div className='flex flex-col w-full h-fit'>
+            <div className='flex flex-col w-full h-full items-center overflow-hidden'>
                 <MsSearch/>
-                <MsMenuItem name={'Home'} link={'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
+                <ScrollableMenus vertical={true}>
+                        <div className='flex flex-col h-fit'>
+                            <MenuItem name={'Home'} link={currentUserId?`/${currentUserId}/home`:'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
+                            {user && menus && menus.length> 0 && 
+                                menus.map((menu,i) => <MenuItem key={i} name={menu.name} link={menu.link} Icon={menu.Icon} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu} separator={menu.separator}/>)
+                            }
+                        </div>
+                    </ScrollableMenus>
+                {/* <MsMenuItem name={'Home'} link={'/home'} Icon={PiHouseSimple} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>
                 <div className='flex flex-col h-fit'>
                     {user && menus && menus.length > 0 && 
                         menus.map((menu,i) => <MsMenuItem key={i} name={menu.name} link={menu.link} Icon={menu.Icon} expanded={expanded} setOpenMobileMenu={setOpenMobileMenu}/>)
                     }
-                </div>
+                </div> */}
             </div>
             <div className='flex w-full'>
                 {user?

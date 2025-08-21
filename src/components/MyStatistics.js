@@ -171,22 +171,29 @@ const MyStatistics = () => {
                 <div style={{width:contentSize.width+'px',height:contentSize.height+'px'}}
                     className='relative flex flex-col min-w-[680px]'>
                     <div className='flex flex-row w-full text-sm text-[rgb(68,71,70)] font-helveticaNeueMedium capitalize'>
-                        <p className='w-[25%] px-2'>CPD</p>
-                        <p className='w-[25%] px-2'>Completion</p>
-                        <p className='w-[25%] px-2'>Points</p>
-                        <p className='w-[25%] px-2'>Awarded Points</p>
+                        <p className='w-[20%] px-2'>CPD</p>
+                        <p className='w-[20%] px-2'>Program</p>
+                        <p className='w-[20%] px-2'>Completion</p>
+                        <p className='w-[20%] px-2'>Points</p>
+                        <p className='w-[20%] px-2'>Awarded Points</p>
                     </div>
                     {enrollmentCourses && 
                         enrollmentCourses.map((enrollmentCourse,i) => {
                             return <>
                                 <div key={i} className='flex flex-row w-full'>
-                                    <div className='w-[25%] p-2'>
+                                    <div className='w-[20%] p-2'>
                                         <p className='w-full p-2 text-xs text-[rgb(0,175,240)] font-helveticaNeueRegular bg-[rgba(0,175,240,.2)] rounded-md'>
                                             {enrollmentCourse.course?
                                                 enrollmentCourse.course.name:''}
                                         </p>
                                     </div>
-                                    <div className='flex w-[25%] h-full items-center p-2'>
+                                    <div className='w-[20%] p-2'>
+                                        <p className='w-full p-2 text-xs text-[rgb(0,175,240)] font-helveticaNeueRegular bg-[rgba(0,175,240,.2)] rounded-md'>
+                                            {enrollmentCourse.course && enrollmentCourse.course.program?
+                                                enrollmentCourse.course.program.name:''}
+                                        </p>
+                                    </div>
+                                    <div className='flex w-[20%] h-full items-center p-2'>
                                         <div className='relative w-full h-4 bg-gray-200'>
                                             <div style={{width:enrollmentCourse.completionPercentage+'%'}} className='h-full bg-[rgb(138,209,164)]'/>
                                             <p className='absolute top-0 left-0 w-full text-xs text-[rgb(68,71,70)] text-center font-helveticaNeueRegular'>
@@ -194,12 +201,12 @@ const MyStatistics = () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className='flex w-[25%] h-full items-center'>
+                                    <div className='flex w-[20%] h-full items-center'>
                                         <p className='w-full p-2 text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular'>
                                             {enrollmentCourse.coursePoints}
                                         </p>
                                     </div>
-                                    <div className='flex w-[25%] h-full items-center'>
+                                    <div className='flex w-[20%] h-full items-center'>
                                         <p className='w-full p-2 text-sm text-[rgb(0,175,240)] font-helveticaNeueMedium'>
                                             {enrollmentCourse.points}
                                         </p>
@@ -209,10 +216,11 @@ const MyStatistics = () => {
                         })
                     }
                     <div className='absolute flex flex-row top-0 left-0 right-0 bottom-0'>
-                        <div className='w-[25%] h-full border-r border-[rgba(0,175,240,.2)]'/>
-                        <div className='w-[25%] h-full border-r border-[rgba(0,175,240,.2)]'/>
-                        <div className='w-[25%] h-full border-r border-[rgba(0,175,240,.2)]'/>
-                        <div className='w-[25%] h-full'/>
+                        <div className='w-[20%] h-full border-r border-[rgba(0,175,240,.2)]'/>
+                        <div className='w-[20%] h-full border-r border-[rgba(0,175,240,.2)]'/>
+                        <div className='w-[20%] h-full border-r border-[rgba(0,175,240,.2)]'/>
+                        <div className='w-[20%] h-full border-r border-[rgba(0,175,240,.2)]'/>
+                        <div className='w-[20%] h-full'/>
                     </div>
                 </div>
             </Scrollable>

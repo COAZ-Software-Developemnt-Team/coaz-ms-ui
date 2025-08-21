@@ -69,36 +69,34 @@ const AddQuestion = ({id,reload}) => {
         <div>
             <FormDialog title='Add Question'>
                 <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                        <Scrollable vertical={true}>
-                            <div className='flex flex-col w-full h-auto space-y-4 shrink-0'>
-                                <TextArea
-                                    label='Description'
-                                    id='description'
-                                    name='description'
-                                    value={question?question.description:''}
-                                    placeholder='Enter description'
-                                    onChange={(e) => handleChange(e,onChange)}
-                                    register={register}
-                                    errors={errors}
-                                /> 
-                                <Input
-                                    label='Marks' 
-                                    type='number'
-                                    id='marks' 
-                                    name='marks'
-                                    value={question && question.marks?question.marks:''}
-                                    onChange={(e) => handleChange(e,onChange)}
-                                    register={register}
-                                    errors={errors}
-                                    width={256}
-                                />
-                                <Message message={message}/>
-                                <button onClick={handleSubmit} className='flex shrink-0 w-64 h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                                    Submit
-                                </button>
-                            </div>
-                        </Scrollable>
+                    <div className='flex flex-col w-full h-auto p-8'>
+                        <div className='flex flex-col w-full h-auto space-y-4 shrink-0'>
+                            <TextArea
+                                label='Description'
+                                id='description'
+                                name='description'
+                                value={question?question.description:''}
+                                placeholder='Enter description'
+                                onChange={(e) => handleChange(e,onChange)}
+                                register={register}
+                                errors={errors}
+                            /> 
+                            <Input
+                                label='Marks' 
+                                type='number'
+                                id='marks' 
+                                name='marks'
+                                value={question && question.marks?question.marks:''}
+                                onChange={(e) => handleChange(e,onChange)}
+                                register={register}
+                                errors={errors}
+                                width={256}
+                            />
+                            <Message message={message}/>
+                            <button onClick={handleSubmit} className='flex shrink-0 w-64 h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                                Submit
+                            </button>
+                        </div>
                     </div>
                 </FormValidator>
             </FormDialog>

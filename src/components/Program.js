@@ -3,25 +3,33 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { useLocation,useParams, Outlet, useOutletContext } from 'react-router-dom';
 import EditProgram from './EditProgram';
 import { PiGraduationCapFill,PiBook,PiTag, PiPencilSimple } from 'react-icons/pi';
-import AddProgramCourse from './AddProgramCourse';
-import ProgramCourseItem from './ProgramCourseItem';
+import AddCourse from './AddCourse';
+import CourseItem from './CourseItem';
 import AddTariff from './AddTariff';
 import Tariff from './Tariff';
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
 import Detail from './Detail';
+import ContentContainer from './ContentContainer';
+import UserItem from './UserItem';
 import {useData} from '../data'
 
 const Program = () => {
     const {setDialog} = useContext(GlobalContext);
     const [program,setProgram] = useState(null);
-    const [programCourses,setProgramCourses] = useState([]);
+    const [students,setStudents] = useState([]);
+    const [courses,setCourses] = useState([]);
     const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
+    const [loading,setLoading] = useState();
+    const [parent,setParent] = useState(null);
+    const [parentPath,setParentPath] = useState(null);
+    const location = useLocation();
+    const state = location.state;
     const {request} = useData();
-    const {programId,courseId} = useParams();
-    const {parentPath} = useOutletContext();
-    const patn = useLocation().pathname;
+    const {currentUserId,programId,courseId} = useParams();
+    const path = useLocation().pathname;
+
+    const ENROLLMENTS = 'enrollments';
+    const PROGRAMS = 'programs';
 
     const onEdit = (e) => {
         e.preventDefault();
@@ -35,7 +43,7 @@ const Program = () => {
         e.preventDefault();
         setDialog({
             show:true,
-            Component:() => <AddProgramCourse programId={programId} reload={getCourses}/>
+            Component:() => <AddCourse programId={programId} reload={getCourses}/>
         })
     }
 
@@ -88,7 +96,7 @@ const Program = () => {
                         btns.push(
                             {
                                 Icon:PiBook,
-                                name:'Add Course',
+                                name:'Add CPD',
                                 handler:onAddCourse
                             }
                         )
@@ -112,23 +120,39 @@ const Program = () => {
         }
     }
 
-    const getCourses = async () => {
-        await request('GET','programcourses/program',null,{
-            programId:programId
-        },true)
-        .then((response) => {
-            if(response.content) {
-                setProgramCourses(response.content);
-            } else {
-                setProgramCourses([])
-            }
-        })
-        .catch((error) => {
-            setProgramCourses([])
-        })
+    const getCourses = async (parent) => {
+        if(parent && parent === PROGRAMS) {
+            await request('GET','courses/program',null,{
+                programId:programId
+            },true)
+            .then((response) => {
+                if(response.content) {
+                    setCourses(response.content);
+                } else {
+                    setCourses([])
+                }
+            })
+            .catch((error) => {
+                setCourses([])
+            })
+        } else {
+            await request('GET','courses/program/available',null,{
+                programId:programId
+            },true)
+            .then((response) => {
+                if(response.content) {
+                    setCourses(response.content);
+                } else {
+                    setCourses([])
+                }
+            })
+            .catch((error) => {
+                setCourses([])
+            })
+        }
     }
 
-    const getTariffs = () => {
+    const getTariffs = async () => {
         if(programId) {
             request('GET',`tariffs/${programId}`,null,null,true)
             .then((response) => {
@@ -144,48 +168,86 @@ const Program = () => {
         }
     }
 
+    const getStudents = async () => {
+        await request('GET','programstudents/program',null,{
+            programId:programId
+        },true)
+        .then((response) => {
+            if(response.content) {
+                setStudents(response.content);
+            } else {
+                setStudents([])
+            }
+        })
+        .catch((error) => {
+            setStudents([])
+        })
+    }
+
+    const load = async () => {
+        setLoading(true);
+        let prt = null;
+        if(path) {
+            if(path.includes(PROGRAMS)) {
+                prt = PROGRAMS;
+            } else if(path.includes(ENROLLMENTS)) {
+                prt = ENROLLMENTS;
+            }
+        }
+        setParent(prt);
+        if(!courseId && state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
+        await getProgram();
+        await getCourses(prt);
+        await getTariffs();
+        await getStudents();
+        setLoading(false);
+    }
+
     useEffect(() => {
-        getProgram();
-        getCourses();
-        getTariffs();
-    },[patn])
+        load();
+    },[path])
   return (
     <>{courseId?
-        <Outlet context={{parentPath:`/programs/${programId}`}}/>
+        <Outlet/>
         :
-        <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-            className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-            {program &&
-                <>
-                <MsHeader previous={parentPath} buttons={buttons} Icon={PiGraduationCapFill} text={program.name} subText={program.description}/>
-                <div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-                    <Scrollable vertical={true}>
-                        <div className='flex flex-col w-full h-auto space-y-4'>
-                            <div className='flex flex-col w-full h-auto space-y-2'>
-                                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
-                                <Detail label='Tariff Applicable' value={program.tariffApplicable?'Yes':'No'}/>
-                                {program.tariffApplicable && program.criteriaPathItem &&
-                                    <Detail label='Tariff Criteria Path' value={program.criteriaPathItem.id}/>
-                                }
-                            </div>
-                            {programCourses && programCourses.length > 0 &&
-                            <div className='flex flex-col w-full h-auto'>
-                                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Courses</p>
-                                {programCourses.map((programCourse,i) => <ProgramCourseItem key={i} programCourse={programCourse} reload={getCourses}/>)}
-                            </div>
-                            }
-                            {tariffs && tariffs.length > 0 &&
-                            <div className='flex flex-col w-full h-auto'>
-                                <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Tariffs</p>
-                                {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={getTariffs}/>)}
-                            </div>
-                            }
-                        </div>
-                    </Scrollable>
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={parent === PROGRAMS?buttons:null} 
+            Icon={PiGraduationCapFill} 
+            text={program?program.name:''} 
+            loading={loading}>
+            <div className='flex flex-col w-full h-auto space-y-4'>
+                {program && 
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                    {program.description && <Detail label='Description' value={program.description}/>}
+                    <Detail label='Tariff Applicable' value={program.tariffApplicable?'Yes':'No'}/>
+                    {program.tariffApplicable && program.criteriaPathItem &&
+                    <Detail label='Tariff Criteria Path' value={program.criteriaPathItem.id}/>
+                    }
                 </div>
-                </>
-            }
-        </div>
+                }
+                {courses && courses.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Courses</p>
+                    {courses.map((course,i) => <CourseItem key={i} course={course} parent={parent} reload={getCourses}/>)}
+                </div>
+                }
+                {tariffs && tariffs.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Tariffs</p>
+                    {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={getTariffs}/>)}
+                </div>
+                }
+                {parent === PROGRAMS && students && students.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Students</p>
+                    {students.map((student,i) => <UserItem key={i} user={student.student} reload={getStudents}/>)}
+                </div>
+                }
+            </div>
+        </ContentContainer>
         }
     </>
   )

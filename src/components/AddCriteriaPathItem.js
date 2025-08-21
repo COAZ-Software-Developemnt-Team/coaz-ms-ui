@@ -14,7 +14,7 @@ const AddCriteriaPathItem = ({previouId,reload}) => {
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
-    const [request] = useData()
+    const {request} = useData()
 
     const submit = async (e) => {
         setMessage({content:'',success:false});
@@ -111,7 +111,7 @@ const AddCriteriaPathItem = ({previouId,reload}) => {
     return (
         <FormDialog title='Add Criteria Path'>
             <FormValidator>
-                <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
+                <div className='flex flex-col w-full h-auto p-8'>
                     <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_course' setCalcWidth={setInputWidth}/>
                     <Message message={message}/>
                     <button style={{'--width':inputWidth+'px'}} 

@@ -1,19 +1,16 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate,useLocation,useParams, Outlet, useOutletContext } from 'react-router-dom';
+import { useNavigate,useLocation,useParams} from 'react-router-dom';
 import EditUser from './EditUser';
-import {PiLockKeyOpen ,PiPencilSimple,PiCaretDoubleLeft,PiCaretLeft,PiCaretDoubleRight,PiCaretRight, PiFunnel,PiFolderLight } from 'react-icons/pi';
+import {PiLockKeyOpen ,PiPencilSimple } from 'react-icons/pi';
 import ResetPassword from './ResetPassword';
 import Detail from './Detail';
 import {useData} from '../data';
-import TransactionFilter from './TransactionFilter';
-import TransactionItem from './TransactionItem';
 import ContentContainer from './ContentContainer';
 
 const User = () => {
-    const {setDialog,setAccess} = useContext(GlobalContext);
+    const {setDialog} = useContext(GlobalContext);
     const [user,setUser] = useState(null);
-    const [currentUser,setCurrentUser] = useState(null);
     const [expiryDate,setExpiryDate] = useState(null);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
@@ -51,8 +48,9 @@ const User = () => {
         .then(async (currentResponse) => {
             if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
                 currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                currentResponse.content.user.createdOn = currentResponse.content.user.createdOn?new Date(currentResponse.content.user.createdOn):new Date();
+                currentResponse.content.user.lastUpdatedOn = currentResponse.content.user.lastUpdatedOn?new Date(currentResponse.content.user.lastUpdatedOn):new Date();
                 currentUsr = currentResponse.content.user;
-                setCurrentUser(currentUsr);
             }
         })
         if(!currentUsr) {
@@ -87,6 +85,8 @@ const User = () => {
             .then(async (response) => {
                 if(response.content) {
                     response.content.dateOfBirth = response.content.dateOfBirth?new Date(response.content.dateOfBirth):new Date();
+                    response.content.createdOn = response.content.createdOn?new Date(response.content.createdOn):new Date();
+                    response.content.lastUpdatedOn = response.content.lastUpdatedOn?new Date(response.content.lastUpdatedOn):new Date();
                     usr = response.content;
                     setUser(response.content);
                     await request('GET','expirydate',null,{
@@ -143,6 +143,7 @@ const User = () => {
     }
 
     useEffect(() => {
+        console.log(state)
         getUser();
     },[path])
     return (
@@ -167,6 +168,10 @@ const User = () => {
                     <Detail label='User Type' value={user.userType?user.userType.name:''} capitalize={true}/>
                     {user.userGroup && <Detail label='User Group' value={user.userGroup.name}/>}
                     {expiryDate && <Detail label='Expiry date' value={expiryDate.toLocaleString('default', { month: 'long' })+' '+expiryDate.getDate()+', '+expiryDate.getFullYear()+' '+expiryDate.toLocaleTimeString('en-US')}/>}
+                    {user.createdOn && user.createdOn !== '' && <Detail label='Created on' value={user.createdOn.toLocaleString('default', { month: 'long' })+' '+user.createdOn.getDate()+', '+user.createdOn.getFullYear()+' '+user.createdOn.toLocaleTimeString('en-US')}/>}
+                    {user.createdBy && <Detail label='Created by' value={user.createdBy.name}/>}
+                    {user.lastUpdatedOn && user.lastUpdatedOn !== '' && <Detail label='Last updated on' value={user.lastUpdatedOn.toLocaleString('default', { month: 'long' })+' '+user.lastUpdatedOn.getDate()+', '+user.lastUpdatedOn.getFullYear()+' '+user.lastUpdatedOn.toLocaleTimeString('en-US')}/>}
+                    {user.lastUpdatedBy && <Detail label='Last updated by' value={user.lastUpdatedBy.name}/>}
                 </div>
                 <div className='flex flex-col w-full h-auto space-y-2'>
                     <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Personal Details</p>

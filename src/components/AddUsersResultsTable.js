@@ -333,6 +333,8 @@ const Page = ({page,columns,headerRef}) => {
                         <div key={i} className={column.name+` start-0 px-2 text-left whitespace-nowrap overflow-hidden overflow-ellipsis ${user['status'] === 'ERROR'?'text-red-500':user['status'] === 'WARNING'?'text-yellow-500':''}`}>
                             {user[column.name] instanceof Date?user[column.name].toLocaleDateString():
                             typeof user[column.name] === 'boolean'?user[column.name]?'Yes':'No':
+                            column.name === 'district'?user.district.name:
+                            column.name === 'province'?user.district.province:
                             user[column.name]}
                         </div>
                     )}

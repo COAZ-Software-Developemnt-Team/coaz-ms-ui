@@ -4,27 +4,36 @@ import { useLocation,useParams, useOutletContext } from 'react-router-dom';
 import EditCourse from './EditCourse';
 import { PiBookFill,PiPencilSimple,PiTextAlignLeft,PiTag } from 'react-icons/pi';
 import AddTopic from './AddTopic';
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
 import {useData} from '../data';
 import TopicItem from './TopicItem';
 import Detail from './Detail';
 import AddTariff from './AddTariff';
 import Tariff from './Tariff';
 import ContentContainer from './ContentContainer';
+import CourseTeacherItem from './CourseTeacherItem';
+import UserItem from './UserItem';
 
 const Course = () => {
     const {setDialog} = useContext(GlobalContext);
     const [course,setCourse] = useState(null);
+    const [courseTeachers,setCourseTeachers] = useState([]);
+    const [courseStudents,setCourseStudents] = useState([]);
     const [topics,setTopics] = useState([]);
     const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [loading,setLoading] = useState(false); 
+    const [parentPath,setParentPath] = useState(null);
+    const [parent,setParent] = useState(null);
     const {request} = useData();
-    const {courseId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,programId,courseId} = useParams();
+    const location = useLocation();
+    const state = location.state;
     const path = useLocation().pathname;
+
+    const ENROLLMENTS = 'enrollments';
+    const PROGRAMS = 'programs';
+    const MY_COURSES = 'my_courses';
 
     const onEdit = (e) => {
         e.preventDefault();
@@ -78,6 +87,8 @@ const Course = () => {
             await request('GET',`course/${courseId}`,null,null,true)
             .then((response) => {
                 if(response.content) {
+                    response.content.availableFrom = response.content.availableFrom?new Date(response.content.availableFrom):null;
+                    response.content.availableTo = response.content.availableTo?new Date(response.content.availableTo):null;
                     setCourse(response.content);
                     let btns = [];
                     if(updateAuth) {
@@ -129,7 +140,7 @@ const Course = () => {
         })
     }
 
-    const getTariffs = () => {
+    const getTariffs = async () => {
         if(courseId) {
             request('GET',`tariffs/${courseId}`,null,null,true)
             .then((response) => {
@@ -145,11 +156,58 @@ const Course = () => {
         }
     }
 
+    const getCourseTeachers = async () => {
+        if(courseId) {
+            request('GET','courseteachers/course',null,{courseId:courseId},true)
+            .then((response) => {
+                if(response.status && response.status === 'SUCCESSFUL' && response.content) {
+                    setCourseTeachers(response.content);
+                } else {
+                    setCourseTeachers([]);
+                }
+            })
+            .catch((error) => {
+                setCourseTeachers([]);
+            })
+        }
+    }
+
+    const getCourseStudents = async () => {
+        await request('GET','programstudentcourses/course',null,{
+            courseId:courseId
+        },true)
+        .then((response) => {
+            if(response.content) {
+                setCourseStudents(response.content);
+            } else {
+                setCourseStudents([])
+            }
+        })
+        .catch((error) => {
+            setCourseStudents([])
+        })
+    }
+
+
     const load = async () => {
         setLoading(true);
+        if(state && state.parentPath) {
+            if(state.parentPath.includes(PROGRAMS)) {
+                setParent(PROGRAMS)
+            } else if(state.parentPath.includes(ENROLLMENTS)) {
+                setParent(ENROLLMENTS)
+            } else if(state.parentPath.includes(MY_COURSES)) {
+                setParent(MY_COURSES)
+            }
+        }
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         await getCourse();
         await getTopics();
-        getTariffs();
+        await getTariffs();
+        await getCourseTeachers();
+        await getCourseStudents();
         setLoading(false);
     }
 
@@ -157,32 +215,51 @@ const Course = () => {
         load()
     },[path])
   return (
-    <div style={{backgroundSize:304+'px',backgroundImage:'url(/images/home_bg.jpg)'}}
-        className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiBookFill} text={course && course.name} subText={course && course.professionalCategory?course.professionalCategory:''} loading={loading}>
-            {course && 
-                <div className='flex flex-col w-full h-auto space-y-4'>
-                    <div className='flex flex-col w-full h-auto space-y-2'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
-                        <Detail label='External Id' value={course.externalId}/>
-                        <Detail label='Points' value={course.points}/>
-                    </div>
-                    {topics && topics.length > 0 &&
-                    <div className='flex flex-col w-full h-auto'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Topics</p>
-                        {topics.map((topic,i) => <TopicItem key={i} topic={topic} reload={getTopics} updateAuthority={updateAuthority}/>)}
-                    </div>
-                    }
-                    {tariffs && tariffs.length > 0 &&
-                    <div className='flex flex-col w-full h-auto'>
-                        <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Tariffs</p>
-                        {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={getTariffs}/>)}
-                    </div>
-                    }
+    <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+        buttons={parent === PROGRAMS?buttons:null} 
+        Icon={PiBookFill} 
+        text={course && course.name}  
+        loading={loading}>
+        {course && 
+            <div className='flex flex-col w-full h-auto space-y-4'>
+                <div className='flex flex-col w-full h-auto space-y-2'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+                    {course.description && <Detail label='Description' value={course.description}/>}
+                    <Detail label='External Id' value={course.externalId}/>
+                    <Detail label='Points' value={course.points}/>
+                    {course.program && <Detail label='Program' value={course.program.name}/>}
+                    {course.professionalCategory && <Detail label='Professional Category' value={course.professionalCategory}/>}
+                    {course.availableFrom && <Detail label='Available from' value={course.availableFrom.toLocaleString('default', { month: 'long' })+' '+course.availableFrom.getDate()+', '+course.availableFrom.getFullYear()}/>}
+                    {course.availableTo && <Detail label='Available upto' value={course.availableTo.toLocaleString('default', { month: 'long' })+' '+course.availableTo.getDate()+', '+course.availableTo.getFullYear()}/>}
+                    <Detail label='Available' value={course.available?'Yes':'No'}/>
                 </div>
-            }
-        </ContentContainer>
-    </div>
+                {topics && topics.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Topics</p>
+                    {topics.map((topic,i) => <TopicItem key={i} topic={topic} reload={getTopics} updateAuthority={updateAuthority}/>)}
+                </div>
+                }
+                {tariffs && tariffs.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Tariffs</p>
+                    {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={getTariffs}/>)}
+                </div>
+                }
+                {parent === PROGRAMS && courseTeachers && courseTeachers.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>CPD Teachers</p>
+                    {courseTeachers.map((courseTeacher,i) => <CourseTeacherItem key={i} courseTeacher={courseTeacher} showTeacher={true} parent={parent} reload={getCourseTeachers}/>)}
+                </div>
+                }
+                {parent === PROGRAMS && courseStudents && courseStudents.length > 0 &&
+                <div className='flex flex-col w-full h-auto'>
+                    <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>CPD Students</p>
+                    {courseStudents.map((courseStudent,i) => <UserItem key={i} user={courseStudent.programStudent.student} reload={getCourseStudents}/>)}
+                </div>
+                }
+            </div>
+        }
+    </ContentContainer>
   )
 }
 

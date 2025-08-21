@@ -67,7 +67,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 if(inputs[i].type == 'select') {
                                     row.push(
                                         <Select 
-                                            key={i} 
+                                            key={j+'-'+i} 
                                             label={inputs[i].label} 
                                             id={id+'_'+i} 
                                             name={inputs[i].name}  
@@ -85,7 +85,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 } else if(inputs[i].type == 'checkbox') {
                                     row.push(
                                         <Checkbox 
-                                            key={i}
+                                            key={j+'-'+i}
                                             name={inputs[i].label}
                                             width={inputWidth} 
                                             checked={inputs[i].value} 
@@ -96,7 +96,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 } else if(inputs[i].type == 'time') {
                                     row.push(
                                         <Time 
-                                            key={i} 
+                                            key={j+'-'+i} 
                                             label={inputs[i].label}
                                             id={id+'_'+i}   
                                             value={inputs[i].value}
@@ -110,7 +110,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 } else if(inputs[i].type == 'textarea') {
                                     row.push(
                                         <TextArea
-                                            key={i} 
+                                            key={j+'-'+i} 
                                             label={inputs[i].label}
                                             id={id+'_'+i}  
                                             name={inputs[i].name}  
@@ -124,7 +124,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 } else if(inputs[i].type == 'file') {
                                     row.push(
                                         <FileInput
-                                            key={i} 
+                                            key={j+'-'+i} 
                                             label={inputs[i].label}
                                             id={id+'_'+i}  
                                             name={inputs[i].name}  
@@ -142,7 +142,7 @@ const Inputs = ({inputs,minWidth,paddingX,spaceX,id,setCalcWidth}) => {
                                 } else {
                                     row.push(
                                         <Input 
-                                            key={i} 
+                                            key={j+'-'+i} 
                                             label={inputs[i].label}
                                             type={inputs[i].type} 
                                             id={id+'_'+i}  

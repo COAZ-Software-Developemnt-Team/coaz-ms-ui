@@ -11,11 +11,8 @@ import ContentContainer from './ContentContainer';
 import User from './User';
 
 const Accounts = () => {
-    const {setDialog} = useContext(GlobalContext);
     const [accounts,setAccounts] = useState([]);
-    const [readAuthority,setReadAuthority] = useState(false);
-    const {accountId} = useParams();
-    const [buttons,setButtons] = useState([]);
+    const {currentUserId,accountId} = useParams();
     const [pageNo,setPageNo] = useState(0);
     const [pageSize,setPageSize] = useState(0);
     const [totalElements,setTotalElements] = useState(0);
@@ -79,8 +76,12 @@ const Accounts = () => {
             authority:'READ'
         },true)
         .then(async response => {
-            if(user && response.status === 'YES') {
-                await request('GET','accounts',null,null,true)
+            if(user && response.status === 'YES' && page) {
+                await request('GET','accounts',null,{
+                    pageNo:page.pageNo,
+                    pageSize:page.pageSize,
+                    sortBy:page.sortBy,
+                    sortDir:page.sortDir},true)
                 .then((response) => {
                     if(response.content) {
                         setAccounts(response.content);
@@ -123,18 +124,17 @@ const Accounts = () => {
         setLoading(false);
     }
 
-    const load = async () => {
-        getAccounts(page);
-    }
-
     useEffect(() => {
-        load();
+        getAccounts(page);
     },[path,page])
   return (
     <>{accountId?
-        <Outlet context={{parentPath:`/accounts`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiBankFill} text='Accounts' loading={loading}>
-            {readAuthority && accounts  && totalElements >  pageSize &&
+        <Outlet/>:
+        <ContentContainer previous={currentUserId?`/${currentUserId}/home`:'/home'} 
+            Icon={PiBankFill} 
+            text='Accounts' 
+            loading={loading}>
+            {accounts  && totalElements >  pageSize &&
                 <div className='flex flex-wrap w-full h-fit justify-between items-center'>
                     <p className='text-xs font-helveticaNeueRegular text-[rgb(145,145,145)] tracking-wider'>
                         {`Showing ${accounts && accounts.length > 0?(pageNo * pageSize)+1:0} to ${((pageNo * pageSize)+accounts.length)} of ${totalElements}`}
@@ -186,6 +186,8 @@ export default Accounts
 
 const AccountItem = ({account}) => {
     const [balance,setBalance] = useState(0);
+    const {currentUserId} = useParams(); 
+    const path = useLocation().pathname;
     const {request} = useData();
 
     let USDecimal = new Intl.NumberFormat('en-US', {
@@ -215,7 +217,7 @@ const AccountItem = ({account}) => {
         <div className='flex flex-row w-full h-auto'>
             {account &&
             <div className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <div onClick={(e) => navigate(`/accounts/${account.id}`)}
+                <div onClick={(e) => navigate(`/${currentUserId}/accounts/${account.id}`,{state:{parentPath:path}})}
                     className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
                     <PiMoneyWavyLight size={40} className='text-[rgb(0,175,240)] shrink-0'/>
                     <div className='flex flex-col w-full h-fit'>

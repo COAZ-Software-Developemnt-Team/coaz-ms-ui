@@ -5,8 +5,9 @@ import Inputs from './Inputs';
 import Message from './Message';
 import FormDialog from './FormDialog';
 import {useData} from '../data';
+import TextArea from './TextArea';
 
-const AddCourse = ({reload}) => {
+const AddCourse = ({programId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [course,setCourse] = useState({});
     const [professionalCategories,setProfessionalCategories] = useState([]);
@@ -43,7 +44,15 @@ const AddCourse = ({reload}) => {
 
     const inputs = [
         {
-            label:'name',
+            label:'Program',
+            type:'text', 
+            name:'program',
+            value:course && course.program?course.program.name:'',   
+            placeholder:'Progam name...',
+            disabled:true
+        },
+        {
+            label:'Name',
             type:'text', 
             name:'name',
             value:course && course.name?course.name:'',   
@@ -82,6 +91,31 @@ const AddCourse = ({reload}) => {
             value:course && course.professionalCategory?course.professionalCategory:'',
             placeholder:'Select professional category...',
             onChange:(e) => handleChange(e,onChange)
+        },
+        {
+            label:'Available from',
+            type:'date',
+            name:'availableFrom', 
+            value:course && course.availableFrom?course.availableFrom.toISOString().slice(0, 10):'',
+            placeholder:'Available from...',
+            onChange:(e) => handleChange(e,onDate)
+        },
+        {
+            label:'Available upto',
+            type:'date',
+            name:'availableTo', 
+            value:course && course.availableTo?course.availableTo.toISOString().slice(0, 10):'',
+            placeholder:'Available upto...',
+            onChange:(e) => handleChange(e,onDate)
+        },
+        {
+            label:'Visible when unavailable',
+            type:'checkbox',
+            name:'visibleWhenUnavailable',
+            value:course?course.visibleWhenUnavailable:false,   
+            onChange:(e) => {
+                setCourse({...course,visibleWhenUnavailable: !course.visibleWhenUnavailable});
+            }
         },
         {
             label:'Tariff Applicable',
@@ -128,6 +162,11 @@ const AddCourse = ({reload}) => {
         }
     }
 
+    const onDate = (e) => {
+        const value = e.target.value;
+        setCourse({...course, [e.target.name]: new Date(value)});
+    };
+
     const onCriteriaPath = (e) => {
         if(e.target.value === '') {
             setCourse({...course, [e.target.name]: null});
@@ -138,38 +177,58 @@ const AddCourse = ({reload}) => {
     }
 
     useEffect(() => {
-        request('GET','professionalcategories',null,null,false)
-        .then((response) => {
-            if(response.content) {
-                setProfessionalCategories(response.content);
-            }  else {
-                setProfessionalCategories([]);
-            }
-        })
-        .catch((error) => {
-            setProfessionalCategories([]);
-        })
+        (async () => {
+            let program = null;
+            await request('GET',`program/${programId}`,null,null,true)
+            .then((response) => {
+                if(response.content) {
+                    program = response.content;
+                } 
+            })
 
-        request('GET','criteriapath/leaves',null,null,true)
-        .then((response) => {
-            if(response.status) {
-                if(response.status === 'SUCCESSFUL' && response.content && response.content.length > 0) {
-                    setCriteriaPaths(response.content);
-                    setCourse({...course, criteriaPathItem: response.content[0]});
-                } else {
+            await request('GET','professionalcategories',null,null,false)
+            .then((response) => {
+                if(response.content) {
+                    setProfessionalCategories(response.content);
+                }  else {
+                    setProfessionalCategories([]);
+                }
+            })
+            .catch((error) => {
+                setProfessionalCategories([]);
+            })
+
+            let criteriaPathItem = null;
+            await request('GET','criteriapath/leaves',null,null,true)
+            .then((response) => {
+                if(response.status) {
+                    if(response.status === 'SUCCESSFUL' && response.content && response.content.length > 0) {
+                        setCriteriaPaths(response.content);
+                        criteriaPathItem = response.content[0];
+                    } else {
+                        setCriteriaPaths([]);
+                    }
+                } else  {
                     setCriteriaPaths([]);
                 }
-            } else  {
-                setCriteriaPaths([]);
-            }
-        })
+            })
+            setCourse({...course, program: program,criteriaPathItem: criteriaPathItem});
+        })()
     },[]);
 
     return (
         <FormDialog title='Add Course'>
             {course && <FormValidator>
-                <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
+                <div className='flex flex-col w-full h-auto p-8'>
                     <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_course' setCalcWidth={setInputWidth}/>
+                    <TextArea
+                        label='Description'
+                        id='description'
+                        name='description'
+                        value={course.description?course.description:''}
+                        placeholder='Enter description'
+                        onChange={(e) => handleChange(e,onChange)}
+                    />
                     <Message message={message}/>
                     <button style={{'--width':inputWidth+'px'}} 
                         onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>

@@ -82,7 +82,7 @@ const Courses = () => {
     },[path])
   return (
     <>{courseId?
-        <Outlet context={{parentPath:`/courses`}}/>:
+        <Outlet/>:
         <ContentContainer previous='/home' buttons={buttons} Icon={PiBookFill} text='CPDs' loading={loading}>
             {myClasses && myClasses.length > 0 &&
             <div className='flex flex-col w-full h-auto space-y-2'>

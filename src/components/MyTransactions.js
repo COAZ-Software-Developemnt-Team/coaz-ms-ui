@@ -69,6 +69,7 @@ const MyTransactions = () => {
 
     const handleLast = (e) => {
         if(e) e.preventDefault();
+        
         if(page.pageNo < totalPages - 1 && !last) {
             setPage({...page, pageNo: totalPages - 1});
         }
@@ -76,7 +77,7 @@ const MyTransactions = () => {
 
     const onDeposit = (e) => {
         e.preventDefault();
-        navigate(`/deposit/${currentUserId}`);
+        navigate(`/deposit/${currentUserId}`,{state:{parentPath:path}});
     }
 
     const getTransactions = async (filter,page) => {

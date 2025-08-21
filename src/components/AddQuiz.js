@@ -10,7 +10,7 @@ import {useData} from '../data';
 const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [quiz,setQuiz] = useState({});
-    const [courseClass,setCourseClass] = useState({});
+    const [courseTeacher,setCourseTeacher] = useState({});
     const [topic,setTopic] = useState(null);
     const [message,setMessage] = useState({content:'',success:false});
     const minWidth = 240;
@@ -18,9 +18,9 @@ const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
     const {request} = useData();
     const submit = async (e) => {
         setMessage({content:'',success:false});
-        if(courseClass) {
+        if(courseTeacher) {
             setLoading(true);
-            quiz.courseClass = courseClass;
+            quiz.courseTeacher = courseTeacher;
             quiz.topic = topic;
             request('POST','quiz',quiz,null,true)
             .then((response) => {
@@ -51,7 +51,7 @@ const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
             type:'text', 
             name:'course',
             disabled:true,
-            value:courseClass && courseClass.course?courseClass.course.name:'',   
+            value:courseTeacher && courseTeacher.course?courseTeacher.course.name:'',   
             placeholder:'Enter course...'
         },
         {
@@ -67,7 +67,7 @@ const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
             type:'text', 
             name:'teacher',
             disabled:true,
-            value:courseClass && courseClass.teacher?courseClass.teacher.name:'',   
+            value:courseTeacher && courseTeacher.teacher?courseTeacher.teacher.name:'',   
             placeholder:'Enter teacher...'
         },
         {
@@ -123,13 +123,13 @@ const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
 
     useEffect(() => {
         if(courseId && teacherId) {
-            request('GET','class',null,{
+            request('GET','courseteacher',null,{
                 courseId:courseId,
                 teacherId:teacherId
             },true)
             .then((response) => {
                 if(response.content) {
-                    setCourseClass(response.content);
+                    setCourseTeacher(response.content);
                 } else {
                     setDialog(null);
                 }
@@ -156,19 +156,17 @@ const AddQuiz = ({courseId,teacherId,topicId,reload}) => {
     return (
         <div>
             <FormDialog title='Add quiz'>
-                <div className='flex w-full sm:w-[640px] h-full sm:h-[500px] p-8'>
-                    <Scrollable vertical={true}>
-                        {quiz && <FormValidator>
-                            <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
-                                <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_quiz' setCalcWidth={setInputWidth}/>
-                                <Message message={message}/>
-                                <button style={{'--width':inputWidth+'px'}} 
-                                    onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                                    Submit
-                                </button>
-                            </div>
-                        </FormValidator>}
-                    </Scrollable>
+                <div className='flex w-full h-auto p-8'>
+                    {quiz && <FormValidator>
+                        <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
+                            <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_quiz' setCalcWidth={setInputWidth}/>
+                            <Message message={message}/>
+                            <button style={{'--width':inputWidth+'px'}} 
+                                onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                                Submit
+                            </button>
+                        </div>
+                    </FormValidator>}
                 </div>
             </FormDialog>
         </div>

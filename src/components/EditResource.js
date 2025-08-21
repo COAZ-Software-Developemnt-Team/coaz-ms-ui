@@ -109,8 +109,7 @@ const EditResource = ({id, update}) => {
         <div>
             <FormDialog title='Edit resource'>
                 {resource && <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-[380px] p-8'>
-                        <Scrollable vertical={true}>
+                    <div className='flex flex-col w-full p-8'>
                             <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
                                 <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='edit_resource' setCalcWidth={setInputWidth}/>
                                 <Message message={message}/>
@@ -119,7 +118,6 @@ const EditResource = ({id, update}) => {
                                     Submit
                                 </button>
                             </div>
-                        </Scrollable>
                     </div>
                 </FormValidator>}
             </FormDialog>

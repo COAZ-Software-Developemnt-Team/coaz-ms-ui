@@ -7,10 +7,12 @@ import {useData} from '../data';
 const EnrollmentTopic = () => {
     const [enrollmentTopic,setEnrollmentTopic] = useState(null);
     const [loading,setLoading] = useState();
-    const {programId,studentId,courseId,teacherId,topicId,resourceId,activityId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,programId,studentId,courseId,teacherId,topicId,resourceId,activityId} = useParams();
+    const [parentPath,setParentPath] = useState(null);
     const path = useLocation().pathname;
-    const [request] = useData;
+    const {request} = useData();
+    const location = useLocation();
+    const state = location.state;
     const navigate = useNavigate();
     
     const getEnrollmentTopic = async () => {
@@ -24,24 +26,30 @@ const EnrollmentTopic = () => {
                 if(response.content) {
                     setEnrollmentTopic(response.content);
                 }  else {
-                  navigate(parentPath)
+                  navigate(state && state.parentPath?state.parentPath:currentUserId?`/${currentUserId}/home`:'/home')
                 }
             })
             .catch((error) => {
-                navigate(parentPath)
+                navigate(state && state.parentPath?state.parentPath:currentUserId?`/${currentUserId}/home`:'/home')
             })
         }
         setLoading(false);
     }
 
     useEffect(() => {
+        if((!courseId || !teacherId || !topicId || !(resourceId || activityId)) && state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         getEnrollmentTopic();
     },[path])
   return (
     <>{courseId && teacherId && topicId && (resourceId || activityId)?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}`}}/>
+        <Outlet/>
         :
-        <ContentContainer previous={parentPath} Icon={PiTextAlignLeftFill} text={enrollmentTopic && enrollmentTopic.topic?enrollmentTopic.topic.name:''} loading={loading}>
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            Icon={PiTextAlignLeftFill} 
+            text={enrollmentTopic && enrollmentTopic.topic?enrollmentTopic.topic.name:''} 
+            loading={loading}>
             {enrollmentTopic && enrollmentTopic.topic &&
                 <div className='flex flex-col w-full h-auto space-y-4'>
                     {enrollmentTopic.resources && enrollmentTopic.resources.length > 0 &&
@@ -86,21 +94,10 @@ const EnrollmentMaterial = ({enrollmentMaterial}) => {
         e.preventDefault();
         if(enrollmentMaterial.material) {
             if(enrollmentMaterial.material.classname === 'Resource') {
-                navigate(`${path}/resource/${enrollmentMaterial.material.id}`);
-                /* await download(`resource/download/${enrollmentMaterial.material.id}`,null,true)
-                .then((response) => {
-                    if(response instanceof Blob) {
-                        const url = window.URL.createObjectURL(new Blob([response],{type:"application/pdf"}));
-                        window.open(url);
-                        request('POST',`view/${enrollmentMaterial.material.id}`,null,null,true)
-                        .then(() => {
-                            reload && reload();
-                        })
-                    }
-                }) */
+                navigate(`${path}/resource/${enrollmentMaterial.material.id}`,{state:{parentPath:path}});
             }
             else if(enrollmentMaterial.material.classname === 'Quiz' || enrollmentMaterial.material.classname === 'Assignment') {
-                navigate(`${path}/attempts/${enrollmentMaterial.material.id}`)
+                navigate(`${path}/attempts/${enrollmentMaterial.material.id}`,{state:{parentPath:path}})
             }
         }
     }

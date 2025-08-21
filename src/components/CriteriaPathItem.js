@@ -1,6 +1,6 @@
 import React, {useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useParams,useLocation } from 'react-router-dom';
 import { PiTrash,PiDotsThreeVertical, PiPathLight } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import {useData} from '../data';
@@ -8,6 +8,7 @@ import {useData} from '../data';
 const CriteriaPathItem = ({criteriaPathItem,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {currentUserId} = useParams();
     const {request} = useData();
     const moreRef = useRef(null)
 
@@ -39,7 +40,7 @@ const CriteriaPathItem = ({criteriaPathItem,deleteAuthority,reload}) => {
             <div  onMouseEnter={(e) => setHighlighted(true)} 
                     onMouseLeave={(e) => setHighlighted(false)} 
                     className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <div onClick={(e) => navigate(`/paths/${criteriaPathItem.id}`)}
+                <div onClick={(e) => navigate(`/${currentUserId}/paths/${criteriaPathItem.id}`)}
                     className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
                     <PiPathLight size={40} className='text-[rgb(0,175,240)] shrink-0'/>
                     <div className='flex flex-col w-full h-fit'>

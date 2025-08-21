@@ -180,51 +180,49 @@ const EditRole = ({id,reload}) => {
             >
             <FormDialog title='Edit Role'>
                 {role && <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                        <Scrollable vertical={true}>
-                            <div className='flex flex-col w-full h-auto shrink-0'>
-                                <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_role' setCalcWidth={setInputWidth}/>
-                                <div className='flex flex-col w-full h-auto space-y-2'>
-                                    <p className='text-gray-600 text-sm capitalize'>Authorities</p>
-                                    <div className='flex flex-col w-full h-auto p-4 space-y-4 border rounded-lg'>
-                                        {role && role.authorities && role.authorities.map((authority,i) => 
-                                        <div key={i} 
-                                            onClick={(e) => {
-                                                setSelectedAuth(authority); 
-                                            }}
-                                            className='flex flex-row space-x-4'>
-                                            <p className={`flex flex-row w-full h-auto text-sm tracking-wider whitespace-nowrap overflow-ellipsis capitalize font-jostBook ${selectedAuth === authority?'text-[rgb(0,175,240)]':''} cursor-pointer`}>
-                                                {authority}
-                                            </p>
-                                        </div>)
-                                        }
-                                    </div>
-                                    <div className='flex flex-row w-auto h-auto space-x-4'>
-                                        <button ref={addButtonRef} 
-                                            onClick={(e) => {
-                                                add(e);
-                                            }} 
-                                            className={`flex w-6 h-6 items-center justify-center ${addingAuthority?'border border-[rgb(0,175,240)] text-[rgb(0,175,240)]':'bg-[rgb(0,175,240)] text-white hover:bg-[rgba(0,175,240,.7)]'}  rounded-sm`}>
-                                            <LiaPlusSolid size={16}/>
-                                        </button>
-                                        <button onClick={(e) => {
-                                                let authorities = role.authorities.filter((roleAuthority => roleAuthority !== selectedAuth));
-                                                setRole({...role,authorities:authorities});
-                                                setSelectedAuth(null);
-                                            }} 
-                                            disabled={!selectedAuth}
-                                            className={`flex w-6 h-6 items-center justify-center ${selectedAuth?'bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)]':'bg-[rgba(0,175,240,.7)]'} text-white rounded-sm`}>
-                                            <PiTrashLight size={16}/>
-                                        </button>
-                                    </div>
+                    <div className='flex flex-col w-full h-auto p-8'>
+                        <div className='flex flex-col w-full h-auto shrink-0'>
+                            <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_role' setCalcWidth={setInputWidth}/>
+                            <div className='flex flex-col w-full h-auto space-y-2'>
+                                <p className='text-gray-600 text-sm capitalize'>Authorities</p>
+                                <div className='flex flex-col w-full h-auto p-4 space-y-4 border rounded-lg'>
+                                    {role && role.authorities && role.authorities.map((authority,i) => 
+                                    <div key={i} 
+                                        onClick={(e) => {
+                                            setSelectedAuth(authority); 
+                                        }}
+                                        className='flex flex-row space-x-4'>
+                                        <p className={`flex flex-row w-full h-auto text-sm tracking-wider whitespace-nowrap overflow-ellipsis capitalize font-jostBook ${selectedAuth === authority?'text-[rgb(0,175,240)]':''} cursor-pointer`}>
+                                            {authority}
+                                        </p>
+                                    </div>)
+                                    }
                                 </div>
-                                <Message message={message}/>
-                                <button style={{'--width':inputWidth+'px'}} 
-                                    onClick={handleSubmit} className='flex shrink-0 w-full lg:w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                                    Submit
-                                </button>
+                                <div className='flex flex-row w-auto h-auto space-x-4'>
+                                    <button ref={addButtonRef} 
+                                        onClick={(e) => {
+                                            add(e);
+                                        }} 
+                                        className={`flex w-6 h-6 items-center justify-center ${addingAuthority?'border border-[rgb(0,175,240)] text-[rgb(0,175,240)]':'bg-[rgb(0,175,240)] text-white hover:bg-[rgba(0,175,240,.7)]'}  rounded-sm`}>
+                                        <LiaPlusSolid size={16}/>
+                                    </button>
+                                    <button onClick={(e) => {
+                                            let authorities = role.authorities.filter((roleAuthority => roleAuthority !== selectedAuth));
+                                            setRole({...role,authorities:authorities});
+                                            setSelectedAuth(null);
+                                        }} 
+                                        disabled={!selectedAuth}
+                                        className={`flex w-6 h-6 items-center justify-center ${selectedAuth?'bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)]':'bg-[rgba(0,175,240,.7)]'} text-white rounded-sm`}>
+                                        <PiTrashLight size={16}/>
+                                    </button>
+                                </div>
                             </div>
-                        </Scrollable>
+                            <Message message={message}/>
+                            <button style={{'--width':inputWidth+'px'}} 
+                                onClick={handleSubmit} className='flex shrink-0 w-full lg:w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                                Submit
+                            </button>
+                        </div>
                     </div>
                 </FormValidator>}
                 {addAuthority && 

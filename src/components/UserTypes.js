@@ -16,7 +16,7 @@ const UserTypes = () => {
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
     const {request} = useData();
-    const {userTypeId} = useParams();
+    const {currentUserId,userTypeId} = useParams();
     const path = useLocation().pathname;
 
     const onAddUserType = (e) => {
@@ -76,8 +76,8 @@ const UserTypes = () => {
     },[path])
   return (
     <>{userTypeId?
-        <Outlet context={{parentPath:`/usertypes`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiUsersThreeFill} text='User Types' loading={loading}>
+        <Outlet/>:
+        <ContentContainer previous={currentUserId?`/${currentUserId}/home`:'/home'} buttons={buttons} Icon={PiUsersThreeFill} text='User Types' loading={loading}>
             {userTypes && userTypes.length > 0 &&
             <div className='flex flex-col w-full h-auto space-y-2'>
                 {userTypes.map((userType,i) => <UserTypeItem key={i} userType={userType} deleteAuthority={deleteAuthority} reload={load}/>)}
@@ -95,6 +95,8 @@ const UserTypeItem = ({userType,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const [tariff,setTariff] = useState(null);
+    const {currentUserId} = useParams();
+    const path = useLocation().pathname;
     const {request} = useData();
     const moreRef = useRef(null)
 
@@ -146,7 +148,7 @@ const UserTypeItem = ({userType,deleteAuthority,reload}) => {
             <div  onMouseEnter={(e) => setHighlighted(true)} 
                     onMouseLeave={(e) => setHighlighted(false)} 
                     className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <div onClick={(e) => navigate(`/usertypes/${userType.id}`)}
+                <div onClick={(e) => navigate(`/${currentUserId}/usertypes/${userType.id}`,{state:{parentPath:path}})}
                     className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
                     <PiUsersThreeLight size={40} className='text-[rgb(0,175,240)] shrink-0'/>
                     <div className='flex flex-col w-full h-fit'>

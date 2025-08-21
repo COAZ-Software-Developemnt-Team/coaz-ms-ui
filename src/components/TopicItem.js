@@ -9,7 +9,7 @@ const TopicItem = ({topic,reload,updateAuthority}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
     const {request} = useData();
-    const {courseId,teacherId} = useParams();
+    const {currentUserId,courseId,teacherId} = useParams();
     const path = useLocation().pathname;
     const moreRef = useRef(null)
 
@@ -18,7 +18,7 @@ const TopicItem = ({topic,reload,updateAuthority}) => {
     const onOpen = (e) => {
         e.preventDefault();
         if(courseId && teacherId) {
-            navigate(`${path}/${topic.id}`);
+            navigate(`${path}/${topic.id}`,{state:{parentPath:path}});
         }
     }
 

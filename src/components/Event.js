@@ -1,6 +1,6 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useLocation,useParams, useOutletContext } from 'react-router-dom';
+import { useLocation,useParams } from 'react-router-dom';
 import { PiDotsThreeVertical,PiTag,PiTrash, PiPencilSimple, PiMaskHappy, PiCalendarDotFill, PiCloudSunLight } from 'react-icons/pi';
 import YesNoDialog from './YesNoDialog';
 import AddTariff from './AddTariff';
@@ -21,12 +21,19 @@ const Event = () => {
     const [eventUsers,setEventUsers] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const [parent,setParent] = useState(null);
+    const [parentPath,setParentPath] = useState(null);
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [readUsersAuthority,setReadUsersAuthority] = useState(false);
-    const {eventId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,eventId} = useParams();
     const path = useLocation().pathname;
-    const [request] = useData;
+    const location = useLocation();
+    const state = location.state;
+    const {request} = useData();
+
+    const EVENTS = 'events';
+    const MY_EVENTS = 'my_events';
+
     const onEdit = (e) => {
         e.preventDefault();
         setDialog({
@@ -184,6 +191,18 @@ const Event = () => {
 
     const load = async () => {
         setLoading(true);
+        let prt = null;
+        if(path) {
+            if(path.includes(EVENTS)) {
+                prt = EVENTS;
+            } else if(path.includes(MY_EVENTS)) {
+                prt = MY_EVENTS;
+            }
+        }
+        setParent(prt);
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         await getEvent();
         await getEventDays();
         await getTariffs();
@@ -197,7 +216,12 @@ const Event = () => {
 
   return (
     <div className='flex flex-col w-full h-full space-y-8 items-center overflow-hidden'>
-        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiCalendarDotFill} text={event?event.name:''} subText={event?event.description:''} loading={loading}>
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={parent === EVENTS?buttons:null} 
+            Icon={PiCalendarDotFill} 
+            text={event?event.name:''} 
+            subText={event?event.description:''} 
+            loading={loading}>
             {event &&
             <div className='flex flex-col w-full h-fit space-y-4'>
                 <div className='flex flex-col w-full h-auto space-y-2'>
@@ -206,6 +230,7 @@ const Event = () => {
                     {event.tariffApplicable && event.criteriaPathItem &&
                         <Detail label='Tariff Criteria Path' value={event.criteriaPathItem.id}/>
                     }
+                    {event.description && <Detail label='Description' value={event.description}/>}
                 </div>
                 {eventDays && eventDays.length > 0 &&
                 <div className='flex flex-col w-full h-auto'>
@@ -219,7 +244,7 @@ const Event = () => {
                     {tariffs.map((tariff,i) => <Tariff key={i} tariff={tariff} reload={load}/>)}
                 </div>
                 }
-                {readUsersAuthority && eventUsers && eventUsers.length > 0 &&
+                {parent == EVENTS && readUsersAuthority && eventUsers && eventUsers.length > 0 &&
                 <div className='flex flex-col w-full h-auto'>
                     <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Users</p>
                     {eventUsers.map((eventUser,i) => <UserItem key={i} user={eventUser.user} reload={load}/>)}

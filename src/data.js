@@ -1,9 +1,10 @@
 import axios from "axios";
-// axios.defaults.baseURL = 'http://localhost:8080/api/';
-axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
-// axios.defaults.baseURL = 'http://192.168.0.161:8080/api/';
+
+//axios.defaults.baseURL = 'http://localhost:8080/api/';
+//axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
+//axios.defaults.baseURL = 'http://192.168.0.161:8080/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz_test/api/';
-//axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
+axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
 
 export function useData() {
     const request = async (method,url,body,params,authorization,refresh) => {
@@ -11,7 +12,7 @@ export function useData() {
       switch(method) {
         case 'POST': {
           await axios.post(url, body,{
-              params: params,
+              params:params,
               headers:authorization?{Authorization:`bearer ${sessionStorage.getItem("access_token")}`}:null
           })
           .then((postResponse) => {

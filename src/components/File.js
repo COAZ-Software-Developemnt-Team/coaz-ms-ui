@@ -9,19 +9,16 @@ import ContentContainer from './ContentContainer';
 const File = () => {
     const [loading,setLoading] = useState(false);
     const [parent,setParent] = useState('');
-    const location = useLocation();
     const pathname = useLocation().pathname;
     const {currentUserId,path} = useParams();
     const [file,setFile] = useState(null);
     const {request} = useData();
-    const { state } = location;
 
     const getFile = async () => {
         if(currentUserId) {
             await request('GET','file',null,{path:path?path:currentUserId},true)
             .then((response) => {
                 if(response.content) {
-                    console.log(response.content)
                     setFile(response.content);
                 }  else {
                     setFile(null);
@@ -34,20 +31,6 @@ const File = () => {
     }
 
     const load = async () => {
-        let user = null
-      /*   await request('GET','current',null,null,true)
-        .then(async (currentResponse) => {
-            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                user = currentResponse.content.user;
-                setCurrentUser(currentResponse.content.user);
-            } else {
-                setCurrentUser(false);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        }) */
         setLoading(true);
         await getFile();
         setParent(pathname.replace(/^(.*)\-.*$/,'$1')) // Remove last string after '-'
@@ -59,7 +42,7 @@ const File = () => {
     },[path])
 
   return (
-    <ContentContainer previous={parent && parent != pathname?parent:`/${currentUserId}/home`} Icon={PiFolderFill} text={file && currentUserId == file.name?'My Files':file?file.name:''} loading={loading}>
+    <ContentContainer previous={parent && parent != pathname?parent:`/${currentUserId}/home`} Icon={PiFolderFill} text={file && currentUserId == file.name?'My Files':file?file.name:'No Files'} loading={loading}>
         {file &&
             <div className='flex flex-col w-full h-fit space-y-4'>
                 <div className='flex flex-col w-full h-auto space-y-2'>
@@ -152,15 +135,15 @@ const FileItem = ({file}) => {
 const FileIcon = ({filename,size}) => {
     const lastDotIndex = filename.lastIndexOf('.');
     if (lastDotIndex === -1 || lastDotIndex === 0) {
-        return <PiFolderLight size={size} className='text-[rgb(0,175,240)]'/>;
+        return <PiFolderLight size={size} className='text-[rgb(0,175,240)] shrink-0'/>;
     }
     let ext = filename.substring(lastDotIndex + 1)                                                                
     if(ext === 'pdf') {
-        return <PiFilePdfLight size={size} className='text-[rgb(0,175,240)]'/>
+        return <PiFilePdfLight size={size} className='text-[rgb(0,175,240)] shrink-0'/>
     } else if(ext === 'doc' || ext === 'docx') {
-        return <PiFileDocLight size={size} className='text-[rgb(0,175,240)]'/>
+        return <PiFileDocLight size={size} className='text-[rgb(0,175,240)] shrink-0'/>
     } else {
-        return <PiFileLight size={size} className='text-[rgb(0,175,240)]'/>
+        return <PiFileLight size={size} className='text-[rgb(0,175,240)] shrink-0'/>
     }
 }
 

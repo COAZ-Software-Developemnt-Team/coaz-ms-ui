@@ -1,133 +1,116 @@
-import React,{useContext, useEffect,useState} from 'react'
-import {BsGraphUpArrow,BsGraphUp} from "react-icons/bs";
+import React,{useEffect,useState} from 'react'
 import Scrollable from './Scrollable';
 import { useRef } from 'react';
 import {useData} from '../data';
 import { PiArrowLeftLight, PiChartLineDownThin, PiChartLineUpThin, PiMoneyWavyThin } from 'react-icons/pi';
-import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import Deposit from './Deposit';
-import YesNoDialog from './YesNoDialog';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 const Account = () => {
-    const {setDialog,setAccess} = useContext(GlobalContext);
     const [account,setAccount] = useState(null)
     const [transactions,setTransactions] = useState([]);
     const [debits,setDebits] = useState(0);
     const [credits,setCredits] = useState(0);
     const [balance,setBalance] = useState(0);
-    const {accountId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,accountId} = useParams();
+    const [parentPath,setParentPath] = useState(null);
+    const location = useLocation();
+    const state = location.state;
     const transactionsRef = useRef(null);
     const padding = 16;
     const [contentSize,setContentSize] = useState({width:0,height:0});
     const {request} = useData();
+    const path = useLocation().pathname;
 
     const navigate = useNavigate();
 
-    /* const onDeposit = (e) => {
-        e.preventDefault();
-        if(!user) {
-            return;
-        }
-        setDialog({
-            show:true,
-            Component:() =>                       
-                <YesNoDialog 
-                    title='Deposit' 
-                    message='Are you sure you want to deposit into your account?' 
-                    onYes={async (e) => {
-                        setAccess({Component:() => <Deposit user={user}/>});
-                    }}
-                />
-        })
-    } */
-
     useEffect(() => {
-      (async () => {
-        let usr = null;
-        await request('GET','current',null,null,true)
-        .then(async (currentResponse) => {
-            if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
-                currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
-                usr = currentResponse.content.user;
-            } else {
-                usr = false;
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        })
-        if(accountId && usr) {
-            let acc = null;
-            await request ('GET','hasauthority',null,{
-                contextName:'ACCOUNT',
-                authority:'READ'
-            },true)
-            .then(async response => {
-                if(usr && response.status === 'YES') {
-                    await request('GET',`account/${accountId}`,null,null,true)
-                    .then((response) => {
-                        if(response.content) {
-                            acc = response.content;
-                        } else {
-                            navigate(parentPath);
-                        }
-                    })
-                    .catch((error) => {
-                        navigate(parentPath);
-                    });
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
+        (async () => {
+            let usr = null;
+            await request('GET','current',null,null,true)
+            .then(async (currentResponse) => {
+                if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
+                    currentResponse.content.user.dateOfBirth = currentResponse.content.user.dateOfBirth?new Date(currentResponse.content.user.dateOfBirth):new Date();
+                    usr = currentResponse.content.user;
                 } else {
-                    await request ('GET','account/my',null,null,true)
-                    .then((response) => {
-                        if(response.content && response.content.holder && usr && usr.id === response.content.holder.id) {
-                            acc = response.content;
-                        } else {
-                            navigate(parentPath);
-                        }
-                    })
-                    .catch((error) => {
-                        navigate(parentPath);
-                    })
+                    usr = false;
                 }
             })
             .catch((error) => {
-                navigate(parentPath);
+                console.error(error);
             })
-
-            if(acc) {
-                setAccount(acc);
-                await request('GET',`transactions/account`,null,{accountId:acc.id},true)
-                .then((response) => {
-                    if(response.content) {
-                        let dr = 0;
-                        let cr = 0;
-                        for(let transaction of response.content) {
-                            if(transaction.createdOn) {
-                                transaction.createdOn = new Date(transaction.createdOn);
+            if(accountId && usr) {
+                let acc = null;
+                await request ('GET','hasauthority',null,{
+                    contextName:'ACCOUNT',
+                    authority:'READ'
+                },true)
+                .then(async response => {
+                    if(usr && response.status === 'YES') {
+                        await request('GET',`account/${accountId}`,null,null,true)
+                        .then((response) => {
+                            if(response.content) {
+                                acc = response.content;
                             } else {
-                                transaction.createdOn = new Date();
+                                navigate(parentPath);
                             }
-                            if(transaction.debit && transaction.debit.id == acc.id) {
-                                dr += transaction.amount;
+                        })
+                        .catch((error) => {
+                            navigate(parentPath);
+                        });
+                    } else {
+                        await request ('GET','account/my',null,null,true)
+                        .then((response) => {
+                            if(response.content && response.content.holder && usr && usr.id === response.content.holder.id) {
+                                acc = response.content;
+                            } else {
+                                navigate(parentPath);
                             }
-                            if(transaction.credit && transaction.credit.id == acc.id) {
-                                cr += transaction.amount;
-                            }
-                        }
-                        setDebits(dr);
-                        setCredits(cr);
-                        setBalance(dr - cr);
-                        let sortedTrans = response.content.sort((trans1,trans2) => (trans1.createdOn < trans2.createdOn)?-1:(trans1.createdOn > trans2.createdOn)?1:0)
-                        setTransactions(sortedTrans);
+                        })
+                        .catch((error) => {
+                            navigate(parentPath);
+                        })
                     }
                 })
                 .catch((error) => {
-                    setTransactions([]);
+                    navigate(parentPath);
                 })
+
+                if(acc) {
+                    setAccount(acc);
+                    await request('GET',`transactions/account`,null,{accountId:acc.id},true)
+                    .then((response) => {
+                        if(response.content) {
+                            let dr = 0;
+                            let cr = 0;
+                            for(let transaction of response.content) {
+                                if(transaction.createdOn) {
+                                    transaction.createdOn = new Date(transaction.createdOn);
+                                } else {
+                                    transaction.createdOn = new Date();
+                                }
+                                if(transaction.debit && transaction.debit.id == acc.id) {
+                                    dr += transaction.amount;
+                                }
+                                if(transaction.credit && transaction.credit.id == acc.id) {
+                                    cr += transaction.amount;
+                                }
+                            }
+                            setDebits(dr);
+                            setCredits(cr);
+                            setBalance(dr - cr);
+                            let sortedTrans = response.content.sort((trans1,trans2) => (trans1.createdOn < trans2.createdOn)?-1:(trans1.createdOn > trans2.createdOn)?1:0)
+                            setTransactions(sortedTrans);
+                        }
+                    })
+                    .catch((error) => {
+                        setTransactions([]);
+                    })
+                }
             }
-        }
-      })()
+        })()
         
 
         const observer = new ResizeObserver(entries => {
@@ -151,7 +134,7 @@ const Account = () => {
     <div className='flex flex-col w-full h-full shrink-0 p-8 space-y-4 tracking-wider text-[rgb(68,71,70)] font-helveticaNeueMedium'>
         <div className='flex flex-row items-center justify-between'>
             <div className='flex flex-row space-x-2 items-center'>
-                <button onClick={(e) => navigate(parentPath)} 
+                <button onClick={(e) => navigate(parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home')} 
                   className='flex w-10 h-10 items-center justify-center rounded-full text-[rgb(0,175,240)] hover:bg-[rgba(0,0,0,.04)]'>
                     <PiArrowLeftLight size={20}/>
                 </button>

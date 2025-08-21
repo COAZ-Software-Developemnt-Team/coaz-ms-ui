@@ -11,7 +11,6 @@ const UserItem = ({user,deleteAuthority,reload}) => {
     const {currentUserId} = useParams();
     const {request} = useData();
     const moreRef = useRef(null);
-
     const navigate = useNavigate();
 
     const onOpen = (e) => {

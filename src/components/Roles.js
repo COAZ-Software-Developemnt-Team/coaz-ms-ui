@@ -15,8 +15,8 @@ const Roles = () => {
     const [deleteAuthority,setDeleteAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const {currentUserId,roleId} = useParams();
     const {request} = useData();
-    const {roleId} = useParams();
     const path = useLocation().pathname;
 
     const onAddRole = (e) => {
@@ -72,8 +72,12 @@ const Roles = () => {
     },[path])
   return (
     <>{roleId?
-        <Outlet context={{parentPath:`/roles`}}/>:
-        <ContentContainer previous='/home' buttons={buttons} Icon={PiMaskHappyFill} text='Roles' loading={loading}>
+        <Outlet/>:
+        <ContentContainer previous={currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={buttons} 
+            Icon={PiMaskHappyFill} 
+            text='Roles' 
+            loading={loading}>
             {roles && roles.length > 0 &&
             <div className='flex flex-col w-full h-auto space-y-2'>
                 {roles.map((role,i) => <RoleItem key={i} role={role} deleteAuthority={deleteAuthority} reload={load}/>)}
@@ -90,7 +94,9 @@ export default Roles
 const RoleItem = ({role,deleteAuthority,reload}) => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [highlighted,setHighlighted] = useState(false);
+    const {currentUserId} = useParams();
     const {request} = useData();
+    const path = useLocation().pathname;
     const moreRef = useRef(null)
 
     const navigate = useNavigate();
@@ -122,7 +128,7 @@ const RoleItem = ({role,deleteAuthority,reload}) => {
             <div  onMouseEnter={(e) => setHighlighted(true)} 
                     onMouseLeave={(e) => setHighlighted(false)} 
                     className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.04)] rounded-md'>
-                <div onClick={(e) => navigate(`/roles/${role.id}`)}
+                <div onClick={(e) => navigate(`/${currentUserId}/roles/${role.id}`,{state:{parentPath:path}})}
                     className='flex flex-row w-fit items-center space-x-2 shrink-0 cursor-pointer'>
                     <PiMaskHappyLight size={40} className='text-[rgb(0,175,240)] shrink-0'/>
                     <div className='flex flex-col w-full h-fit'>

@@ -28,7 +28,7 @@ const UserProfile = ({onLogout}) => {
             <div className='flex w-full h-32 pt-12 justify-center bg-[rgba(0,175,240,.1)]'>
                 <div className='flex w-40 h-40 rounded-full bg-[rgb(0,175,240)] shadow-lg'>
                     {user && <p className='flex w-fit h-auto m-auto text-white text-7xl font-jostMedium overflow-hidden'>
-                        {user.firstname.charAt(0)+user.lastname.charAt(0)}
+                        {user.firstname.charAt(0).toUpperCase()+user.lastname.charAt(0).toUpperCase()}
                     </p>}
                 </div>
             </div>

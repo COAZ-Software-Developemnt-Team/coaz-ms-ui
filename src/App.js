@@ -11,7 +11,7 @@ import Topic from './components/Topic';
 import Program from './components/Program';
 import Courses from './components/Courses';
 import Course from './components/Course';
-import CourseClass from './components/CourseClass';
+import CourseTeacher from './components/CourseTeacher';
 import Enrollment from './components/Enrollment';
 import Attempts from './components/Attempts';
 import MyStatistics from './components/MyStatistics';
@@ -43,6 +43,17 @@ import { useData } from './data';
 import Login from './components/Login';
 import Deposit from './components/Deposit';
 import Enrollments from './components/Enrollments';
+import ChangePassword from './components/ChangePassword';
+import PaymentOptions from './components/PaymentOptions';
+import MyEvents from './components/MyEvents';
+import CourseTeachers from './components/CourseTeachers';
+import EventUser from './components/EventUser';
+import Payment from './components/Payment';
+import MobilePayment from './components/MobilePayment';
+import EnrollCourse from './components/EnrollCourse';
+import AddUserSelf from './components/Register';
+import Register from './components/Register';
+import FinishRegistration from './components/FinishRegistration';
 
 const convertToId = (value) => {
   return value.replace(/ /g,'_').toLowerCase();
@@ -149,36 +160,34 @@ function App() {
 				screenSize,convertToId,dialog,setDialog,loading,setLoading,
 				dropMainMenuIndex,setDropMainMenuIndex,showDropMainMenu,setShowDropMainMenu,
 				dropMainMenuIndexs,setDropMainMenuIndexs,getTextWidth,
-				popupData,setPopupData,userFilter,setUserFilter,transactionFilter,setTransactionFilter
-        ,access,setAccess,request}}>
+				popupData,setPopupData,userFilter,setUserFilter,transactionFilter,setTransactionFilter,
+        access,setAccess,request}}>
         <Routes>
           <Route path='/' element={<ManagementSystem/>}>
             <Route path='home/' element={<Home/>}/>
           </Route>
           <Route path='/login' element={<Login/>}/>
+          <Route path='/change_password' element={<ChangePassword/>}/>
+          <Route path='/payment_options/:currentUserId/:receivableId/:criteriaId' element={<PaymentOptions/>}/>
+          <Route path='/payment' element={<Payment/>}/>
+          <Route path='/mobile_payment' element={<MobilePayment/>}/>
+          <Route path='/payment' element={<Payment/>}/>
           <Route path='/deposit/:currentUserId' element={<Deposit/>}/>
+          <Route path='/register' element={<Register/>}/>
+          <Route path='/finish_registration' element={<FinishRegistration/>}/>
+          <Route path='/enroll/:currentUserId/:courseId' element={<EnrollCourse/>}/>
           <Route path='/:currentUserId' element={<ManagementSystem/>}>
             <Route path='home/' element={<Home/>}/>
             <Route path='profile' element={<User/>}/>
             <Route path='my_transactions' element={<MyTransactions/>}/>
             <Route path='file/:path?' element={<File/>}/>
-            <Route path='users' element={<Users/>}>
-              <Route path=':userId' element={<User/>}/>
-            </Route>
-            <Route path='usertypes' element={<UserTypes/>}>
-              <Route path=':userTypeId' element={<UserType/>}/>
-            </Route>
-            <Route path='usergroups' element={<UserGroups/>}/>
-            <Route path='roles' element={<Roles/>}>
-              <Route path=':roleId' element={<Role/>}/>
-            </Route>
-            <Route path='statistics/' element={<MyStatistics/>}/>
+            <Route path='statistics' element={<MyStatistics/>}/>
             <Route path='enrollments' element={<Enrollments/>}>
               <Route path=':programId' element={<Program/>}>
                 <Route path=':courseId' element={<Course/>}/>
               </Route>
               <Route path='enrollment/:programId' element={<Enrollment/>}>
-                <Route path='class/:studentId/:courseId' element={<EnrollmentCourse/>}>
+                <Route path='teacher/:studentId/:courseId' element={<EnrollmentCourse/>}>
                   <Route path=':teacherId/:topicId' element={<EnrollmentTopic/>}>
                     <Route path='resource/:resourceId' element={<Resource/>}/>
                     <Route path='attempts/:activityId' element={<EnrollmentMaterial/>}>
@@ -189,10 +198,9 @@ function App() {
                 <Route path=':courseId' element={<Course/>}/>
               </Route>
             </Route>
-            <Route path='classes' element={() => <div>Classes</div>}/>
-            <Route path='courses' element={<Courses/>}>
+            <Route path='my_courses' element={<CourseTeachers/>}>
               <Route path=':courseId' element={<Course/>}/>
-              <Route path='class/:courseId/:teacherId' element={<CourseClass/>}>
+              <Route path='courseteacher/:courseId/:teacherId' element={<CourseTeacher/>}>
                 <Route path=':topicId' element={<Topic/>}>
                   <Route path='resource/:resourceId' element={<Resource/>}/>
                   <Route path='questions/:activityId' element={<ActivityQuestions/>}/>
@@ -200,6 +208,25 @@ function App() {
                     <Route path=':attemptId' element={<EnrollmentAttempt/>}/>
                   </Route>
                 </Route>
+              </Route>
+            </Route>
+            <Route path='my_events' element={<MyEvents/>}>
+              <Route path='event_user/:eventId' element={<EventUser/>}/>
+              <Route path=':eventId' element={<Event/>}/>
+            </Route>
+            <Route path='users' element={<Users/>}>
+              <Route path=':userId' element={<User/>}/>
+            </Route>
+            <Route path='usertypes' element={<UserTypes/>}>
+              <Route path=':userTypeId' element={<UserType/>}/>
+            </Route>
+            <Route path='usergroups' element={<UserGroups/>}/>
+            <Route path='roles' element={<Roles/>}>
+              <Route path=':roleId' element={<Role/>}/>
+            </Route>
+            <Route path='programs' element={<Programs/>}>
+              <Route path=':programId' element={<Program/>}>
+                <Route path=':courseId' element={<Course/>}/>
               </Route>
             </Route>
             <Route path='events' element={<Events/>}>
@@ -222,21 +249,21 @@ function App() {
 				</div>
 				}
 				{access && access.Component &&
-				<div style={{backdropFilter:'blur(64px)'}}
-            className='fixed flex flex-col w-screen h-screen z-30 bg-[rgba(255,255,255,.2)] overflow-hidden'>
-            <div className='flex flex-row-reverse w-full h-16 items-center shrink-0 text-[rgb(68,71,70)]'>
-              <button onClick={e => 
-                  {
-                    setAccess(null);
-                  }
-                } className='flex w-10 h-10 mr-4 items-center justify-center bg-white rounded-full shadow-md'>
-                <PiXLight size={20}/>
-              </button>
-            </div>
-            <div className='flex w-full h-full no-scrollbar overflow-auto items-center justify-center'>
-              <access.Component/>
-            </div>
-				</div>
+          <div style={{backdropFilter:'blur(64px)'}}
+              className='fixed flex flex-col w-screen h-screen z-30 bg-[rgba(255,255,255,.2)] overflow-hidden'>
+              <div className='flex flex-row-reverse w-full h-16 items-center shrink-0 text-[rgb(68,71,70)]'>
+                <button onClick={e => 
+                    {
+                      setAccess(null);
+                    }
+                  } className='flex w-10 h-10 mr-4 items-center justify-center bg-white rounded-full shadow-md'>
+                  <PiXLight size={20}/>
+                </button>
+              </div>
+              <div className='flex w-full h-full no-scrollbar overflow-auto items-center justify-center'>
+                <access.Component/>
+              </div>
+          </div>
 				}
 				{popupData && popupData.show && 
 					<Popup/>

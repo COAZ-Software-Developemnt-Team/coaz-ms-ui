@@ -403,7 +403,7 @@ const AddUser = ({reload}) => {
             .catch((error) => {
                 setUserTypes([]);
             })
-            await request('GET','userGroups',null,null,false)
+            await request('GET','usergroups',null,null,false)
             .then((response) => {
                 if(response.content) {
                     setUserGroups(response.content);
@@ -467,15 +467,13 @@ const AddUser = ({reload}) => {
   return (
     <FormDialog title='Add User'>
         {user && <FormValidator>
-            <div className='flex flex-col w-full sm:w-[640px] h-[90vh] p-8'>
-                <Scrollable vertical={true}>
-                    <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_course' setCalcWidth={setInputWidth}/>
-                    <Message message={message}/>
-                    <button style={{'--width':inputWidth+'px'}} 
-                        onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                        Submit
-                    </button>
-                </Scrollable>
+            <div className='flex flex-col w-full h-auto p-8'>
+                <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_course' setCalcWidth={setInputWidth}/>
+                <Message message={message}/>
+                <button style={{'--width':inputWidth+'px'}} 
+                    onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                    Submit
+                </button>
             </div>
         </FormValidator>}
     </FormDialog>

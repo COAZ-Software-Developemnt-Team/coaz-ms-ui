@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import FormDialog from './FormDialog'
-import Input from './Input'
 import {useData} from '../data'
 import CriteriaPathItem from './CriteriaPathItem2'
 

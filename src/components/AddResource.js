@@ -10,7 +10,7 @@ import {useData} from '../data'
 const AddResource = ({courseId,teacherId,topicId,reload}) => {
     const {setLoading,setDialog} = useContext(GlobalContext);
     const [resource,setResource] = useState({});
-    const [courseClass,setCourseClass] = useState(null);
+    const [courseTeacher,setCourseTeacher] = useState(null);
     const [topic,setTopic] = useState(null);
     const [file,setFile] = useState(null);
     const [durationUnits,setDurationUnits] = useState([])
@@ -18,11 +18,12 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
     const minWidth = 240;
     const [inputWidth,setInputWidth] = useState(minWidth);
     const {request} = useData();
+
     const submit = async (e) => {
         setMessage({content:'',success:false});
-        if(courseClass) {
+        if(courseTeacher) {
             setLoading(true);
-            resource.courseClass = courseClass;
+            resource.courseTeacher = courseTeacher;
             resource.topic = topic;
             const formData = new FormData();
             formData.append('resource', new Blob([JSON.stringify(resource)],{type:'application/json'}));
@@ -56,7 +57,7 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
             type:'text', 
             name:'course',
             disabled:true,
-            value:courseClass && courseClass.course?courseClass.course.name:'',   
+            value:courseTeacher && courseTeacher.course?courseTeacher.course.name:'',   
             placeholder:'Enter course...'
         },
         {
@@ -72,7 +73,7 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
             type:'text', 
             name:'teacher',
             disabled:true,
-            value:courseClass && courseClass.teacher?courseClass.teacher.name:'',   
+            value:courseTeacher && courseTeacher.teacher?courseTeacher.teacher.name:'',   
             placeholder:'Enter teacher...'
         },
         {
@@ -151,13 +152,13 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
 
     useEffect(() => {
         if(courseId && teacherId) {
-            request('GET','class',null,{
+            request('GET','courseteacher',null,{
                 courseId:courseId,
                 teacherId:teacherId
             },true)
             .then((response) => {
                 if(response.content) {
-                    setCourseClass(response.content);
+                    setCourseTeacher(response.content);
                 } else {
                     setDialog(null);
                 }
@@ -181,7 +182,8 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
         }
         request('GET',`durationunits`,null,null,false)
         .then((response) => {
-            if(response.content) {
+            if(response.content && response.content.length > 0) {
+                setResource({...resource,durationUnit:response.content[0]})
                 setDurationUnits(response.content);
             } else {
                 setDurationUnits([]);
@@ -196,17 +198,15 @@ const AddResource = ({courseId,teacherId,topicId,reload}) => {
         <div>
             <FormDialog title='Add resource'>
                 {resource && <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                        <Scrollable vertical={true}>
-                            <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
-                                <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_resource' setCalcWidth={setInputWidth}/>
-                                <Message message={message}/>
-                                <button style={{'--width':inputWidth+'px'}} 
-                                    onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                                    Submit
-                                </button>
-                            </div>
-                        </Scrollable>
+                    <div className='flex flex-col w-full h-auto p-8'>
+                        <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
+                            <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_resource' setCalcWidth={setInputWidth}/>
+                            <Message message={message}/>
+                            <button style={{'--width':inputWidth+'px'}} 
+                                onClick={handleSubmit} className='flex shrink-0 w-[var(--width)] h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                                Submit
+                            </button>
+                        </div>
                     </div>
                 </FormValidator>}
             </FormDialog>

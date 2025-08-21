@@ -2,33 +2,21 @@ import React, {useEffect,useState,useContext} from 'react'
 import { useParams } from 'react-router-dom';
 import { GlobalContext } from '../contexts/GlobalContext';
 import Message from './Message';
-import {useData} from '../data'
+import {useData} from '../data';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Access from './Access';
 
 const Deposit = () => {
-    const [message,setMessage] = useState({content:'',success:false});
-    const [onSubmit,setOnSubmit] = useState({method:() => {}});
-
-    return (
-        <div className='flex w-full h-full items-center justify-center bg-[url(/public/images/bg_cpd.jpg)] bg-center bg-cover'>
-            <div className='flex flex-col w-[95%] sm:w-[640px] h-fit pb-4 bg-white items-center rounded-xl shadow-md overflow-hidden'>
-                <MobileMoney setMessage={setMessage} setOnSubmit={setOnSubmit}/>
-                <Message message={message}/>
-                <button onClick={(e) => onSubmit.method()} 
-                    className='w-72 h-10 rounded-lg shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
-                    Submit
-                </button>
-            </div>
-        </div>
-    )
-}
-
-export default Deposit
-
-const MobileMoney = ({setMessage,setOnSubmit}) => {
     const {currentUserId} = useParams();
     const {setLoading} = useContext(GlobalContext);
     const [amount,setAmount] = useState(0);
+    const [message,setMessage] = useState({content:'',success:false});
     const {request} = useData();
+    const location = useLocation();
+    const state = location.state;
+
+    const navigate = useNavigate();
+
     const [phoneNumber,setPhoneNumber] = useState({
         part1:'260',
         part2:'',
@@ -54,6 +42,10 @@ const MobileMoney = ({setMessage,setOnSubmit}) => {
             return;
         }
         setPhoneNumber({...phoneNumber,[e.target.name]:value})
+    }
+
+    const close = () => {
+        navigate(state && state.parentPath?state.parentPath:'/home');
     }
 
     const confirm = async () => {
@@ -112,88 +104,94 @@ const MobileMoney = ({setMessage,setOnSubmit}) => {
         })
     } 
 
-    useEffect(() => {
-        setOnSubmit({method:()=>confirm()});
-    },[amount,phoneNumber])
-
     return (
-        
-            <div className='flex flex-col space-y-6 w-full h-fit p-8'>
-                <div className='flex flex-row w-full h-fit justify-between'>
-                    <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
-                        <img src='/images/airtel.png' alt='Airtel' className='w-full h-full object-contain object-center'/>
+        <Access onClose={close}>
+            <div className='flex flex-col w-[95%] sm:w-[640px] h-[420px] bg-white items-center rounded-xl shadow-md overflow-hidden'>
+                <div className='flex flex-col space-y-6 w-full h-fit p-8'>
+                    <div className='flex flex-row w-full h-fit justify-between'>
+                        <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
+                            <img src='/images/airtel.png' alt='Airtel' className='w-full h-full object-contain object-center'/>
+                        </div>
+                        <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
+                            <img src='/images/mtn.png' alt='Mtn' className='w-full h-full object-contain object-center'/>
+                        </div>
+                        <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
+                            <img src='/images/zamtel.png' alt='Zamtel' className='w-full h-full object-contain object-center'/>
+                        </div>
                     </div>
-                    <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
-                        <img src='/images/mtn.png' alt='Mtn' className='w-full h-full object-contain object-center'/>
+                    <div className='flex flex-row w-full h-10 items-center text-gray-600 text-sm'>
+                        <label htmlFor='amount' className='w-1/3 capitalize'>Amount</label>
+                        <div className='flex flex-row space-x-1 w-2/3 h-full items-center overflow-hidden'>
+                            <p className='flex w-11 shrink-0'>ZMW</p>
+                            <input
+                                id='amount'
+                                name='amount'
+                                type='number'
+                                inputMode='numeric'
+                                value={amount}
+                                onChange={onAmount}
+                                className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${amount === '' || amount < 1?'border-red-500':''} rounded-lg`}
+                            />
+                        </div>
                     </div>
-                    <div className='w-24 h-24 p-2 rounded-3xl overflow-hidden'>
-                        <img src='/images/zamtel.png' alt='Zamtel' className='w-full h-full object-contain object-center'/>
+                    <div className='flex flex-row w-full h-10 items-center text-gray-600 text-sm'>
+                        <label htmlFor='number' className='w-1/3 capitalize'>Phone number</label>
+                        <div className='flex flex-row space-x-1 w-2/3 h-full items-center justify-between overflow-hidden'>
+                            <input 
+                                type='text'
+                                inputMode='numeric'
+                                maxLength={3}
+                                name='part1'
+                                disabled={true}
+                                value={phoneNumber.part1}
+                                placeholder='000'
+                                onChange={onPhoneNumber}
+                                className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part1 === ''?'border-red-500':''} rounded-lg`}
+                            />
+                            <p className=''>-</p>
+                            <input 
+                                type='text'
+                                inputMode='numeric'
+                                maxLength={3}
+                                name='part2'
+                                value={phoneNumber.part2}
+                                placeholder='000'
+                                onChange={onPhoneNumber}
+                                className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part2 === ''?'border-red-500':''} rounded-lg`}
+                            />
+                            <p className=''>-</p>
+                            <input 
+                                type='text'
+                                inputMode='numeric'
+                                maxLength={3}
+                                name='part3'
+                                value={phoneNumber.part3}
+                                placeholder='000'
+                                onChange={onPhoneNumber}
+                                className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part3 === ''?'border-red-500':''} rounded-lg`}
+                            />
+                            <p className=''>-</p>
+                            <input 
+                                type='text'
+                                inputMode='numeric'
+                                maxLength={3}
+                                name='part4'
+                                value={phoneNumber.part4}
+                                placeholder='000'
+                                onChange={onPhoneNumber}
+                                className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part4 === ''?'border-red-500':''} rounded-lg`}
+                            />
+                        </div>
                     </div>
                 </div>
-                <div className='flex flex-row w-full h-10 items-center text-gray-600 text-sm'>
-                    <label htmlFor='amount' className='w-1/3 capitalize'>Amount</label>
-                    <div className='flex flex-row space-x-1 w-2/3 h-full items-center overflow-hidden'>
-                        <p className='flex w-11 shrink-0'>ZMW</p>
-                        <input
-                            id='amount'
-                            name='amount'
-                            type='number'
-                            inputMode='numeric'
-                            value={amount}
-                            onChange={onAmount}
-                            className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${amount === '' || amount < 1?'border-red-500':''} rounded-lg`}
-                        />
-                    </div>
-                </div>
-                <div className='flex flex-row w-full h-10 items-center text-gray-600 text-sm'>
-                    <label htmlFor='number' className='w-1/3 capitalize'>Phone number</label>
-                    <div className='flex flex-row space-x-1 w-2/3 h-full items-center justify-between overflow-hidden'>
-                        <input 
-                            type='text'
-                            inputMode='numeric'
-                            maxLength={3}
-                            name='part1'
-                            disabled={true}
-                            value={phoneNumber.part1}
-                            placeholder='000'
-                            onChange={onPhoneNumber}
-                            className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part1 === ''?'border-red-500':''} rounded-lg`}
-                        />
-                        <p className=''>-</p>
-                        <input 
-                            type='text'
-                            inputMode='numeric'
-                            maxLength={3}
-                            name='part2'
-                            value={phoneNumber.part2}
-                            placeholder='000'
-                            onChange={onPhoneNumber}
-                            className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part2 === ''?'border-red-500':''} rounded-lg`}
-                        />
-                        <p className=''>-</p>
-                        <input 
-                            type='text'
-                            inputMode='numeric'
-                            maxLength={3}
-                            name='part3'
-                            value={phoneNumber.part3}
-                            placeholder='000'
-                            onChange={onPhoneNumber}
-                            className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part3 === ''?'border-red-500':''} rounded-lg`}
-                        />
-                        <p className=''>-</p>
-                        <input 
-                            type='text'
-                            inputMode='numeric'
-                            maxLength={3}
-                            name='part4'
-                            value={phoneNumber.part4}
-                            placeholder='000'
-                            onChange={onPhoneNumber}
-                            className={`flex w-full h-10 p-1 focus:outline-none font-thin whitespace-nowrap bg-transparent border ${phoneNumber.part4 === ''?'border-red-500':''} rounded-lg`}
-                        />
-                    </div>
-                </div>
+                <Message message={message}/>
+                <button onClick={confirm} 
+                    className='w-72 h-10 rounded-lg shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
+                    Submit
+                </button>
             </div>
+        </Access>
     )
 }
+
+export default Deposit

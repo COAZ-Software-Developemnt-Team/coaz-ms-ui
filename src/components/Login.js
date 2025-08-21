@@ -4,18 +4,15 @@ import { GlobalContext } from '../contexts/GlobalContext';
 import { PiUser } from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import Message from './Message';
-import Payment from './MobilePayment';
-import FinishRegistration from './FinishRegistration';
-import ChangePassword from './ChangePassword';
-import AddUserSelf from './AddUserSelf';
+import Access from './Access';
 import { useData } from '../data';
 import axios from "axios";
 
-// axios.defaults.baseURL = 'http://localhost:8080/api/';
-axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
-// axios.defaults.baseURL = 'http://192.168.0.161:8080/api/';
+//axios.defaults.baseURL = 'http://localhost:8080/api/';
+//axios.defaults.baseURL = 'http://localhost:8080/coaz/api/';
+//axios.defaults.baseURL = 'http://192.168.0.161:8080/api/';
 //axios.defaults.baseURL = 'https://coaz.org:8085/coaz_test/api/';
-//axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
+axios.defaults.baseURL = 'https://coaz.org:8085/coaz/api/';
 
 export function useLogin () {
     const {request} = useData();
@@ -26,20 +23,33 @@ export function useLogin () {
         sessionStorage.setItem("refresh_token",'');
         let responseObject = {};
         await axios.get("login",{params:{username:username,password:password}})
-        .then((response) => {
+        .then(async (response) => {
             if(response.data['access_token']) {
                 sessionStorage.setItem("access_token",response.data['access_token']);
                 sessionStorage.setItem("refresh_token",response.data['refresh_token']);
-                request('GET','current',null,null,true)
+                await request('GET','current',null,null,true)
                 .then(async (currentResponse) => {
-                    console.log(currentResponse);
                     if(currentResponse.status && currentResponse.status === 'SUCCESSFUL' && currentResponse.content && currentResponse.content.user && currentResponse.content.user.status === 'ACTIVE') {
                         navigate(`/${currentResponse.content.user.id}/home`)
+                    } else if(currentResponse.message) {
+                        responseObject = {error_message:currentResponse.message};
+                    } else if(typeof currentResponse === "string") {
+                        responseObject = {error_message:currentResponse};
+                    } else {
+                        responseObject = {error_message:'Error getting current user'};
                     }
                 })
-                responseObject = {status:'SUCCESSFUL'};
+                .catch((error) => {
+                    responseObject = {error_message:error.message};
+                })
+            } else if(response.data.status === 'PENDING_PAYMENT' && response.data.user && response.data.tariff) {
+                navigate('/mobile_payment',{state:{parentPath:'/home',user:response.data.user,tariff:response.data.tariff}});
+            } else if(response.data.status && response.data.status === 'OTP' && response.data.user ) {
+                navigate('/change_password',{state:{user:response.data.user}})
+            } else if(response.data.status === 'INCOMPLETE_REGISTRATION' && response.data.user) {
+                navigate('/finish_registration',{state:{user:response.data.user}})
             } else {
-                responseObject = response.data;
+                responseObject = {error_message:'Error logging in'};
             }
         })
         .catch((error) => {
@@ -53,7 +63,6 @@ export function useLogin () {
                 responseObject = {error_message:error.message};
             }
         })
-        
         return responseObject; 
     }
 
@@ -66,7 +75,7 @@ export function useLogin () {
   return {login:login,logout:logout}
 }
 
-const Login = ({reload}) => {
+const Login = () => {
     const {setDialog,setLoading,setAccess} = useContext(GlobalContext);
     const [username,setUsername] = useState("");
     const [password,setPassword] = useState(""); 
@@ -83,28 +92,20 @@ const Login = ({reload}) => {
         if(login) {
             await login(username,password)
             .then( (response) => {
-                if(response.status) {
-                    if(response.status === 'SUCCESSFUL') {
-                        
-                    } else if(response.status === 'PENDING_PAYMENT' && response.user && response.tariff) {
-                        //setAccess({Component:() => <Payment user={response.user} tariff={response.tariff}  reload={reload}/>});
-                    } else if(response.status === 'OTP' && response.user) {
-                        setAccess({Component:() => <ChangePassword user={response.user} reload={reload}/>});
-                    } else if(response.status === 'INCOMPLETE_REGISTRATION' && response.user) {
-                        setAccess({Component:() => <FinishRegistration user={response.user} reload={reload}/>});
-                    } else {
-                        setMessage({content:response,success:false});
-                    }
-                } else if(response.error_message) {
+                if(response.status === 'SUCCESSFUL') {
+                    setMessage({content:'Successful',success:true});
+                }
+                if(response.error_message) {
                     setMessage({content:response.error_message,success:false});
+                } else if(response.message) {
+                    setMessage({content:response.message,success:false});
                 } else {
-                    setMessage({content:response,success:false});
+                    setMessage({content:'Something went wrong',success:false})
                 }
             })
             .catch((error) => {
                 setMessage({content:error.message,success:false});
                 logout()
-                reload && reload()
             })
             setLoading(false);
         }
@@ -112,7 +113,7 @@ const Login = ({reload}) => {
 
     const onCreateAccount = (e) => {
         e.preventDefault();
-        setAccess({Component:() => <AddUserSelf/>})
+        navigate('/register')
     }
 
     const onForgotPassword = async (e) => {
@@ -140,51 +141,53 @@ const Login = ({reload}) => {
     };
 
   return (
-    <div className='flex flex-col w-full h-full space-y-4 items-center justify-center bg-[url(/public/images/bg_cpd.jpg)] bg-center bg-cover overflow-hidden'>
-        <PiUser size={64} className='flex mx-auto text-[rgb(0,175,240)] shrink-0'/>
-        <input 
-            type="text" 
-            name="username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            placeholder="User name..."
-            className='flex w-72 h-10 shrink-0 p-2 focus:outline-none font-thin text-sm whitespace-nowrap rounded-lg shadow-md'
-        />
-        <input 
-            type="password" 
-            name="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder='Password...'
-            className='flex w-72 h-10 shrink-0 p-2 focus:outline-none font-thin text-sm whitespace-nowrap rounded-lg shadow-md'
-        />
-        <Message message={message}/>
-        <button 
-            onClick={(e) => {
-                setDialog({
-                    show:true,
-                    Component:() => 
-                        <YesNoDialog 
-                            title='Forgot password' 
-                            message='By clicking here your password will be reset and an OTP will be sent to your email. Are you sure your want to proceed?'
-                            onYes={async (e) => {
-                                await onForgotPassword(username);
-                            }}
-                        />
-                })
-            }}
-            className='w-72 h-6 items-center justify-center shrink-0  text-sm font-thin italic text-[rgb(0,175,240)] hover:underline'>
-            Forgot Password?
-        </button>
-        <button onClick={(e) => onLogin(e)} 
-            className='w-72 h-10 rounded-lg items-center justify-center shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
-            Login
-        </button>
-        <button onClick={(e) => onCreateAccount(e)} 
-            className='w-72 h-10 rounded-lg items-center justify-center shrink-0 bg-white hover:bg-[rgb(0,175,240)] font-thin text-gray-400 hover:text-white shadow-md'>
-            Create Account
-        </button>
-    </div>
+    <Access onClose={() => navigate('/home')}>
+        <div className='flex flex-col w-full h-full space-y-4 items-center justify-center overflow-hidden'>
+            <PiUser size={64} className='flex mx-auto text-[rgb(0,175,240)] shrink-0'/>
+            <input 
+                type="text" 
+                name="username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="User name..."
+                className='flex w-72 h-10 shrink-0 p-2 focus:outline-none font-thin text-sm whitespace-nowrap rounded-lg shadow-md'
+            />
+            <input 
+                type="password" 
+                name="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder='Password...'
+                className='flex w-72 h-10 shrink-0 p-2 focus:outline-none font-thin text-sm whitespace-nowrap rounded-lg shadow-md'
+            />
+            <Message message={message}/>
+            <button 
+                onClick={(e) => {
+                    setDialog({
+                        show:true,
+                        Component:() => 
+                            <YesNoDialog 
+                                title='Forgot password' 
+                                message='By clicking here your password will be reset and an OTP will be sent to your email. Are you sure your want to proceed?'
+                                onYes={async (e) => {
+                                    await onForgotPassword(username);
+                                }}
+                            />
+                    })
+                }}
+                className='w-72 h-6 items-center justify-center shrink-0  text-sm font-thin italic text-[rgb(0,175,240)] hover:underline'>
+                Forgot Password?
+            </button>
+            <button onClick={(e) => onLogin(e)} 
+                className='w-72 h-10 rounded-lg items-center justify-center shrink-0  bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white shadow-md'>
+                Login
+            </button>
+            <button onClick={(e) => onCreateAccount(e)} 
+                className='w-72 h-10 rounded-lg items-center justify-center shrink-0 bg-white hover:bg-[rgb(0,175,240)] font-thin text-gray-400 hover:text-white shadow-md'>
+                Register
+            </button>
+        </div>
+    </Access>
   )
 }
 

@@ -7,12 +7,15 @@ import LoadingIcons from 'react-loading-icons'
 const Resource = () => {
     const {resourceId} = useParams();
     const path = useLocation().pathname;
-    const {parentPath} = useOutletContext();
     const [iframeSrc, setIframeSrc] = useState(null);
     const [viewed,setViewed] = useState(null);
     const [duration,setDuration] = useState(null);
     const [loading,setLoading] = useState();
-    const [request,download] = useData();
+    const {request,download} = useData();
+    const [parentPath,setParentPath] = useState(null);
+    const {currentUserId} = useParams();
+    const location = useLocation();
+    const state = location.state;
     const viewedRef = useRef(viewed);
 
     const navigate = useNavigate();
@@ -24,6 +27,9 @@ const Resource = () => {
     useEffect(() => {
         (async () => {
             setLoading(true);
+            if(state && state.parentPath) {
+                setParentPath(state.parentPath);
+            }
             await download(`resource/download/${resourceId}`,null,true)
             .then(async (response) => {
                 if(response instanceof Blob) {
@@ -71,7 +77,7 @@ const Resource = () => {
         :
         <div className='relative w-full h-full bg-white overflow-hidden'>
             <div className='flex flex-row w-full h-10 shrink-0 px-2 items-center justify-center'>
-                <button onClick={(e) => navigate(parentPath)} className='absolute flex left-0 w-10 h-10 items-center justify-center text-[rgb(68,71,70)]'>
+                <button onClick={(e) => navigate(parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home')} className='absolute flex left-0 w-10 h-10 items-center justify-center text-[rgb(68,71,70)]'>
                     <PiArrowLeftLight size={20}/>
                 </button>
                 <div className='flex flex-row w-fit h-fit px-2 py-1 items-center border rounded-full'>

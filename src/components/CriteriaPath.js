@@ -8,6 +8,7 @@ import {useData} from '../data';
 import AddCriteriaPathItem from './AddCriteriaPathItem';
 import CriteriaPathItem from './CriteriaPathItem';
 import Detail from './Detail';
+import ContentContainer from './ContentContainer';
 
 const CriteriaPath = () => {
 	const {setDialog} = useContext(GlobalContext);
@@ -15,9 +16,9 @@ const CriteriaPath = () => {
 	const [deleteAuthority,setDeleteAuthority] = useState(false);
 	const [children,setChildren] = useState([]);
 	const [buttons,setButtons] = useState([]);
+	const [loading,setLoading] = useState(false);
 	const {request} = useData();
-	const {pathId} = useParams();
-	const {parentPath} = useOutletContext();
+	const {currentUserId,pathId} = useParams();
 	const path = useLocation().pathname;
 
 	const onAddChild = (e) => {
@@ -77,9 +78,9 @@ const CriteriaPath = () => {
 		}
 	}
 
-	const getChildren = () => {
+	const getChildren = async () => {
 		if(pathId) {
-			request('GET','criteriapaths/previous',null,{previousId:pathId},true)
+			await request('GET','criteriapaths/previous',null,{previousId:pathId},true)
 			.then((response) => {
 				if(response.status && response.status === 'SUCCESSFUL' && response.content) {
 					setChildren(response.content);
@@ -93,42 +94,47 @@ const CriteriaPath = () => {
 		}
 	}
 
+	const load = async () => {
+		setLoading(true);
+		await getCriteriaPathItem();
+		await getChildren();
+		setLoading(false);
+	}
+
 	useEffect(() => {
-		getCriteriaPathItem();
-		getChildren();
+		load();
 	},[path])
 
   return (
 	<div className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-		{criteriaPathItem &&
-			<>
-			<MsHeader previous={criteriaPathItem.previous?`${parentPath}/${criteriaPathItem.previous.id}`:parentPath} buttons={buttons} Icon={PiPathFill} text={criteriaPathItem.name} subText={criteriaPathItem.id}/>
-			<div className='relative w-[95%] h-full bg-[rgb(255,255,255)] rounded-2xl border border-[rgba(0,175,240,.2)] overflow-hidden p-4'>
-				<Scrollable vertical={true}>
-					<div className='flex flex-col w-full h-auto space-y-4'>
-						<div className='flex flex-col w-full h-auto space-y-2'>
-							<p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
-							<Detail label='Name' value={criteriaPathItem.name?criteriaPathItem.name:''}/>
-							<Detail label='Type' value={criteriaPathItem.type?criteriaPathItem.type:''}/>
-							<Detail label='Class Name' value={criteriaPathItem.className?criteriaPathItem.className:''}/>
-							{criteriaPathItem.getMethod && 
-								<Detail label='method' value={criteriaPathItem.getMethod}/>
-							}
-							{criteriaPathItem.previous && 
-								<Detail label='Previous' value={criteriaPathItem.previous.name}/>
-							}
-						</div>
-                        {children && children.length > 0 &&
-                        <div className='flex flex-col w-full h-auto space-y-2'>
-                            <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Children</p>
-                            {children.map((child,i) => <CriteriaPathItem key={i} criteriaPathItem={child} deleteAuthority={deleteAuthority} reload={getChildren}/>)}
-                        </div>
-                        }
-                    </div>
-				</Scrollable>
-			</div>
-			</>
-		}
+		<ContentContainer previous={currentUserId && criteriaPathItem && criteriaPathItem.previous?`/${currentUserId}/paths/${criteriaPathItem.previous.name}`:currentUserId && path !== `/${currentUserId}/paths`?`/${currentUserId}/paths`:currentUserId?`/${currentUserId}/home`:'/home'}
+            buttons={buttons} 
+            Icon={PiPathFill} 
+            text={criteriaPathItem?criteriaPathItem.name:''} 
+            loading={loading}> 
+			{criteriaPathItem && 
+				<div className='flex flex-col w-full h-auto space-y-4'>
+					<div className='flex flex-col w-full h-auto space-y-2'>
+						<p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Details</p>
+						<Detail label='Name' value={criteriaPathItem.name?criteriaPathItem.name:''}/>
+						<Detail label='Type' value={criteriaPathItem.type?criteriaPathItem.type:''}/>
+						<Detail label='Class Name' value={criteriaPathItem.className?criteriaPathItem.className:''}/>
+						{criteriaPathItem.getMethod && 
+							<Detail label='method' value={criteriaPathItem.getMethod}/>
+						}
+						{criteriaPathItem.previous && 
+							<Detail label='Previous' value={criteriaPathItem.previous.name}/>
+						}
+					</div>
+					{children && children.length > 0 &&
+					<div className='flex flex-col w-full h-auto space-y-2'>
+						<p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Children</p>
+						{children.map((child,i) => <CriteriaPathItem key={i} criteriaPathItem={child} deleteAuthority={deleteAuthority} reload={getChildren}/>)}
+					</div>
+					}
+				</div>
+			}
+        </ContentContainer>
 	</div>
   )
 }

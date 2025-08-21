@@ -2,9 +2,7 @@ import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useLocation,useParams, useOutletContext } from 'react-router-dom';
 import { PiPencilSimple, PiMaskHappyFill, PiShieldCheckeredLight } from 'react-icons/pi';
-import Scrollable from './Scrollable';
 import EditRole from './EditRole';
-import MsHeader from './Header';
 import {useData} from '../data';
 import ContentContainer from './ContentContainer';
 
@@ -14,9 +12,11 @@ const Role = () => {
     const [updateAuthority,setUpdateAuthority] = useState(false);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const [parentPath,setParentPath] = useState(null);
+    const location = useLocation();
+    const state = location.state;
     const {request} = useData();
-    const {roleId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,roleId} = useParams();
     const path = useLocation().pathname;
 
     const onEdit = (e) => {
@@ -68,12 +68,19 @@ const Role = () => {
     }
 
     useEffect(() => {
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         getRole();
     },[path])
 
   return (
     <div className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiMaskHappyFill} text={role?role.name:''} loading={loading}> 
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={buttons} 
+            Icon={PiMaskHappyFill} 
+            text={role?role.name:''} 
+            loading={loading}> 
             {role && role.authorities && role.authorities.length > 0 &&
             <div className='flex flex-col w-full h-auto'>
                 <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>Authorities</p>

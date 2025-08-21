@@ -6,6 +6,7 @@ import YesNoDialog from './YesNoDialog';
 import ContentContainer from './ContentContainer';
 import Detail from './Detail';
 import {useData} from '../data';
+import EnrollmentAttemptItem from './EnrollmentAttemptItem';
 
 const EnrollmentMaterial = () => {
     const {setDialog} = useContext(GlobalContext);
@@ -16,10 +17,12 @@ const EnrollmentMaterial = () => {
     const [attempted,setAttempted] = useState(0);
     const [passGrade,setPassGrade] = useState(0);
     const [highestGrade,setHighestGrade] = useState(0);
-    const {programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
+    const {currentUserId,programId,studentId,courseId,teacherId,topicId,activityId,attemptId} = useParams();
+    const [parentPath,setParentPath] = useState(null);
+    const location = useLocation();
+    const state = location.state;
     const path = useLocation().pathname;
-    const {parentPath} = useOutletContext();
-    const [request] = useData;
+    const {request} = useData();
     const navigate = useNavigate();
 
     const onAttempt = async (e) => {
@@ -38,7 +41,7 @@ const EnrollmentMaterial = () => {
                             },true)
                             .then( async (response) => {
                                 if(response.status && response.status === 'SUCCESSFUL' && response.content) {
-                                    navigate(`${path}/${response.content.id}`)
+                                    navigate(`${path}/${response.content.id}`,{state:{parentPath:path}})
                                 } 
                             })
                         }}
@@ -56,10 +59,10 @@ const EnrollmentMaterial = () => {
             .then((response) => {
                 if(response.content) {
                     setEnrollmentMaterial(response.content);
-                    if(response.content.material && response.content.material.courseClass) {
-                        request('GET','class/access',null,{
-                            courseId:response.content.material.courseClass.courseId,
-                            teacherId:response.content.material.courseClass.teacherId
+                    if(response.content.material && response.content.material.courseTeacher) {
+                        request('GET','courseteacher/access',null,{
+                            courseId:response.content.material.courseTeacher.courseId,
+                            teacherId:response.content.material.courseTeacher.teacherId
                         },true)
                         .then((accessResponse) => {
                             if(accessResponse.content && accessResponse.content === 'STUDENT') {
@@ -97,20 +100,27 @@ const EnrollmentMaterial = () => {
     }
 
     useEffect(() => {
+        if((!programId || !courseId || !teacherId || !topicId || !activityId || !attemptId) && state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         getEnrollmentMaterial();
     },[path])
 
   return (
     <>{programId && courseId && teacherId && topicId && activityId && attemptId?
-        <Outlet context={{parentPath:`/programs/enrollment/${programId}/class/${studentId}/${courseId}/${teacherId}/${topicId}/attempts/${activityId}`}}/>
+        <Outlet/>
         :
-        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiFileTextFill} text={enrollmentMaterial && enrollmentMaterial.material?enrollmentMaterial.material.name:''} loading={loading}>
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={buttons} 
+            Icon={PiFileTextFill} 
+            text={enrollmentMaterial && enrollmentMaterial.material?enrollmentMaterial.material.name:''} 
+            loading={loading}>
             {enrollmentMaterial &&
             <div className='flex flex-col w-full h-auto space-y-4'>
                 <div className='flex flex-col w-full h-auto space-y-2 text-xs tracking-wider'>
                     <p className='w-full h-6 text-xs font-helveticaNeueRegular  text-[rgba(0,175,240,.5)] uppercase'>Details</p>
                     <Detail label='Maximum Attempts' value={attempts}/>
-                    <Detail label='Attempted' value={attempted}/>
+                    <Detail label='Attempts' value={attempted}/>
                     <Detail label='Pass Grade' value={`${passGrade}%`}/>
                     <Detail label='Highest Grade' value={`${highestGrade}%`}/>
                 </div>
@@ -128,62 +138,3 @@ const EnrollmentMaterial = () => {
 }
 
 export default EnrollmentMaterial
-
-const EnrollmentAttemptItem = ({enrollmentAttempt}) => {
-    const [date,setDate] = useState(null);
-
-    let USDecimal = new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-
-    useEffect(() => {
-        if(enrollmentAttempt && enrollmentAttempt.attempt && enrollmentAttempt.attempt.createdOn) {
-            setDate(new Date(enrollmentAttempt.attempt.createdOn));
-        }
-    },[enrollmentAttempt])
-
-    return (
-        <div className='flex flex-row w-full h-auto'>
-            {enrollmentAttempt && enrollmentAttempt.attempt && enrollmentAttempt.attempt.user && enrollmentAttempt.attempt.activity &&
-            <div className='flex flex-row w-full p-2 items-center justify-between space-x-4 hover:bg-[rgba(0,0,0,.05)] rounded-md'>
-                <div className='flex flex-row w-fit items-center space-x-2 shrink-0'>
-                    <PiTargetLight size={40} className='text-[rgb(0,175,240)] shrink-0'/>
-                    <div className='flex flex-col w-full h-fit'>
-                        <p className={`text-sm text-[rgb(68,71,70)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                            {enrollmentAttempt.attempt.activity.name}
-                        </p>
-                        <div className='flex flex-wrap space-x-1'>
-                            <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular overflow-hidden overflow-ellipsis capitalize`}>
-                                {`${date && date.toLocaleString('default', { month: 'long' })+' '+date.getDate()+', '+date.getFullYear()+' '+date.toLocaleTimeString('en-US')}`}
-                            </p>
-                            {enrollmentAttempt.attempt.status === 'PENDING'?
-                                <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                    , Pending...
-                                </p>
-                                :
-                            enrollmentAttempt.attempt.status === 'CLOSED'?
-                                <div className='flex flex-row space-x-1 text-[rgb(145,145,145)]'>
-                                    <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                        {`${enrollmentAttempt.marks} of ${enrollmentAttempt.totalMarks}`}
-                                    </p>
-                                    <p className={`text-xs ${enrollmentAttempt.passed && 'text-green-600'} font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                        {`, ${USDecimal.format(enrollmentAttempt.grade)}%`}
-                                    </p>
-                                </div>
-                                :
-                            enrollmentAttempt.attempt.status === 'NEW'?
-                                <p className={`text-xs text-[rgb(145,145,145)] font-helveticaNeueRegular whitespace-nowrap overflow-hidden overflow-ellipsis capitalize`}>
-                                    , New
-                                </p>
-                                :
-                                <></>
-                            }
-                        </div>
-                        
-                    </div> 
-                </div>
-            </div>}
-        </div>
-    )
-}

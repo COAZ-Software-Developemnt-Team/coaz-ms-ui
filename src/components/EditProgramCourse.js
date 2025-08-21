@@ -130,8 +130,7 @@ const EditProgramCourse = ({programId,courseId,reload}) => {
         <div>
             <FormDialog title='Add CPD'>
                 {programCourse && <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                        <Scrollable vertical={true}>
+                    <div className='flex flex-col w-full h-auto p-8'>
                             <div className='flex flex-col w-full h-auto shrink-0 space-y-4'>
                                 <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_course' setCalcWidth={setInputWidth}/>
                                 <Message message={message}/>
@@ -140,7 +139,6 @@ const EditProgramCourse = ({programId,courseId,reload}) => {
                                     Submit
                                 </button>
                             </div>
-                        </Scrollable>
                     </div>
                 </FormValidator>}
             </FormDialog>

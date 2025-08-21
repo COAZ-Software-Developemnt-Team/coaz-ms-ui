@@ -1,28 +1,26 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useNavigate,useLocation,useParams,useOutletContext, Outlet } from 'react-router-dom';
+import { useNavigate,useLocation,useParams,Outlet } from 'react-router-dom';
 import { PiTarget  ,PiTextAlignLeftFill,PiFilePdf,PiClipboardText,PiClipboardTextLight,PiFileText,PiFileTextLight, PiFilePdfLight,PiTrash,PiDotsThreeVertical, PiFileHtml, PiFileHtmlLight} from "react-icons/pi";
 import YesNoDialog from './YesNoDialog';
 import AddResource from './AddResource';
 import AddQuiz from './AddQuiz';
-import Scrollable from './Scrollable';
-import MsHeader from './Header';
 import {useData} from '../data';
-import AddHtmlResource from './AddHtmlResource';
 import ContentContainer from './ContentContainer';
 
 const Topic = () => {
     const {setDialog} = useContext(GlobalContext);
     const [topic,setTopic] = useState(null);
-    const [courseClass,setCourseClass] = useState(null);
     const [resources,setResources] = useState([]);
     const [assignments] = useState([]);
     const [quizzes,setQuizzes] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const [parentPath,setParentPath] = useState(null);
     const {request} = useData();
-    const {courseId,teacherId,topicId,resourceId,activityId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,courseId,teacherId,topicId,resourceId,activityId} = useParams();
+    const location = useLocation();
+    const state = location.state;
     const path = useLocation().pathname;
 
     const onAddResource = (e) => {
@@ -31,16 +29,6 @@ const Topic = () => {
                 show:true,
                 Component:() => 
                     <AddResource courseId={courseId} teacherId={teacherId} topicId={topicId} reload={getResources}/>
-            })
-        }
-    }
-
-    const onAddHtmlResource = (e) => {
-        if(courseId,teacherId) {
-            setDialog({
-                show:true,
-                Component:() => 
-                    <AddHtmlResource courseId={courseId} teacherId={teacherId} topicId={topicId}/>
             })
         }
     }
@@ -59,27 +47,25 @@ const Topic = () => {
 
     }
 
-    
-    const getCourseClass = async () => {
+    const getCourseTeacher = async () => {
         if(courseId && teacherId) {
-            await request('GET','class',null,{
+            await request('GET','courseteacher',null,{
                 courseId:courseId,
                 teacherId:teacherId
             },true)
             .then((response) => {
                 if(response.content) {
-                    setCourseClass(response.content);
                     setButtons([
                         {
                             Icon:PiFilePdf,
                             name:'Add Resourse',
                             handler:onAddResource
-                        },
+                        }/* ,
                         {
                             Icon:PiFileHtml,
                             name:'Add Html Resourse',
                             handler:onAddHtmlResource
-                        },
+                        } */,
                         {
                             Icon:PiClipboardText,
                             name:'Add Quiz',
@@ -91,19 +77,14 @@ const Topic = () => {
                             handler:onAddAssignment
                         }
                     ])
-                }  else {
-                  setCourseClass(null);
-                }
-            })
-            .catch((error) => {
-                setCourseClass(null);
+                } 
             })
         }
     }
 
     const getResources = async (e) => {
         if(courseId && topicId) {
-            await request('GET','/resources/my/class/topic',null,{
+            await request('GET','/resources/courseteacher/topic',null,{
                 courseId:courseId,
                 topicId:topicId
             },true)
@@ -121,7 +102,7 @@ const Topic = () => {
     }
 
     const getQuizzes = async (e) => {
-        await request('GET','/quizzes/my/class/topic',null,{
+        await request('GET','/quizzes/courseteacher/topic',null,{
             courseId:courseId,
             topicId:topicId
         },true)
@@ -157,8 +138,11 @@ const Topic = () => {
 
     const load = async () => {
         setLoading(true);
+        if(!courseId || !teacherId || !topicId || !(resourceId || activityId) && state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         await getTopic();
-        await getCourseClass();
+        await getCourseTeacher();
         await getResources();
         await getAssignments();
         await getQuizzes();
@@ -170,8 +154,12 @@ const Topic = () => {
     },[path])
   return (
     <>{courseId && teacherId && topicId && (resourceId || activityId)?
-        <Outlet context={{parentPath:`/courses/class/${courseId}/${teacherId}/${topicId}`}}/>:
-        <ContentContainer previous={parentPath} buttons={buttons} Icon={PiTextAlignLeftFill} text={topic?topic.name:''} loading={loading}>
+        <Outlet/>:
+        <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'} 
+            buttons={buttons} 
+            Icon={PiTextAlignLeftFill} 
+            text={topic?topic.name:''} 
+            loading={loading}>
             {resources && resources.length > 0 &&
             <div className='flex flex-col w-full h-auto'>
                 <p className='w-full h-6 text-xs font-helveticaNeueRegular tracking-wider text-[rgba(0,175,240,.5)] uppercase'>resources</p>
@@ -211,15 +199,15 @@ const Material = ({material,reload}) => {
         e.preventDefault();
         if(material) {
             if(material.classname === 'Resource') {
-                navigate(`${path}/resource/${material.id}`)
+                navigate(`${path}/resource/${material.id}`,{state:{parentPath:path}})
                 setDialog(null);
             }
-            else if(material.classname === 'HtmlResource') {
+            /* else if(material.classname === 'HtmlResource') {
                 navigate(`${path}/htmlresource/${material.id}`)
                 setDialog(null);
-            }
+            } */
             else if(material.classname === 'Quiz' || material.classname === 'Assignment') {
-                navigate(`${path}/questions/${material.id}`)
+                navigate(`${path}/questions/${material.id}`,{state:{parentPath:path}})
                 setDialog(null);
             }
         }
@@ -227,7 +215,7 @@ const Material = ({material,reload}) => {
 
     const onAttempts = (e) => {
         e.preventDefault();
-        navigate(`${path}/attempts/${material.id}`)
+        navigate(`${path}/attempts/${material.id}`,{state:{parentPath:path}})
     }
 
     const onDelete = (e) => {

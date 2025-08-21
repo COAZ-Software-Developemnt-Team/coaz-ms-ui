@@ -113,8 +113,7 @@ const AddUserType = ({reload}) => {
         <div>
             <FormDialog title='Add User Type'>
                 {userType && <FormValidator>
-                    <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                        <Scrollable vertical={true}>
+                    <div className='flex flex-col w-full h-auto p-8'>
                             <div className='flex flex-col w-full h-auto space-y-4 shrink-0'>
                                 <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='add_usertype' setCalcWidth={setInputWidth}/>
                                 <Message message={message}/>
@@ -123,7 +122,6 @@ const AddUserType = ({reload}) => {
                                     Submit
                                 </button>
                             </div>
-                        </Scrollable>
                     </div>
                 </FormValidator>}
             </FormDialog>

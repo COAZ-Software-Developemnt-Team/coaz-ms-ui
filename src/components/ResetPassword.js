@@ -135,18 +135,16 @@ const ResetPassword = ({userId}) => {
     return (
         <FormDialog title='Reset password'>
             <FormValidator>
-                <div className='flex flex-col w-full sm:w-[640px] h-auto p-8'>
-                    <Scrollable vertical={true}>
-                        <div className='flex flex-col w-full h-full no-scrollbar space-y-8 overflow-auto'>
-                            <PiLockKeyOpenDuotone size={64} className='flex mx-auto mb-4 text-[rgb(0,175,240)] shrink-0'/>
-                            <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='finish_registration' setCalcWidth={setInputWidth}/>
-                            <Message message={message}/>
-                            <button style={{width:inputWidth+'px'}} 
-                                onClick={handleSubmit} className='flex shrink-0 h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
-                                Submit
-                            </button>
-                        </div>
-                    </Scrollable>
+                <div className='flex flex-col w-full h-auto p-8'>
+                    <div className='flex flex-col w-full h-full no-scrollbar space-y-8 overflow-auto'>
+                        <PiLockKeyOpenDuotone size={64} className='flex mx-auto mb-4 text-[rgb(0,175,240)] shrink-0'/>
+                        <Inputs inputs={inputs} minWidth={minWidth} paddingX={0} spaceX={32} id='finish_registration' setCalcWidth={setInputWidth}/>
+                        <Message message={message}/>
+                        <button style={{width:inputWidth+'px'}} 
+                            onClick={handleSubmit} className='flex shrink-0 h-10 mx-auto rounded-lg items-center justify-center bg-[rgb(0,175,240)] hover:bg-[rgba(0,175,240,.7)] text-white'>
+                            Submit
+                        </button>
+                    </div>
                 </div>
             </FormValidator>
         </FormDialog>

@@ -1,7 +1,9 @@
 import React,{useState,useEffect} from 'react'
-import { NavLink, useLocation} from 'react-router-dom';
+import { useParams,NavLink} from 'react-router-dom';
 
 const MenuItem = ({name,link,Icon,count,expanded,setOpenMobileMenu,separator}) => {
+    const {currentUserId} = useParams();
+
     if(separator) {
         return (
             <div className='flex flex-row w-full h-6 px-4 items-center justify-center overflow-hidden'>
@@ -13,7 +15,7 @@ const MenuItem = ({name,link,Icon,count,expanded,setOpenMobileMenu,separator}) =
     } else {
         return (
             <div className={`flex flex-col w-full h-auto px-2 shrink-0`}>
-                <NavLink to={link?link:''} state={{parentPath:'/home'}}
+                <NavLink to={link?link:''} state={{parentPath:currentUserId?`/${currentUserId}/home`:'/home'}}
                     onClick={(e) => {
                         setOpenMobileMenu(false);
                     }}

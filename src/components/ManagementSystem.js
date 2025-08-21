@@ -59,9 +59,18 @@ const ManagementSystem = () => {
                     enroll = true;
                     mnus.push({name:'My statistics', link:`/${currentUserId}/statistics`, Icon:PiChartLine})
                     mnus.push({name:'Enrollments', link:`/${currentUserId}/enrollments`, Icon:PiStudent})
-                    mnus.push({name:'My Classes', link:`/${currentUserId}/classes`, Icon:PiChalkboardTeacher})
                 }
             })
+            await request('GET','hasauthority',null,{
+                contextName:'COURSE',
+                authority:'TEACH'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    mnus.push({name:'My CPDs', link:`/${currentUserId}/my_courses`, Icon:PiChalkboardTeacher})
+                }
+            })
+            mnus.push({name:'My Events', link:`/${currentUserId}/my_events`, Icon:PiCalendarDots})
             let settingsMenus = []
             let createUser = false;
             let readUser = false;
@@ -250,6 +259,7 @@ const ManagementSystem = () => {
             }
             
             let createProgram = false;
+            let readProgram = false;
             let updateProgram = false;
             let deleteProgram = false;
 
@@ -260,6 +270,16 @@ const ManagementSystem = () => {
             .then((response) => {
                 if(response.status && response.status === 'YES') {
                     createProgram = true;
+                }
+            })
+
+            await request('GET','hasauthority',null,{
+                contextName:'PROGRAM',
+                authority:'READ'
+            },true)
+            .then((response) => {
+                if(response.status && response.status === 'YES') {
+                    readProgram = true;
                 }
             })
 
@@ -283,60 +303,47 @@ const ManagementSystem = () => {
                 }
             })
 
-            if(enroll || createProgram || updateProgram || deleteProgram) {
+            if(createProgram || readProgram || updateProgram || deleteProgram) {
                 settingsMenus.push({name:'Programs', link:`/${currentUserId}/programs`, Icon:PiGraduationCap})
             } 
 
-            let createCourse = false;
-            let updateCourse = false;
-            let deleteCourse = false;
-            let teach = false;
-
+            let createEvent = false;
+            let updateEvent = false;
+            let deleteEvent = false;
+            
             await request('GET','hasauthority',null,{
-                contextName:'COURSE',
-                authority:'TEACH'
-            },true)
-            .then((response) => {
-                if(response.status && response.status === 'YES') {
-                    teach = true;
-                }
-            })
-
-            await request('GET','hasauthority',null,{
-                contextName:'COURSE',
+                contextName:'EVENT',
                 authority:'CREATE'
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    createCourse = true;
+                    createEvent = true;
                 }
             })
 
             await request('GET','hasauthority',null,{
-                contextName:'COURSE',
+                contextName:'EVENT',
                 authority:'UPDATE'
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    updateCourse = true;
+                    updateEvent = true;
                 }
             })
 
             await request('GET','hasauthority',null,{
-                contextName:'COURSE',
+                contextName:'EVENT',
                 authority:'DELETE'
             },true)
             .then((response) => {
                 if(response.status && response.status === 'YES') {
-                    deleteCourse = true;
+                    deleteEvent = true;
                 }
             })
-            if(teach || createCourse || updateCourse || deleteCourse) {
-                settingsMenus.push({name:'CPDs', link:`/${currentUserId}/courses`, Icon:PiBook})
-            }
-            if(currentUserId) {
+            if(createEvent || updateEvent || deleteEvent) {
                 settingsMenus.push({name:'Events', link:`/${currentUserId}/events`, Icon:PiCalendarDots})
             }
+            
             let createCriteriaPath = false;
             let deleteCriteriaPath = false;
             await request('GET','hasauthority',null,{

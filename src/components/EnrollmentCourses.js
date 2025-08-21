@@ -140,7 +140,8 @@ const EnrollmentCourseItem = ({enrollmentCourse,reload}) => {
                 Component:() => 
                     <YesNoDialog 
                         title='Unenroll Course' 
-                        message={`Are you sure you want to unenroll from ${enrollmentCourse.course.name}?`} 
+                        message={`Are you sure you want to unenroll fro ${enrollmentCourse.course.name}? 
+                            If you click 'Yes' all progress you've made in this cpd will be permanently deleted`} 
                         onYes={async (e) => {                             
                             await request('DELETE',`enrollment/course`,null,{
                                 courseId:enrollmentCourse.course.id

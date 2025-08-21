@@ -1,14 +1,12 @@
 import React, {useEffect,useState,useContext,useRef} from 'react'
 import { GlobalContext } from '../contexts/GlobalContext';
 import { useLocation,useParams, useOutletContext } from 'react-router-dom';
-import { PiDotsThreeVertical,PiTag,PiTrash, PiUsersThreeFill, PiMaskHappyLight, PiPencilSimple, PiMaskHappy, PiPath } from 'react-icons/pi';
-import Scrollable from './Scrollable';
+import { PiDotsThreeVertical,PiTag,PiTrash, PiUsersThreeFill, PiMaskHappyLight, PiPencilSimple, PiMaskHappy} from 'react-icons/pi';
 import YesNoDialog from './YesNoDialog';
 import EditUserType from './EditUserType';
 import AddTariff from './AddTariff';
 import AddContextRole from './AddContextRole';
 import Tariff from './Tariff';
-import MsHeader from './Header';
 import {useData} from '../data';
 import Detail from './Detail';
 import ContentContainer from './ContentContainer';
@@ -20,9 +18,11 @@ const UserType = () => {
     const [tariffs,setTariffs] = useState([]);
     const [buttons,setButtons] = useState([]);
     const [loading,setLoading] = useState(false);
+    const location = useLocation();
+    const state = location.state;
+    const [parentPath,setParentPath] = useState(null);
     const {request} = useData();
-    const {userTypeId} = useParams();
-    const {parentPath} = useOutletContext();
+    const {currentUserId,userTypeId} = useParams();
     const path = useLocation().pathname;
 
     const onEdit = (e) => {
@@ -160,6 +160,9 @@ const UserType = () => {
 
     const load = async () => {
         setLoading(true);
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         await getUserType();
         await getObjectContextRoles();
         await getTariffs();
@@ -172,7 +175,12 @@ const UserType = () => {
 
   return (
     <div className='flex flex-col w-full h-full pb-8 space-y-8 items-center overflow-hidden'>
-            <ContentContainer previous={parentPath} buttons={buttons} Icon={PiUsersThreeFill} text={userType?userType.name:''} subText={userType?userType.description:''} loading={loading}>
+            <ContentContainer previous={parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home'}  
+                buttons={buttons} 
+                Icon={PiUsersThreeFill} 
+                text={userType?userType.name:''} 
+                subText={userType?userType.description:''} 
+                loading={loading}>
                 {userType &&
                 <div className='flex flex-col w-full h-fit space-y-4'>
                     <div className='flex flex-col w-full h-auto space-y-2'>

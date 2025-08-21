@@ -1,7 +1,7 @@
 import React, {useEffect,useState,useContext,useRef} from 'react';
 import { GlobalContext } from '../contexts/GlobalContext';
-import { useParams,useNavigate, useOutletContext } from 'react-router-dom';
-import { RiFileListFill,RiFileList3Line,RiTimeFill,RiQuestionnaireLine,RiMore2Line} from "react-icons/ri";
+import { useParams,useNavigate, useLocation } from 'react-router-dom';
+import { RiFileListFill,RiFileList3Line,RiTimeFill,RiMore2Line} from "react-icons/ri";
 import { PiArrowLeft,PiQuestion } from 'react-icons/pi';
 import Scrollable from './Scrollable';
 import AddQuestion from './AddQuestion';
@@ -12,10 +12,18 @@ const ActivityQuestions = () => {
     const {setDialog,setPopupData} = useContext(GlobalContext);
     const [activity,setActivity] = useState(null);
     const [questions,setQuestions] = useState([]);
+    const [parent,setParent] = useState(null);
+    const [parentPath,setParentPath] = useState(null);
     const {request} = useData();
     const {activityId} = useParams();
-    const {parentPath} = useOutletContext();
+    const location = useLocation();
+    const state = location.state;
+    const {currentUserId} = useParams();
+    const path = useLocation().pathname;
     const moreRef = useRef(null);
+
+    const ENROLLMENTS = 'enrollments';
+    const PROGRAMS = 'programs';
 
     let USDecimal = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
@@ -43,6 +51,16 @@ const ActivityQuestions = () => {
     }
 
     useEffect(() => {
+        if(path) {
+            if(path.includes(PROGRAMS)) {
+                setParent(PROGRAMS);
+            } else if(path.includes(ENROLLMENTS)) {
+                setParent(ENROLLMENTS);
+            }
+        }
+        if(state && state.parentPath) {
+            setParentPath(state.parentPath);
+        }
         ( async () => {
             await request('GET',`activity/${activityId}`,null,null,true)
             .then(async (response) => {
@@ -64,7 +82,7 @@ const ActivityQuestions = () => {
                     <div className='flex flex-col w-full h-auto pb-4 space-y-8 bg-[rgba(255,255,255,.96)]'>
                         <div className='flex flex-row w-full h-fit p-4 justify-between shrink-0 space-x-2 text-[rgb(0,175,240)] items-center'>
                             <button 
-                                onClick={(e) => navigate(parentPath)}
+                                onClick={(e) => navigate(parentPath?parentPath:currentUserId?`/${currentUserId}/home`:'/home')}
                                 className='flex w-12 h-12 hover:bg-[rgba(0,0,0,.05)] rounded-full'
                             >
                                 <PiArrowLeft size={32} className='flex m-auto'/>
